@@ -1,0 +1,13 @@
+{
+  "name": "tagreplacer",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "Alex Baldwin <alex@bldwn.co> (http://bldwn.co/)",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "grant-express": "^3.6.4",
+    "tumblr.js": "^1.1.1"
+  }
+}
