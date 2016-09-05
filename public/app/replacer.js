@@ -18,11 +18,11 @@ var Replacer = React.createClass({
     return {
       loading: false,
       error: undefined,
-      blog: this.props.blogs[0].name || undefined,
+      blog: 'tagreplacertest' ,//this.props.blogs[0].name || undefined,
       find: undefined,
       replace: undefined,
-      //exact: true,
       posts: [],
+      replaced: []
     }
   },
 
@@ -76,7 +76,9 @@ var Replacer = React.createClass({
           this.setState({
             loading: false,
             posts: json.posts
-          });
+          }, function() {
+            this.refs.replaceInput.focus();
+          }.bind(this));
         } else {
           this.setState({
             loading: false,
@@ -85,9 +87,10 @@ var Replacer = React.createClass({
         }
       }.bind(this)).catch(function(error){
         this.setState({
-          error: error
+          loading: false,
+          error: error.message
         });
-      });
+      }.bind(this));
 
     } else {
 
@@ -99,13 +102,64 @@ var Replacer = React.createClass({
 
   },
 
-  resetFind: function(event) {
+  replace: function(event) {
+
+    if (event) {
+      event.preventDefault();
+    }
+
+    if (this.state.loading) {
+      return;
+    }
+
+    if (notempty(this.state.blog) && notempty(this.state.find) && notempty(this.state.replace)) {
+
+      this.setState({
+        loading: true
+      });
+
+      fetch('/api/replace', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blog: this.state.blog,
+          find: this.state.find,
+          replace: this.state.replace
+        })
+      }).then(function(response){
+        if (!response.ok) { throw Error(response.statusText); }
+        return response.json();
+      }).then(function(json){
+        this.setState({
+          loading: false,
+          replaced: json
+        });
+      }.bind(this)).catch(function(error){
+        this.setState({
+          loading: false,
+          error: error.message
+        });
+      }.bind(this));
+
+    } else {
+
+      this.setState({
+        error: 'blog, tag to find, and tag to replace are required'
+      });
+
+    }
+
+  },
+
+  reset: function(event) {
     if (event) {
       event.preventDefault();
     }
 
     this.setState({
       find: undefined,
+      replace: undefined,
       posts: []
     });
 
@@ -119,7 +173,7 @@ var Replacer = React.createClass({
         var key = 'option-blog-' + blog.name;
         return (<option key={key} value={blog.name}>{blog.name}</option>);
       });
-      return (<select value={this.props.blog} onChange={this.handleSelect}>{options}</select>);
+      return (<select value={this.state.blog} onChange={this.handleSelect}>{options}</select>);
     }
   },
 
@@ -158,14 +212,16 @@ var Replacer = React.createClass({
       </form>
 
       {foundPosts ? ('found ' + this.state.posts.length + ' posts tagged ' + this.state.find) : null}
-      {foundPosts ? <a className="edit" onClick={this.resetFind}>find a different tag?</a> : null}
+      {foundPosts ? <a className="edit" onClick={this.reset}>find a different tag?</a> : null}
 
       <h2>replace</h2>
       <form className={replaceClassNames} onSubmit={this.replace}>
-        <p>replace {this.state.find ? ('"' + this.state.find + '"') : 'tag'} with</p>
-        <input type="text" name="replace" value={this.state.replace || ''} onChange={this.handleInput} />
-        <button type="submit" className="find" onClick={this.replace}>replace</button>
+        <p>replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</p>
+        <input type="text" name="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />
+        <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
+
+      {this.state.replaced.length > 0 ? ('replaced #' + this.state.find + ' with #' + this.state.replace + ' for ' + this.state.replaced.length + ' posts') : null }
 
     </div>);
   }

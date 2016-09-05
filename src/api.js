@@ -106,22 +106,22 @@ function api(token, secret) {
         return new Promise(function(resolve, reject) {
           // matches whole tag only
           var tags = post.tags.map(function(tag) {
-            if (tag === replace) {
+            if (tag === find) {
               return replace;
             } else {
               return tag;
             }
-          });
+          }).join(','); // >_>
 
           this.client.editPost(blog, {
-            id: id,
+            id: post.id,
             tags: tags
           }).then(function(result) {
             resolve(result);
           }).catch(reject);
-          
+
         }.bind(this));
-      }
+      };
 
     }.bind(this));
   }
