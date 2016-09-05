@@ -1,0 +1,10 @@
+@import 'reset';
+
+body {
+  font-family:sans-serif;
+}
+
+form.disabled {
+  opacity:0.6;
+  pointer-events:none;
+}
