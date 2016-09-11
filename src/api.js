@@ -1,10 +1,12 @@
 require('dotenv').config();
 
+var _ = require('lodash');
 var Promise = require('es6-promise').Promise;
 var tumblr = require('tumblr.js');
 
 
 var POST_LIMIT = 20;
+
 
 /* tag replacer api */
 function api(token, secret) {
@@ -33,7 +35,7 @@ function api(token, secret) {
 
   /*
     returns all posts that have a tag
-    findPostsWithTag('blog_name', 'tag')
+    findPostsWithTag('blog', 'tag')
   */
   this.findPostsWithTag = function findPostsWithTag(blog, tag) {
     return new Promise(function(resolve, reject) {
@@ -76,15 +78,52 @@ function api(token, secret) {
   }
 
   /*
+    finds posts that have more than one tag (inclusive)
+    findPostsWithTags('blog', ['tag1', 'tag2'])
+  */
+  this.findPostsWithTags = function findPostsWithTags(blog, tags) {
+    return new Promise(function(resolve, reject) {
+
+      var sorted = tags.sort();
+
+      // find posts with the first tag, then check for the others
+      this.findPostsWithTag(blog, tags[0])
+      .then(function(result) {
+        // compare post tags to our tags
+        var filtered = result.posts.filter(function(post) {
+          if (_.isEqual(
+            _.intersection(post.tags.sort(), sorted),
+            sorted
+          )) {
+            return true
+          } else {
+            return false
+          }
+        });
+
+        resolve({
+          posts: filtered,
+          total: filtered.length
+        });
+      });
+    }.bind(this));
+  }
+
+  /*
     replaces tags on an array of post ids
-    replaceTags('blog_name', [post_id, another_post_id], 'tag1', 'tag2')
+    replaceTags('blog', 'tag1', 'tag2')
+    find and replace can both be either a string or array
   */
   this.replaceTags = function replaceTags(blog, find, replace) {
     return new Promise(function(resolveAll, rejectAll) {
 
-      // get all posts with tag
-      // (could pass this back in from the front end, but it's a lot of data?)
-      this.findPostsWithTag(blog, find)
+      var findFunction = this.findPostsWithTag;
+      if (Array.isArray(find)) {
+        findFunction = this.findPostsWithTags;
+      }
+
+      // get all posts with tag(s)
+      findFunction(blog, find)
       .then(function(result) {
         return result.posts;
       }).catch(function(error) {
@@ -104,18 +143,14 @@ function api(token, secret) {
       // return a promise to edit the post
       function makePromise(post) {
         return new Promise(function(resolve, reject) {
-          // matches whole tag only
-          var tags = post.tags.map(function(tag) {
-            if (tag === find) {
-              return replace;
-            } else {
-              return tag;
-            }
-          }).join(','); // >_>
 
+          var diff = Array.isArray(find) ? find : [find];
+          var tags = _.chain(post.tags).difference(diff).concat(replace).value();
+          var joined = tags.join(','); // >_> you can send arrays but not accept them???
+          
           this.client.editPost(blog, {
             id: post.id,
-            tags: tags
+            tags: joined
           }).then(function(result) {
             resolve(result);
           }).catch(reject);

@@ -1,10 +1,23 @@
+$text:#111;
+$roboto:'Roboto',sans-serif;
+
 @import 'reset';
+@import 'input';
+
+
+body, html {min-height:100vh;}
 
 body {
-  font-family:sans-serif;
+  font-family:$roboto;
+  font-weight:300;
+  color:$text;
 }
 
-form.disabled {
-  opacity:0.6;
-  pointer-events:none;
+.app {
+  max-width:800px;
+  margin:0 auto;
+}
+
+h2 {
+  margin-bottom:0.5em;
 }

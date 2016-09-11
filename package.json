@@ -16,6 +16,7 @@
     "express": "^4.14.0",
     "express-session": "^1.14.1",
     "grant-express": "^3.6.4",
+    "lodash": "^4.15.0",
     "tumblr.js": "^1.1.1"
   },
   "devDependencies": {
@@ -33,7 +34,6 @@
     "gulp-sass": "^2.3.2",
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
-    "lodash": "^4.15.0",
     "react": "^15.3.1",
     "react-dom": "^15.3.1",
     "react-router": "^2.7.0",

@@ -1,4 +1,5 @@
 var React = require('react');
+var _ = require('lodash');
 
 require('whatwg-fetch');
 
@@ -9,6 +10,11 @@ function notempty(value) {
   } else {
     return false;
   }
+}
+
+function handleFetch(response) {
+  if (!response.ok) { throw Error(response.statusText); }
+  return response.json();
 }
 
 
@@ -26,6 +32,19 @@ var Replacer = React.createClass({
     }
   },
 
+  // helpers
+
+  process: function(string) {
+    if (/,/g.test(string)) {
+      var array = string.split(',');
+      array = array.map(function(item) { return item.trim(); });
+      array = _.pull(array, '');
+      return array;
+    } else {
+      return string;
+    }
+  },
+
   // handlers
 
   handleInput: function(event) {
@@ -33,7 +52,7 @@ var Replacer = React.createClass({
     if (event.target.type === 'checkbox') {
       state[event.target.name] = event.target.checked;
     } else if (event.target.type === 'text') {
-      state[event.target.name] = event.target.value;
+      state[event.target.name] = event.target.value.replace('#','');
     }
     this.setState(state);
   },
@@ -60,21 +79,21 @@ var Replacer = React.createClass({
         loading: true
       });
 
-      fetch('/api/posts', {
+      var find = this.process(this.state.find);
+
+      fetch('/api/find', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           blog: this.state.blog,
-          tag: this.state.find
+          find: find
         })
-      }).then(function(response){
-        if (!response.ok) { throw Error(response.statusText); }
-        return response.json();
-      }).then(function(json){
+      }).then(handleFetch).then(function(json){
         if (json.posts.length > 0) {
           this.setState({
             loading: false,
+            error: undefined,
             posts: json.posts
           }, function() {
             this.refs.replaceInput.focus();
@@ -118,21 +137,22 @@ var Replacer = React.createClass({
         loading: true
       });
 
+      var find = this.process(this.state.find);
+      var replace = this.process(this.state.replace);
+
       fetch('/api/replace', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           blog: this.state.blog,
-          find: this.state.find,
-          replace: this.state.replace
+          find: find,
+          replace: replace
         })
-      }).then(function(response){
-        if (!response.ok) { throw Error(response.statusText); }
-        return response.json();
-      }).then(function(json){
+      }).then(handleFetch).then(function(json){
         this.setState({
           loading: false,
+          error: undefined,
           replaced: json
         });
       }.bind(this)).catch(function(error){
@@ -160,6 +180,7 @@ var Replacer = React.createClass({
     this.setState({
       find: undefined,
       replace: undefined,
+      error: undefined,
       posts: []
     });
 
@@ -175,6 +196,14 @@ var Replacer = React.createClass({
       });
       return (<select value={this.state.blog} onChange={this.handleSelect}>{options}</select>);
     }
+  },
+
+  renderFound: function() {
+    return <p>found {this.state.posts.length} posts tagged {this.state.find}</p>
+  },
+
+  renderReplaced: function() {
+    return <p>replaced {this.state.find} with {this.state.replace} for {this.state.replaced.length} posts</p>
   },
 
   render: function() {
@@ -207,21 +236,22 @@ var Replacer = React.createClass({
 
       <h2>find</h2>
       <form className={findClassNames} onSubmit={this.find}>
-        <input type="text" name="find" value={this.state.find || ''} onChange={this.handleInput} />
+        <label htmlFor="find">find tag</label>
+        <input type="text" name="find" id="find" value={this.state.find || ''} onChange={this.handleInput} />
         <button type="submit" className="find" onClick={this.find}>find</button>
       </form>
 
-      {foundPosts ? ('found ' + this.state.posts.length + ' posts tagged ' + this.state.find) : null}
-      {foundPosts ? <a className="edit" onClick={this.reset}>find a different tag?</a> : null}
+      {foundPosts ? this.renderFound() : null}
+      {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
 
       <h2>replace</h2>
       <form className={replaceClassNames} onSubmit={this.replace}>
-        <p>replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</p>
-        <input type="text" name="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />
+        <label htmlFor="replace">replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</label>
+        <input type="text" name="replace" id="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />
         <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
 
-      {this.state.replaced.length > 0 ? ('replaced #' + this.state.find + ' with #' + this.state.replace + ' for ' + this.state.replaced.length + ' posts') : null }
+      {this.state.replaced.length > 0 ? this.renderReplaced() : null }
 
     </div>);
   }

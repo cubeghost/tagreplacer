@@ -52,11 +52,18 @@ apiRouter.get('/user', function(req, res) {
   }).catch(handleError);
 });
 
-apiRouter.post('/posts', function(req, res) {
-  if (req.body.blog && req.body.tag) {
-    api(req.session.grant.response.access_token, req.session.grant.response.access_secret)
-    .findPostsWithTag(req.body.blog, req.body.tag)
-    .then(function(result) {
+apiRouter.post('/find', function(req, res) {
+  if (req.body.blog && req.body.find) {
+    var access_token = req.session.grant.response.access_token;
+    var access_secret = req.session.grant.response.access_secret;
+
+    var findFunction = api(access_token, access_secret).findPostsWithTag;
+    if (Array.isArray(req.body.find)) {
+      findFunction = api(access_token, access_secret).findPostsWithTags;
+    }
+
+    findFunction(req.body.blog, req.body.find)
+    .then(function returnJSON(result) {
       res.json(result);
     }).catch(handleError);
   } else {
@@ -75,6 +82,7 @@ apiRouter.post('/replace', function(req, res) {
     res.status(400).send('POST body must include "blog", "find", and "replace"');
   }
 });
+
 
 module.exports = {
   web: webRouter,
