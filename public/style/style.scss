@@ -1,23 +1,29 @@
 $text:#111;
+$background:#fff;
 $roboto:'Roboto',sans-serif;
 
 @import 'reset';
 @import 'input';
 
+@import 'selectize';
+
 
 body, html {min-height:100vh;}
 
 body {
+  background-color:$background;
   font-family:$roboto;
   font-weight:300;
   color:$text;
 }
 
 .app {
-  max-width:800px;
-  margin:0 auto;
+  max-width:600px;
+  margin:2em auto;
 }
 
 h2 {
-  margin-bottom:0.5em;
+  margin-bottom:1em;
+
+  display:none;
 }

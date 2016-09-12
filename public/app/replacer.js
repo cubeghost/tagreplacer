@@ -1,8 +1,13 @@
 var React = require('react');
 var _ = require('lodash');
+var { MultiSelect, SimpleSelect } = require('react-selectize');
 
 require('whatwg-fetch');
 
+var { apiFetch, mapForSelectize, labelFromSelectize } = require('./util');
+
+
+var LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
 
 function notempty(value) {
   if (value !== null && value !== undefined && /\S/.test(value)) {
@@ -10,11 +15,6 @@ function notempty(value) {
   } else {
     return false;
   }
-}
-
-function handleFetch(response) {
-  if (!response.ok) { throw Error(response.statusText); }
-  return response.json();
 }
 
 
@@ -25,8 +25,8 @@ var Replacer = React.createClass({
       loading: false,
       error: undefined,
       blog: 'tagreplacertest' ,//this.props.blogs[0].name || undefined,
-      find: undefined,
-      replace: undefined,
+      find: [],
+      replace: [],
       posts: [],
       replaced: []
     }
@@ -34,33 +34,33 @@ var Replacer = React.createClass({
 
   // helpers
 
-  process: function(string) {
-    if (/,/g.test(string)) {
-      var array = string.split(',');
-      array = array.map(function(item) { return item.trim(); });
-      array = _.pull(array, '');
-      return array;
-    } else {
-      return string;
-    }
+  mapForSelectize: function(value) {
+    return { label: value, value: value };
+  },
+
+  labelFromSelectize: function(value) {
+    return value.label;
   },
 
   // handlers
 
-  handleInput: function(event) {
-    var state = this.state;
-    if (event.target.type === 'checkbox') {
-      state[event.target.name] = event.target.checked;
-    } else if (event.target.type === 'text') {
-      state[event.target.name] = event.target.value.replace('#','');
-    }
-    this.setState(state);
+  handleSelect: function(input, value) {
+    var state = {};
+    state[input] = value;
+    this.setState(state, function() {
+      this.refs[input].blur();
+      if (input !== 'blog') {
+        this.refs[input].focus();
+      }
+    }.bind(this));
   },
 
-  handleSelect: function(event) {
-    this.setState({
-      blog: event.target.value
-    });
+  removeTag: function(event) {
+    var state = this.state;
+    var input = event.target.dataset.input;
+    var tags = _.without(this.state[input], event.target.dataset.tag);
+    state[input] = tags;
+    this.setState(state);
   },
 
   find: function(event) {
@@ -79,24 +79,17 @@ var Replacer = React.createClass({
         loading: true
       });
 
-      var find = this.process(this.state.find);
-
-      fetch('/api/find', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          blog: this.state.blog,
-          find: find
-        })
-      }).then(handleFetch).then(function(json){
+      apiFetch('POST', '/find', {
+        blog: this.state.blog,
+        find: this.state.find
+      }).then(function(json){
         if (json.posts.length > 0) {
           this.setState({
             loading: false,
             error: undefined,
             posts: json.posts
           }, function() {
-            this.refs.replaceInput.focus();
+            this.refs.replace.focus();
           }.bind(this));
         } else {
           this.setState({
@@ -104,7 +97,8 @@ var Replacer = React.createClass({
             error: 'didnt find any posts with that tag'
           });
         }
-      }.bind(this)).catch(function(error){
+      }.bind(this))
+      .catch(function(error){
         this.setState({
           loading: false,
           error: error.message
@@ -137,25 +131,18 @@ var Replacer = React.createClass({
         loading: true
       });
 
-      var find = this.process(this.state.find);
-      var replace = this.process(this.state.replace);
-
-      fetch('/api/replace', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          blog: this.state.blog,
-          find: find,
-          replace: replace
-        })
-      }).then(handleFetch).then(function(json){
+      apiFetch('POST', '/replace', {
+        blog: this.state.blog,
+        find: this.state.find,
+        replace: this.state.replace
+      }).then(function(json){
         this.setState({
           loading: false,
           error: undefined,
           replaced: json
         });
-      }.bind(this)).catch(function(error){
+      }.bind(this))
+      .catch(function(error){
         this.setState({
           loading: false,
           error: error.message
@@ -178,10 +165,11 @@ var Replacer = React.createClass({
     }
 
     this.setState({
-      find: undefined,
-      replace: undefined,
+      find: [],
+      replace: [],
       error: undefined,
-      posts: []
+      posts: [],
+      replaced: []
     });
 
   },
@@ -190,12 +178,56 @@ var Replacer = React.createClass({
 
   renderBlogs: function() {
     if (this.props.blogs) {
-      var options = this.props.blogs.map(function(blog){
-        var key = 'option-blog-' + blog.name;
-        return (<option key={key} value={blog.name}>{blog.name}</option>);
-      });
-      return (<select value={this.state.blog} onChange={this.handleSelect}>{options}</select>);
+      return (<SimpleSelect
+        ref="blog"
+        value={{ label: this.state.blog, value: this.state.blog }}
+        options={this.props.blogs.map(function(blog) {
+          return { label: blog.name, value: blog.name }
+        })}
+        onValueChange={function(select) {
+          this.handleSelect('blog', select.value);
+        }.bind(this)}
+      />);
     }
+  },
+
+  renderMultiSelect: function(input) {
+    return (<MultiSelect
+      values={this.state[input].map(this.mapForSelectize)}
+      delimiters={[188]}
+      ref={input}
+      restoreOnBackspace={this.labelFromSelectize}
+      createFromSearch={function(options, tags, search) {
+        var labels = tags.map(this.labelFromSelectize);
+        if (search.trim().length === 0 || labels.indexOf(search.trim()) !== -1) {
+          return null;
+        }
+        return { label: search.trim(), value: search.trim() };
+      }.bind(this)}
+      valuesFromPaste={function(options, tags, pastedText){
+        return pastedText.split(',')
+        .filter(function(text){
+          var labels = tags.map(this.labelFromSelectize);
+          return labels.indexOf(text) === -1;
+        }).map(this.mapForSelectize);
+      }.bind(this)}
+      renderValue={function(tag) {
+        return (<div className="select-tag">
+          <span>#{tag.label}</span>
+          <span className="delete" onClick={this.removeTag} data-tag={tag.label} data-input={input}>&times;</span>
+        </div>);
+      }.bind(this)}
+      renderNoResultsFound={function(tags, search) {
+        if (search.trim().length === 0) {
+          return null;
+        } else if (tags.map(this.labelFromSelectize).indexOf(search.trim()) != -1) {
+          <div className="no-results-found">Tag already exists</div>
+        }
+      }.bind(this)}
+      onValuesChange={function(select) {
+        this.handleSelect(input, select.map(this.labelFromSelectize));
+      }.bind(this)}
+    />)
   },
 
   renderFound: function() {
@@ -226,28 +258,28 @@ var Replacer = React.createClass({
 
     return (<div className="replacer">
       {this.state.loading ? 'loading' : null}
-      {this.state.loading ? <img src="https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif" width="100" /> : null}
+      {this.state.loading ? <img src={LOADING} width="100" /> : null}
       {this.state.error}
 
-      <h2>blog</h2>
       <form className={blogClassNames}>
+        <label>blog</label>
         {this.renderBlogs()}
       </form>
 
-      <h2>find</h2>
       <form className={findClassNames} onSubmit={this.find}>
         <label htmlFor="find">find tag</label>
-        <input type="text" name="find" id="find" value={this.state.find || ''} onChange={this.handleInput} />
+        {this.renderMultiSelect('find')}
+        {/*<input type="text" name="find" id="find" value={this.state.find || ''} onChange={this.handleInput} />*/}
         <button type="submit" className="find" onClick={this.find}>find</button>
       </form>
 
       {foundPosts ? this.renderFound() : null}
       {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
 
-      <h2>replace</h2>
       <form className={replaceClassNames} onSubmit={this.replace}>
         <label htmlFor="replace">replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</label>
-        <input type="text" name="replace" id="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />
+        {this.renderMultiSelect('replace')}
+        {/*<input type="text" name="replace" id="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />*/}
         <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
 
