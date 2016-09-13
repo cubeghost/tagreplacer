@@ -1,5 +1,6 @@
 $text:#111;
 $background:#fff;
+$blue:#3CBFE7;
 $roboto:'Roboto',sans-serif;
 
 @import 'reset';
@@ -12,6 +13,8 @@ body, html {min-height:100vh;}
 
 body {
   background-color:$background;
+  background-image:url(https://66.media.tumblr.com/c343e8da374c2c4d5de765e4b7ef5a0f/tumblr_od0p5cY3CG1tf8vylo1_1280.png);
+
   font-family:$roboto;
   font-weight:300;
   color:$text;
@@ -19,7 +22,8 @@ body {
 
 .app {
   max-width:600px;
-  margin:2em auto;
+  margin:0 auto;
+  padding:2em 0;
 }
 
 h2 {

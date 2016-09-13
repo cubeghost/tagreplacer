@@ -5,63 +5,25 @@ input, button {
   font-family:$roboto;
   font-weight:300;
   font-size:1em;
+  background-color:transparent;
   border-radius:$border-radius;
   border:$border;
+
+  &:focus, &:active {
+    outline:none;
+    border-color:$blue;
+  }
 }
 
 input[type=text] {
   padding:5px 6px;
   color:$text;
-  background-color:transparent;
-
-  &:focus {
-    outline:none;
-    border-color:#3CBFE7;
-  }
 }
 
 button {
   background-size:150%;
   padding:6px 12px 5px;
-  background-color:$background;
   color:$text;
-}
-
-.react-selectize-control {
-  border:$border;
-  border-radius:$border-radius;
-}
-
-.select-tag {
-  padding:3px 6px;
-  margin-right:5px;
-  background-color:rgba(0,0,0,0.1);
-  color:$text;
-  border-radius:0.15em;
-
-  .delete {
-    margin-left:4px;
-    opacity:0.5;
-  }
-}
-
-.react-selectize.multi-select .react-selectize-toggle-button-container {
-  display:none!important;
-}
-
-.react-selectize.simple-select {
-
-  &.open .react-selectize-control {
-    border-bottom-right-radius:0;
-    border-bottom-left-radius:0;
-  }
-
-  .dropdown-menu {
-    margin-top:-2px;
-    border:$border;
-    border-bottom-right-radius:$border-radius;
-    border-bottom-left-radius:$border-radius;
-  }
 }
 
 form {
@@ -85,9 +47,13 @@ form {
     margin:0 1em;
   }
 
+  .react-selectize.multi-select {
+    flex:1 0 40%;
+  }
+
   button {
     text-align:center;
-    flex:1 0 10%;
+    flex:1 0 8%;
   }
 
 }
@@ -95,4 +61,54 @@ form {
 form.disabled {
   opacity:0.6;
   pointer-events:none;
+}
+
+// selectize stuff
+
+.react-selectize-control {
+  border:$border;
+  border-radius:$border-radius;
+}
+
+.select-tag {
+  padding:3px 6px;
+  margin-right:5px;
+  background-color:rgba(0,0,0,0.1);
+  color:$text;
+  border-radius:0.1em;
+
+  .delete {
+    margin-left:4px;
+    opacity:0.3;
+  }
+}
+
+.react-selectize.multi-select {
+
+  .dropdown-menu {
+    display:none;
+  }
+
+  &.open .react-selectize-control {
+    border-color:$blue;
+  }
+
+  .react-selectize-toggle-button-container {
+    display:none!important;
+  }
+}
+
+.react-selectize.simple-select {
+
+  &.open .react-selectize-control {
+    border-bottom-right-radius:0;
+    border-bottom-left-radius:0;
+  }
+
+  .dropdown-menu {
+    margin-top:-2px;
+    border:$border;
+    border-bottom-right-radius:$border-radius;
+    border-bottom-left-radius:$border-radius;
+  }
 }

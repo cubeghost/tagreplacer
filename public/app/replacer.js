@@ -1,6 +1,6 @@
 var React = require('react');
 var _ = require('lodash');
-var { MultiSelect, SimpleSelect } = require('react-selectize');
+var { MultiSelect, SimpleSelect } = require('./react-selectize');
 
 require('whatwg-fetch');
 
@@ -196,7 +196,6 @@ var Replacer = React.createClass({
       values={this.state[input].map(this.mapForSelectize)}
       delimiters={[188]}
       ref={input}
-      restoreOnBackspace={this.labelFromSelectize}
       createFromSearch={function(options, tags, search) {
         var labels = tags.map(this.labelFromSelectize);
         if (search.trim().length === 0 || labels.indexOf(search.trim()) !== -1) {
@@ -217,6 +216,11 @@ var Replacer = React.createClass({
           <span className="delete" onClick={this.removeTag} data-tag={tag.label} data-input={input}>&times;</span>
         </div>);
       }.bind(this)}
+      renderOption={function(tag) {
+        return (<div className="simple-option">
+          <div>{!!tag.newOption ? "add #" + tag.label : tag.label}</div>
+        </div>);
+      }}
       renderNoResultsFound={function(tags, search) {
         if (search.trim().length === 0) {
           return null;
@@ -224,6 +228,22 @@ var Replacer = React.createClass({
           <div className="no-results-found">Tag already exists</div>
         }
       }.bind(this)}
+      onBlur={function(event) {
+        // HAHA WOW
+        var search = event.search.trim();
+        if (search.length > 0 &&
+          (event.values.map(this.labelFromSelectize).indexOf(search) === -1)
+        ) {
+          var values = event.values.map(this.labelFromSelectize);
+          values.push(search);
+          this.refs.find.setState({
+            search: '',
+            anchor: { label: search, value: search }
+          });
+          this.handleSelect(input, values);
+        }
+      }.bind(this)}
+      onBlurResetsInput={false}
       onValuesChange={function(select) {
         this.handleSelect(input, select.map(this.labelFromSelectize));
       }.bind(this)}
@@ -269,21 +289,18 @@ var Replacer = React.createClass({
       <form className={findClassNames} onSubmit={this.find}>
         <label htmlFor="find">find tag</label>
         {this.renderMultiSelect('find')}
-        {/*<input type="text" name="find" id="find" value={this.state.find || ''} onChange={this.handleInput} />*/}
         <button type="submit" className="find" onClick={this.find}>find</button>
       </form>
-
-      {foundPosts ? this.renderFound() : null}
-      {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
 
       <form className={replaceClassNames} onSubmit={this.replace}>
         <label htmlFor="replace">replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</label>
         {this.renderMultiSelect('replace')}
-        {/*<input type="text" name="replace" id="replace" value={this.state.replace || ''} onChange={this.handleInput} ref="replaceInput" />*/}
         <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
 
+      {foundPosts ? this.renderFound() : null}
       {this.state.replaced.length > 0 ? this.renderReplaced() : null }
+      {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
 
     </div>);
   }
