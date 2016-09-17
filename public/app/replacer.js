@@ -24,7 +24,7 @@ var Replacer = React.createClass({
     return {
       loading: false,
       error: undefined,
-      blog: 'tagreplacertest' ,//this.props.blogs[0].name || undefined,
+      blog: this.props.blogs[0].name || undefined,
       find: [],
       replace: [],
       posts: [],
