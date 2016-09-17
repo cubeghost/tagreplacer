@@ -94,7 +94,7 @@ var Replacer = React.createClass({
         } else {
           this.setState({
             loading: false,
-            error: 'didnt find any posts with that tag'
+            error: 'didnt find any posts tagged #' + this.state.find.join(', #')
           });
         }
       }.bind(this))
@@ -274,6 +274,12 @@ var Replacer = React.createClass({
     }
   },
 
+  renderReset: function() {
+    if (this.state.posts.length > 0) {
+      return (<div><button className="reset" onClick={this.reset}>find a different tag?</button></div>);
+    }
+  },
+
   render: function() {
     var foundPosts = this.state.posts.length > 0 ? true : false;
 
@@ -309,7 +315,7 @@ var Replacer = React.createClass({
       </form>
 
       <form className={replaceClassNames} onSubmit={this.replace}>
-        <label htmlFor="replace">replace {this.state.find ? ('#' + this.state.find) : 'tag'} with</label>
+        <label htmlFor="replace">replace {this.state.find.length > 0 ? ('#' + this.state.find.join(', #')) : 'tag'} with</label>
         {this.renderMultiSelect('replace')}
         <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
@@ -317,8 +323,7 @@ var Replacer = React.createClass({
       {this.renderFound()}
       {this.renderPosts()}
       {this.renderReplaced()}
-      {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
-
+      {this.renderReset()}
     </div>);
   }
 

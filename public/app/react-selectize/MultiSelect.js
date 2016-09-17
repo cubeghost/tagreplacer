@@ -115,7 +115,7 @@
               originalEvent: e
             });
           };
-          var searchIsInValues = values.map(function(value) { return value.label; }).indexOf(search) > -1;
+          var searchIsInValues = values.map(function(value) { return value.label; }).indexOf(search.trim()) > -1;
           if (this$.props.onBlurResetsInput || searchIsInValues) {
             onSearchChange("", callback);
           } else {

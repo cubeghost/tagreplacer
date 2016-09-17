@@ -71,6 +71,12 @@ var App = React.createClass({
     var authLink = <a href="/connect/tumblr">connect to tumblr</a>;
 
     return (<div className="app">
+      <header>
+        <h1>tag replacer</h1>
+        <nav>
+          {this.state.auth && !this.state.loading ? <a href="/disconnect">disconnect</a> : null}
+        </nav>
+      </header>
       {this.renderError()}
       {this.state.loading ? 'loading' : null}
       {!this.state.auth && !this.state.loading ? authLink : null}
@@ -80,11 +86,5 @@ var App = React.createClass({
 
 });
 
-
-/*var routes = (
-  <Router history={browserHistory}>
-    <Route path="/" component={App} />
-  </Router>
-);*/
 
 ReactDOM.render(<App />, document.querySelector('.container'));
