@@ -17,7 +17,7 @@ var app = express();
 var grant = grant = new Grant({
   server: {
     protocol: 'http',
-    host: 'localhost:' + process.env.PORT,
+    host: process.env.HOSTNAME,
     callback: '/callback',
     transport: 'session'
   },
