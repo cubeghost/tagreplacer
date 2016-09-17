@@ -32,6 +32,7 @@ app.use(session({
     client: client
   }),
   resave: false,
+  //secure: true,
   saveUninitialized: false,
   secret: process.env.SECRET
 }));
@@ -47,8 +48,14 @@ app.get('/callback', function(req, res) {
   res.redirect('/');
 });
 
+app.get('/disconnect', function(req, res) {
+  req.session.destroy(function(err) {
+    res.redirect('/');
+  });
+});
+
 // listen
 
 app.listen(process.env.PORT, function() {
-  //
+  // :)
 });

@@ -233,7 +233,7 @@
   }
 
   &.dropdown-menu.default {
-    background-color:transparent;;
+    background-color:$background;
     background-position:4px -5px;
 
     .no-results-found {

@@ -57,11 +57,21 @@ var App = React.createClass({
     }.bind(this));
   },
 
+  // render
+
+  renderError: function() {
+    if (this.state.error !== undefined) {
+      if (this.state.error.message !== 'No user session') {
+        return (<div className="error">{this.state.error.message}</div>);
+      }
+    }
+  },
+
   render: function() {
     var authLink = <a href="/connect/tumblr">connect to tumblr</a>;
 
     return (<div className="app">
-      {this.state.error ? error.message : null}
+      {this.renderError()}
       {this.state.loading ? 'loading' : null}
       {!this.state.auth && !this.state.loading ? authLink : null}
       {this.state.auth && !this.state.loading ? <Replacer blogs={this.state.user.blogs} /> : null}

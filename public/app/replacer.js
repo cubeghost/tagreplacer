@@ -236,7 +236,7 @@ var Replacer = React.createClass({
         ) {
           var values = event.values.map(this.labelFromSelectize);
           values.push(search);
-          this.refs.find.setState({
+          this.refs[input].setState({
             search: '',
             anchor: { label: search, value: search }
           });
@@ -251,11 +251,27 @@ var Replacer = React.createClass({
   },
 
   renderFound: function() {
-    return <p>found {this.state.posts.length} posts tagged {this.state.find}</p>
+    if (this.state.posts.length > 0) {
+      return <p>found {this.state.posts.length} posts tagged {this.state.find}</p>
+    }
   },
 
   renderReplaced: function() {
-    return <p>replaced {this.state.find} with {this.state.replace} for {this.state.replaced.length} posts</p>
+    if (this.state.replaced.length > 0) {
+      return <p>replaced {this.state.find} with {this.state.replace} for {this.state.replaced.length} posts</p>
+    }
+  },
+
+  renderPosts: function() {
+    if (this.state.posts.length > 0 /*&& viewPOsts == true*/) {
+      return this.state.posts.map(function(post) {
+        var key = 'post-' + post.id;
+        return (<div className="post" key={key}>
+          <a href={post.post_url} target="_blank">/{post.id}/{post.slug}</a>
+          <span>#{post.tags.join(', #')}</span>
+        </div>);
+      });
+    }
   },
 
   render: function() {
@@ -298,8 +314,9 @@ var Replacer = React.createClass({
         <button type="submit" className="replace" onClick={this.replace}>replace</button>
       </form>
 
-      {foundPosts ? this.renderFound() : null}
-      {this.state.replaced.length > 0 ? this.renderReplaced() : null }
+      {this.renderFound()}
+      {this.renderPosts()}
+      {this.renderReplaced()}
       {foundPosts ? <p><a className="reset" onClick={this.reset}>find a different tag?</a></p> : null}
 
     </div>);

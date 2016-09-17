@@ -9,14 +9,6 @@ var apiRouter = express.Router();
 
 // web router
 
-/*webRouter.use(function(req, res, next) {
-  if (req.session.grant && req.session.grant.response) {
-    next();
-  } else {
-    res.redirect('/');
-  }
-});*/
-
 webRouter.use(express.static(path.dirname(require.main.filename) + '/public'));
 
 function render(req, res) {
@@ -24,7 +16,6 @@ function render(req, res) {
 }
 
 webRouter.get('/', render);
-
 
 // api router
 // prefixed with '/api'
@@ -40,6 +31,7 @@ apiRouter.use(function(req, res, next) {
   if (req.session.grant && req.session.grant.response) {
     next();
   } else {
+    res.statusMessage = 'No user session';
     res.status(401).send('No user session');
   }
 });
