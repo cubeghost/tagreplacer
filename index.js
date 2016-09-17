@@ -44,6 +44,13 @@ app.use(grant);
 app.use('/', router.web);
 app.use('/api', router.api);
 
+app.use(function(req, res, next) {
+  if (!req.session) {
+    next(new Error('No session'));
+  }
+  next();
+});
+
 app.get('/callback', function(req, res) {
   res.redirect('/');
 });
