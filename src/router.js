@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
@@ -9,10 +11,15 @@ var apiRouter = express.Router();
 
 // web router
 
-webRouter.use(express.static(path.dirname(require.main.filename) + '/public'));
+var webDir = '/public';
+if (process.env.NODE_ENV === 'production') {
+  webDir = '/dist';
+}
+
+webRouter.use(express.static(path.dirname(require.main.filename) + webDir));
 
 function render(req, res) {
-  res.sendFile(path.join(path.dirname(require.main.filename) + '/public/index.html'));
+  res.sendFile(path.join(path.dirname(require.main.filename) + webDir + '/index.html'));
 }
 
 webRouter.get('/', render);

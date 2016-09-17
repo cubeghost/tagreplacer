@@ -17,6 +17,7 @@
     "express-session": "^1.14.1",
     "grant-express": "^3.6.4",
     "lodash": "^4.15.0",
+    "node-redis": "^0.1.7",
     "tumblr.js": "^1.1.1"
   },
   "devDependencies": {
