@@ -67,18 +67,27 @@ var App = React.createClass({
     }
   },
 
+  renderLoadingState: function() {
+    if (this.state.loading) {
+      return (<div className="loading">
+        <p>loading</p>
+      </div>);
+    }
+  },
+
   render: function() {
-    var authLink = <a href="/connect/tumblr">connect to tumblr</a>;
+    var authLink = <a href="/connect/tumblr" className="connect">connect to tumblr</a>;
 
     return (<div className="app">
       <header>
         <h1>tag replacer</h1>
         <nav>
+          <a href="/help">help</a>
           {this.state.auth && !this.state.loading ? <a href="/disconnect">disconnect</a> : null}
         </nav>
       </header>
       {this.renderError()}
-      {this.state.loading ? 'loading' : null}
+      {this.renderLoadingState()}
       {!this.state.auth && !this.state.loading ? authLink : null}
       {this.state.auth && !this.state.loading ? <Replacer blogs={this.state.user.blogs} /> : null}
     </div>);

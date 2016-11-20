@@ -42,6 +42,10 @@ var Replacer = React.createClass({
     return value.label;
   },
 
+  formatTags: function(tags) {
+    return '#' + tags.join(', #');
+  },
+
   // handlers
 
   handleSelect: function(input, value) {
@@ -94,7 +98,7 @@ var Replacer = React.createClass({
         } else {
           this.setState({
             loading: false,
-            error: 'didnt find any posts tagged #' + this.state.find.join(', #')
+            error: 'didnt find any posts tagged ' + this.formatTags(this.state.find)
           });
         }
       }.bind(this))
@@ -191,9 +195,10 @@ var Replacer = React.createClass({
     }
   },
 
-  renderMultiSelect: function(input) {
+  renderMultiSelect: function(input, parentClassNames) {
     return (<MultiSelect
       values={this.state[input].map(this.mapForSelectize)}
+      disabled={parentClassNames.indexOf('disabled') > -1}
       delimiters={[188]}
       ref={input}
       createFromSearch={function(options, tags, search) {
@@ -252,13 +257,13 @@ var Replacer = React.createClass({
 
   renderFound: function() {
     if (this.state.posts.length > 0) {
-      return <p>found {this.state.posts.length} posts tagged {this.state.find}</p>
+      return <h2>found {this.state.posts.length} posts tagged #{this.state.find}</h2>
     }
   },
 
   renderReplaced: function() {
     if (this.state.replaced.length > 0) {
-      return <p>replaced {this.state.find} with {this.state.replace} for {this.state.replaced.length} posts</p>
+      return <h2>replaced {this.formatTags(this.state.find)} with {this.formatTags(this.state.replace)} for {this.state.replaced.length} posts</h2>
     }
   },
 
@@ -267,16 +272,25 @@ var Replacer = React.createClass({
       return this.state.posts.map(function(post) {
         var key = 'post-' + post.id;
         return (<div className="post" key={key}>
-          <a href={post.post_url} target="_blank">/{post.id}/{post.slug}</a>
-          <span>#{post.tags.join(', #')}</span>
+          <a href={post.post_url} target="_blank">{post.id}/{post.slug}</a>
+          <span className="tags">{this.formatTags(post.tags)}</span>
         </div>);
-      });
+      }.bind(this));
+    }
+  },
+
+  renderLoadingState: function() {
+    if (this.state.loading) {
+      return (<div className="loading">
+        <p>loading</p>
+        <img src={LOADING} width="100" />
+      </div>);
     }
   },
 
   renderReset: function() {
     if (this.state.posts.length > 0) {
-      return (<div><button className="reset" onClick={this.reset}>find a different tag?</button></div>);
+      return (<button className="reset" onClick={this.reset}>find a different tag?</button>);
     }
   },
 
@@ -299,31 +313,38 @@ var Replacer = React.createClass({
     ].join(' ');
 
     return (<div className="replacer">
-      {this.state.loading ? 'loading' : null}
-      {this.state.loading ? <img src={LOADING} width="100" /> : null}
+      {this.renderLoadingState()}
       {this.state.error}
 
-      <form className={blogClassNames}>
-        <label>blog</label>
-        {this.renderBlogs()}
-      </form>
+      <div className="form">
 
-      <form className={findClassNames} onSubmit={this.find}>
-        <label htmlFor="find">find tag</label>
-        {this.renderMultiSelect('find')}
-        <button type="submit" className="find" onClick={this.find}>find</button>
-      </form>
+        <form className={blogClassNames}>
+          <label>blog</label>
+          {this.renderBlogs()}
+        </form>
 
-      <form className={replaceClassNames} onSubmit={this.replace}>
-        <label htmlFor="replace">replace {this.state.find.length > 0 ? ('#' + this.state.find.join(', #')) : 'tag'} with</label>
-        {this.renderMultiSelect('replace')}
-        <button type="submit" className="replace" onClick={this.replace}>replace</button>
-      </form>
+        <form className={findClassNames} onSubmit={this.find}>
+          <label htmlFor="find">find tag</label>
+          {this.renderMultiSelect('find', findClassNames)}
+          <button type="submit" className="find" onClick={this.find} disabled={findClassNames.indexOf('disabled') > -1}>find</button>
+        </form>
 
-      {this.renderFound()}
-      {this.renderPosts()}
-      {this.renderReplaced()}
-      {this.renderReset()}
+        <form className={replaceClassNames} onSubmit={this.replace}>
+          <label htmlFor="replace">replace {this.state.find.length > 0 ? this.formatTags(this.state.find) : 'tag'} with</label>
+          {this.renderMultiSelect('replace', replaceClassNames)}
+          <button type="submit" className="replace" onClick={this.replace} disabled={replaceClassNames.indexOf('disabled') > -1}>replace</button>
+        </form>
+
+      </div>
+
+      <div className="result">
+        {this.renderFound()}
+        {this.renderReset()}
+        {this.renderPosts()}
+        {this.renderReplaced()}
+      </div>
+
+
     </div>);
   }
 

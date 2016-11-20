@@ -51,7 +51,7 @@
           padding: 4px 0px;
           vertical-align: middle;
           width: 0px;
-          font-family:$roboto;
+          font-family:$monospace;
         }
 
         .value-wrapper {
@@ -92,7 +92,7 @@
       }
 
       .react-selectize-toggle-button path {
-        fill: #999;
+        fill: #bbb;
       }
     }
   }
@@ -165,7 +165,7 @@
 
 .react-selectize {
   &.default {
-    font-family:$roboto;
+    font-family:$monospace;
 
     &.root-node {
       .react-selectize-control {
@@ -233,7 +233,7 @@
   }
 
   &.dropdown-menu.default {
-    background-color:$background;
+    background-color:rgba($background, 0.9);
     background-position:4px -5px;
 
     .no-results-found {

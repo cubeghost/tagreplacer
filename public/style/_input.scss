@@ -1,8 +1,8 @@
-$border:2px solid rgba($text,0.8);
-$border-radius:0.25em;
+//$border:2px solid rgba($text,0.8);
+$border:$lightgray 2px solid;
 
 input, button {
-  font-family:$roboto;
+  font-family:$monospace;
   font-weight:300;
   font-size:1em;
   background-color:transparent;
@@ -11,8 +11,9 @@ input, button {
 
   &:focus, &:active {
     outline:none;
-    border-color:$blue;
+    border-color:$highlight;
   }
+
 }
 
 input[type=text] {
@@ -24,12 +25,22 @@ button {
   background-size:150%;
   padding:6px 12px 5px;
   color:$text;
+  cursor:pointer;
+
+  &:focus, &:active, &:hover {
+    color:$background;
+    border-color:$highlight;
+    background-color:$highlight;
+  }
 }
 
 form {
   display:flex;
   align-items:center;
   margin-bottom:3em;
+  &:last-of-type {
+    margin-bottom:0;
+  }
 
   label {
     text-align:right;
@@ -61,6 +72,10 @@ form {
 form.disabled {
   opacity:0.6;
   pointer-events:none;
+
+  input, button {
+    background-color:$lightgray;
+  }
 }
 
 // selectize stuff
@@ -90,7 +105,7 @@ form.disabled {
   }
 
   &.open .react-selectize-control {
-    border-color:$blue;
+    border-color:$highlight;
   }
 
   .react-selectize-toggle-button-container {
