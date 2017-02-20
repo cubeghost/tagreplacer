@@ -16,7 +16,7 @@ var app = express();
 
 var grant = grant = new Grant({
   server: {
-    protocol: 'http',
+    protocol: process.env.PROTOCOL,
     host: process.env.HOSTNAME,
     callback: '/callback',
     transport: 'session'
@@ -32,7 +32,7 @@ app.use(session({
     client: client
   }),
   resave: false,
-  //secure: true,
+  secure: (process.env.PROTOCOL === 'https' ? true : false),
   saveUninitialized: false,
   secret: process.env.SECRET
 }));
