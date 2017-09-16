@@ -9,8 +9,9 @@ now using a customized version of [react-selectize](https://github.com/furqanZaf
 
 
 ### todo
-- [x] replace elasticache with local redis
-- [ ] add advanced options (incl. "replace queued posts" option)
+- [x] add advanced options (incl. "replace queued posts" option)
+  - [ ] make these options persist in localstorage
+  - [ ] make them less ugly
 - [ ] add case insensitive option (or vice versa)
-- [x] replace tags in place (see https://www.dropbox.com/s/gbbu0ortj50er1g/screenshot20170503222502.png?dl=0)
-- [ ] webkit? (when i wrote this did i mean webpack?)
+- [ ] add help page or at least link to a markdown file or s/t
+- [ ] add react-router to facilitate the above
