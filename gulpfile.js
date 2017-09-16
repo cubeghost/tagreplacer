@@ -121,7 +121,8 @@ gulp.task('dist:cachebust',function(){
 // copy for dist
 gulp.task('dist:copy',function(){
   return gulp.src([
-    './public/build/*'
+    './public/build/*',
+    './public/assets/*'
   ],{
     base: './public/'
   })
