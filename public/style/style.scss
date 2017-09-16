@@ -1,16 +1,18 @@
-$offwhite:#F2F5EA;
-$lightgray:#D6DBD2;
+$offwhite:#F4F4F2;
+$lightgray:#D6D8D4;
 $darkgray:#2C363F;
 $brightpink:#E75A7C;
 
+$color-lightGray:#EFEFEF;
+$color-darkBlueGray:#2C363F;
+
 $text:$darkgray;
 $background:$offwhite;
-$highlight:$brightpink;
+$highlight:saturate(#4BA4BE, 10);
 
-$roboto:'Roboto',sans-serif;
-$monospace:'Inconsolata',monospace;
-$rubik:'Rubik',sans-serif;
-$worksans:'Work Sans',sans-serif;
+$monospace:'Roboto Mono',monospace;
+$font-monospace:'Roboto Mono',monospace;
+$font-sansSerif:'Assistant', Helvetica, Arial, sans-serif;
 $border-radius:0.25em;
 
 
@@ -19,10 +21,6 @@ $border-radius:0.25em;
 
 @import 'selectize';
 
-
-@mixin dots($color) {
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="5" height="5" viewBox="0 0 5 5"><style>.st0{clip-path:url(#SVGID_2_)}.st1{fill:none;stroke:#{$color};stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}.st2{clip-path:url(#SVGID_4_)}.st3,.st4{clip-path:url(#SVGID_6_)}.st4{stroke:#{$color};stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}.st4,.st5{fill:none}.st6{clip-path:url(#SVGID_8_)}.st7{clip-path:url(#SVGID_10_)}.st8{clip-path:url(#SVGID_12_)}.st9{clip-path:url(#SVGID_14_)}.st10{clip-path:url(#SVGID_16_)}.st11{clip-path:url(#SVGID_18_)}.st12{clip-path:url(#SVGID_20_)}.st13{clip-path:url(#SVGID_22_)}.st14{clip-path:url(#SVGID_24_)}.st15{clip-path:url(#SVGID_26_)}.st16{clip-path:url(#SVGID_28_)}.st17{clip-path:url(#SVGID_30_)}.st18{clip-path:url(#SVGID_32_)}.st19{fill:#{$color}}.st20{fill:none;stroke:#{$color};stroke-width:1.7544;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}</style><g id="Layer_1"><defs><path id="SVGID_27_" d="M74 79.2h300v300H74z"/></defs><clipPath id="SVGID_2_"><use xlink:href="#SVGID_27_" overflow="visible"/></clipPath><g class="st0"><path class="st1" d="M-13.8-33.3l4.7-3.6c4.5-3.4 11.8-3.4 16.3 0l54 41.1-54 41.1c-4.5 3.4-11.8 3.4-16.3 0l-54-41.1"/></g><circle class="st19" cx="2.5" cy="2.5" r=".7"/><path class="st19" d="M.7 5c0-.4-.3-.7-.7-.7V5h.7zm3.6-5c0 .4.3.7.7.7V0h-.7zM.7 0H0v.7C.4.7.7.4.7 0zm3.6 5H5v-.7c-.4 0-.7.3-.7.7z"/></g></svg>');
-}
 
 @keyframes pulsate {
   0% {color:#46D282;}
@@ -35,29 +33,31 @@ $border-radius:0.25em;
 body, html {min-height:100vh;}
 
 body {
-  background-color:$background;
-  @include dots($lightgray);
-
-  font-family:$rubik;//$worksans; // $rubik
+  background-color:#4BA4BE;
+  background-image:url(../tinygradient.svg);
+  background-size:cover;
+  background-attachment:fixed;
+  font-family:$font-sansSerif;
   font-weight:300;
-  color:$text;
+  color:$color-lightGray;
 }
 
 .app {
   max-width:640px;
   margin:0 auto;
-  padding:2em 0;
+  padding:4em 0 2em;
 }
 
 header {
   display:flex;
-  //border-bottom:$slightgreen 2px solid;
   padding-bottom:1em;
   margin-bottom:2em;
 
   h1 {
-    font-size:2em;
     flex:1;
+    font-family:$font-monospace;
+    font-weight:900;
+    font-size:2em;
   }
 
   nav {
@@ -67,10 +67,14 @@ header {
 
     a {
       text-decoration:none;
-      color:lighten($text,20);
+      color:inherit;
       margin-left:1em;
+      cursor:pointer;
+      transition:border-color 200ms ease-in-out;
+      border-bottom:2px solid rgba($color-lightGray, 0);
+      padding-bottom:2px;
       &:hover, &:focus, &:active {
-        color:$highlight;
+        border-color:currentColor;
       }
     }
   }
@@ -78,11 +82,13 @@ header {
 }
 
 .connect {
+  display:inline-block;
+  font-family:$font-monospace;
   text-decoration:none;
   padding:1em 2em;
   font-size:1.5em;
   color:$highlight;
-  border:2px solid $highlight;
+  background-color:rgba($color-lightGray, 0.75);
 }
 
 .loading {
@@ -91,8 +97,13 @@ header {
   text-align:center;
 
   p {
+    font-weight:bold;
     animation:pulsate 4s infinite;
   }
+}
+
+.error {
+  margin-bottom:2em;
 }
 
 @mixin window() {
@@ -102,6 +113,7 @@ header {
   border:2px solid $lightgray;
   box-shadow:8px 8px 0 rgba($lightgray,0.5);
   margin-bottom:2em;
+  color:$color-darkBlueGray;
 
   &:before {
     content:'⬓ _';
@@ -138,6 +150,10 @@ header {
     font-size:1.25em;
     margin-bottom:1em;
     line-height:1.75;
+
+    &:not(:first-of-type) {
+      margin-top:1.5em;
+    }
   }
 
   .post {
