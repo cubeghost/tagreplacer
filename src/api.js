@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 var _ = require('lodash');
-var Promise = require('es6-promise').Promise;
 var tumblr = require('tumblr.js');
 
 
@@ -34,45 +33,89 @@ function api(token, secret) {
   }
 
   /*
+
+  */
+  this.getMethods = function getMethod(config) {
+    var methods = [
+      {
+        method: 'blogPosts',
+        arrayKey: 'posts',
+      }
+    ];
+    if (config.includeQueue) {
+      methods.push({
+        method: 'blogQueue',
+        arrayKey: 'queued',
+      });
+    }
+    if (config.includeDrafts) {
+      methods.push({
+        method: 'blogDrafts',
+        arrayKey: 'drafts',
+      });
+    }
+    return methods;
+  }
+
+  /*
     returns all posts that have a tag
     findPostsWithTag('blog', 'tag')
   */
-  this.findPostsWithTag = function findPostsWithTag(blog, tag) {
+  this.findPostsWithTag = function findPostsWithTag(blog, tag, config) {
     return new Promise(function(resolve, reject) {
       // loop through until we have all the posts
 
-      var posts = [];
+      var results = {
+        posts: [],
+        queued: [],
+        drafts: [],
+      };
 
-      function findWithOffset(offset, retry) {
-        this.client.blogPosts(blog, {
+      var methodTypes = this.getMethods(config);
+
+      function findWithOffset(type, offset, retry, params) {
+        return this.client[type.method](blog, Object.assign({
           tag: tag,
           limit: POST_LIMIT,
           offset: offset
-        }).then(function(result) {
-          posts = posts.concat(result.posts);
-          if (result.total_posts > POST_LIMIT && offset < result.total_posts) {
-            findWithOffset(offset + POST_LIMIT);
+        }, params)).then(function(response) {
+          results[type.arrayKey] = results[type.arrayKey].concat(response.posts);
+          if (response.total_posts) {
+            if (response.total_posts > POST_LIMIT && offset < response.total_posts) {
+              return findWithOffset(type, offset + POST_LIMIT);
+            } else {
+              return;
+            }
           } else {
-            return finish(result.total_posts);
+            if (response.posts.length > 0) {
+              if (type.method === 'blogDrafts') {
+                // seriously, what the fuck? seriously.
+                var before_id = response.posts[response.posts.length - 1].id;
+                return findWithOffset(type, offset + POST_LIMIT, undefined, { before_id: before_id })
+              } else {
+                return findWithOffset(type, offset + POST_LIMIT);
+              }
+            } else {
+              return;
+            }
           }
         }).catch(function(error) {
           // retry once
           if (!retry) {
-            findWithOffset(offset);
+            return findWithOffset(type, offset, true);
           } else {
             reject(error);
           }
         });
       }
 
-      function finish(total) {
-        resolve({
-          posts: posts,
-          total: total
-        });
-      }
+      var promises = methodTypes.map(function(type) {
+        return findWithOffset(type, 0);
+      });
 
-      findWithOffset(0);
+      Promise.all(promises).then(function() {
+        resolve(results);
+      })
 
     }.bind(this));
   }
@@ -81,30 +124,34 @@ function api(token, secret) {
     finds posts that have more than one tag (inclusive)
     findPostsWithTags('blog', ['tag1', 'tag2'])
   */
-  this.findPostsWithTags = function findPostsWithTags(blog, tags) {
+  this.findPostsWithTags = function findPostsWithTags(blog, tags, config) {
     return new Promise(function(resolve, reject) {
 
       var sorted = tags.sort();
+      var methodTypes = this.getMethods(config);
 
       // find posts with the first tag, then check for the others
-      this.findPostsWithTag(blog, tags[0])
-      .then(function(result) {
+      this.findPostsWithTag(blog, tags[0], config)
+      .then(function(results) {
+        var filteredResults = Object.assign({}, results);
+
         // compare post tags to our tags
-        var filtered = result.posts.filter(function(post) {
+        function filterPosts(post) {
           if (_.isEqual(
-            _.intersection(post.tags.sort(), sorted),
+            _.intersection(post.tags.slice().sort(), sorted),
             sorted
           )) {
-            return true
+            return true;
           } else {
-            return false
+            return false;
           }
+        }
+
+        methodTypes.forEach(function(type) {
+          filteredResults[type.arrayKey] = filteredResults[type.arrayKey].filter(filterPosts);
         });
 
-        resolve({
-          posts: filtered,
-          total: filtered.length
-        });
+        resolve(filteredResults);
       });
     }.bind(this));
   }
@@ -114,7 +161,7 @@ function api(token, secret) {
     replaceTags('blog', 'tag1', 'tag2')
     find and replace can both be either a string or array
   */
-  this.replaceTags = function replaceTags(blog, find, replace) {
+  this.replaceTags = function replaceTags(blog, find, replace, config) {
     return new Promise(function(resolveAll, rejectAll) {
 
       var findFunction = this.findPostsWithTag;
@@ -122,16 +169,22 @@ function api(token, secret) {
         findFunction = this.findPostsWithTags;
       }
 
+      var methodTypes = this.getMethods(config);
+
       // get all posts with tag(s)
-      findFunction(blog, find)
-      .then(function(result) {
-        return result.posts;
+      findFunction(blog, find, config)
+      .then(function(results) {
+        return results;
       }).catch(function(error) {
         rejectAll(error);
-      }).then(function(posts) {
+      }).then(function(results) {
         // map posts to edit function
-        var actions = posts.map(function(post) {
-          return makePromise(post);
+        var actions = methodTypes.map(function(type) {
+          return results[type.arrayKey].map(function(post) {
+            return makePromise(post);
+          });
+        }).reduce(function(a, b) {
+          return a.concat(b);
         });
 
         // edit all
@@ -145,9 +198,18 @@ function api(token, secret) {
         return new Promise(function(resolve, reject) {
 
           var diff = Array.isArray(find) ? find : [find];
-          var tags = _.chain(post.tags).difference(diff).concat(replace).value();
-          var joined = tags.join(','); // >_> you can send arrays but not accept them???
-          
+          var tags = post.tags.slice();
+          replace.forEach(function(tag, index) {
+            var tagIndex = tags.indexOf(diff[index]);
+            if (tagIndex > -1) {
+              tags.splice(tagIndex, 1, tag);
+            } else {
+              tags.push(tag);
+            }
+          });
+          tags = _.difference(tags, diff);
+          var joined = tags.join(',');
+
           this.client.editPost(blog, {
             id: post.id,
             tags: joined

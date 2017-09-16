@@ -17,6 +17,7 @@ function notempty(value) {
   }
 }
 
+var DEFAULT_BLOG = process.env.NODE_ENV === 'development' ? process.env.TESTING_BLOG : undefined;
 
 var Replacer = React.createClass({
 
@@ -24,10 +25,12 @@ var Replacer = React.createClass({
     return {
       loading: false,
       error: undefined,
-      blog: this.props.blogs[0].name || undefined,
+      blog: DEFAULT_BLOG || this.props.blogs[0].name || undefined,
       find: [],
       replace: [],
       posts: [],
+      queued: [],
+      drafts: [],
       replaced: []
     }
   },
@@ -85,20 +88,27 @@ var Replacer = React.createClass({
 
       apiFetch('POST', '/find', {
         blog: this.state.blog,
-        find: this.state.find
+        find: this.state.find,
+        config: this.props.options
       }).then(function(json){
-        if (json.posts.length > 0) {
+        if (
+          json.posts.length > 0 ||
+          json.queued.length > 0 ||
+          json.drafts.length > 0
+        ) {
           this.setState({
             loading: false,
             error: undefined,
-            posts: json.posts
+            posts: json.posts,
+            queued: json.queued,
+            drafts: json.drafts
           }, function() {
             this.refs.replace.focus();
           }.bind(this));
         } else {
           this.setState({
             loading: false,
-            error: 'didnt find any posts tagged ' + this.formatTags(this.state.find)
+            error: 'didn\'t find any posts tagged ' + this.formatTags(this.state.find)
           });
         }
       }.bind(this))
@@ -138,7 +148,8 @@ var Replacer = React.createClass({
       apiFetch('POST', '/replace', {
         blog: this.state.blog,
         find: this.state.find,
-        replace: this.state.replace
+        replace: this.state.replace,
+        config: this.props.options
       }).then(function(json){
         this.setState({
           loading: false,
@@ -173,6 +184,8 @@ var Replacer = React.createClass({
       replace: [],
       error: undefined,
       posts: [],
+      queued: [],
+      drafts: [],
       replaced: []
     });
 
@@ -255,21 +268,55 @@ var Replacer = React.createClass({
     />)
   },
 
-  renderFound: function() {
-    if (this.state.posts.length > 0) {
-      return <h2>found {this.state.posts.length} posts tagged #{this.state.find}</h2>
+  renderFound: function(key) {
+    if (this.state[key].length > 0) {
+      return (<h2>
+        found {this.state[key].length}&nbsp;
+        {(key === 'queued' ? 'queued posts' : key)} tagged #{this.state.find}
+      </h2>);
     }
   },
 
   renderReplaced: function() {
     if (this.state.replaced.length > 0) {
-      return <h2>replaced {this.formatTags(this.state.find)} with {this.formatTags(this.state.replace)} for {this.state.replaced.length} posts</h2>
+      return (<div>
+        <h2>
+          replaced {this.formatTags(this.state.find)}&nbsp;
+          with {this.formatTags(this.state.replace)}&nbsp;
+          for {this.state.replaced.length} posts
+          <br/>
+        </h2>
+      </div>);
     }
   },
 
   renderPosts: function() {
-    if (this.state.posts.length > 0 /*&& viewPOsts == true*/) {
+    if (this.state.posts.length > 0) {
       return this.state.posts.map(function(post) {
+        var key = 'post-' + post.id;
+        return (<div className="post" key={key}>
+          <a href={post.post_url} target="_blank">{post.id}/{post.slug}</a>
+          <span className="tags">{this.formatTags(post.tags)}</span>
+        </div>);
+      }.bind(this));
+    }
+  },
+
+  renderQueued: function() {
+    if (this.state.queued.length > 0) {
+      return this.state.queued.map(function(post) {
+        var key = 'post-' + post.id;
+        return (<div className="post" key={key}>
+          <a href={post.post_url} target="_blank">{post.id}/{post.slug}</a>
+          <span className="tags">{this.formatTags(post.tags)}</span>
+        </div>);
+      }.bind(this));
+    }
+  },
+
+  renderDrafts: function() {
+    if (this.state.drafts.length > 0) {
+      return this.state.drafts.map(function(post) {
         var key = 'post-' + post.id;
         return (<div className="post" key={key}>
           <a href={post.post_url} target="_blank">{post.id}/{post.slug}</a>
@@ -289,8 +336,14 @@ var Replacer = React.createClass({
   },
 
   renderReset: function() {
-    if (this.state.posts.length > 0) {
+    if (this.state.posts.length || this.state.queued.length || this.state.drafts.length) {
       return (<button className="reset" onClick={this.reset}>find a different tag?</button>);
+    }
+  },
+
+  renderError: function() {
+    if (this.state.error) {
+      return (<div className="error">{this.state.error}</div>);
     }
   },
 
@@ -314,7 +367,7 @@ var Replacer = React.createClass({
 
     return (<div className="replacer">
       {this.renderLoadingState()}
-      {this.state.error}
+      {this.renderError()}
 
       <div className="form">
 
@@ -338,10 +391,14 @@ var Replacer = React.createClass({
       </div>
 
       <div className="result">
-        {this.renderFound()}
-        {this.renderReset()}
-        {this.renderPosts()}
         {this.renderReplaced()}
+        {this.renderReset()}
+        {this.renderFound('posts')}
+        {this.renderPosts()}
+        {this.props.options.includeQueue && this.renderFound('queued')}
+        {this.props.options.includeQueue && this.renderQueued()}
+        {this.props.options.includeDrafts && this.renderFound('drafts')}
+        {this.props.options.includeDrafts && this.renderDrafts()}
       </div>
 
 

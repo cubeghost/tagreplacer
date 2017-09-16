@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-var redis = require('node-redis');
+var redis = require('redis');
 
 var client = redis.createClient(
   process.env.REDIS_PORT,

@@ -1,10 +1,12 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var { Router, Route, IndexRoute, browserHistory } = require('react-router');
+var _ = require('lodash');
 
 require('whatwg-fetch');
 
 var Replacer = require('./replacer');
+var Options = require('./options');
 var { apiFetch, debugError } = require('./util');
 
 
@@ -12,9 +14,14 @@ var App = React.createClass({
 
   getInitialState: function() {
     return {
+      showOptions: true,
       loading: true,
       auth: false, // have we oauthed?
       user: {},
+      options: {
+        includeQueue: false,
+        includeDrafts: true
+      },
       error: undefined
     }
   },
@@ -57,6 +64,23 @@ var App = React.createClass({
     }.bind(this));
   },
 
+  toggleOptions: function() {
+    this.setState({
+      showOptions: !this.state.showOptions
+    });
+  },
+
+  handleOptions: function(event) {
+    var options = _.extend({}, this.state.options);
+    var field = event.target.dataset.field;
+
+    options[field] = event.target.checked;
+
+    this.setState({
+      options: options
+    });
+  },
+
   // render
 
   renderError: function() {
@@ -82,18 +106,22 @@ var App = React.createClass({
       <header>
         <h1>tag replacer</h1>
         <nav>
-          <a href="/help">help</a>
+          <a onClick={this.toggleHelp}>help</a>
+          {this.state.auth && !this.state.loading ? <a onClick={this.toggleOptions}>options</a> : null}
           {this.state.auth && !this.state.loading ? <a href="/disconnect">disconnect</a> : null}
         </nav>
       </header>
       {this.renderError()}
       {this.renderLoadingState()}
+      {this.state.auth && !this.state.loading && this.state.showOptions ? <Options options={this.state.options} handleOptions={this.handleOptions} /> : null}
       {!this.state.auth && !this.state.loading ? authLink : null}
-      {this.state.auth && !this.state.loading ? <Replacer blogs={this.state.user.blogs} /> : null}
+      {this.state.auth && !this.state.loading ? <Replacer blogs={this.state.user.blogs} options={this.state.options} /> : null}
     </div>);
   }
 
 });
+
+
 
 
 ReactDOM.render(<App />, document.querySelector('.container'));

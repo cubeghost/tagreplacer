@@ -6,6 +6,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var watchify = require('watchify');
 var browserify = require('browserify');
 var babelify = require('babelify');
+var envify = require('envify/custom');
 var uglify = require('gulp-uglify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -54,7 +55,11 @@ function run_bundler(watch,callback) {
 
   var bundler = browserify(config.routes.react_source, {debug: true, cache: {}, packageCache: {}})
   .plugin(watchify, {ignoreWatch: ['**/node_modules/**']})
-  .transform(babelify, {presets: ['es2015', 'react']});
+  .transform(babelify, {presets: ['es2015', 'react']})
+  .transform(envify({
+    NODE_ENV: process.env.NODE_ENV,
+    TESTING_BLOG: process.env.TESTING_BLOG
+  }));
 
   // run
   bundle(bundler);

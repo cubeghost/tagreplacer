@@ -61,7 +61,7 @@ apiRouter.post('/find', function(req, res) {
       findFunction = api(access_token, access_secret).findPostsWithTags;
     }
 
-    findFunction(req.body.blog, req.body.find)
+    findFunction(req.body.blog, req.body.find, req.body.config)
     .then(function returnJSON(result) {
       res.json(result);
     }).catch(handleError);
@@ -73,7 +73,7 @@ apiRouter.post('/find', function(req, res) {
 apiRouter.post('/replace', function(req, res) {
   if (req.body.blog && req.body.find && req.body.replace) {
     api(req.session.grant.response.access_token, req.session.grant.response.access_secret)
-    .replaceTags(req.body.blog, req.body.find, req.body.replace)
+    .replaceTags(req.body.blog, req.body.find, req.body.replace, req.body.config)
     .then(function(result) {
       res.json(result);
     }).catch(handleError);
