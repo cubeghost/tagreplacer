@@ -14,13 +14,13 @@ var App = React.createClass({
 
   getInitialState: function() {
     return {
-      showOptions: true,
+      showOptions: false,
       loading: true,
       auth: false, // have we oauthed?
       user: {},
       options: {
         includeQueue: false,
-        includeDrafts: true
+        includeDrafts: false
       },
       error: undefined
     }
