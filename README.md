@@ -16,3 +16,4 @@ now using a customized version of [react-selectize](https://github.com/furqanZaf
 - [ ] add help page or at least link to a markdown file or s/t
 - [ ] add react-router to facilitate the above
 - [ ] explore using react-select instead of customized react-selectize
+- [ ] allow for collapsing of found posts/drafts/queue lists
