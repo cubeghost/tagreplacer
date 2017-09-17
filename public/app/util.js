@@ -33,8 +33,13 @@ function debugError(error) {
   }
 }
 
+function formatPosts(post) {
+
+}
+
 
 module.exports = {
   apiFetch: apiFetch,
-  debugError: debugError
+  debugError: debugError,
+  formatPosts: formatPosts
 };

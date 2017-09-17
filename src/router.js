@@ -23,6 +23,7 @@ function render(req, res) {
 }
 
 webRouter.get('/', render);
+webRouter.get('/help', render);
 
 // api router
 // prefixed with '/api'

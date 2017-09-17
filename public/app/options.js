@@ -1,7 +1,19 @@
 var React = require('react');
+var createReactClass = require('create-react-class');
 
+var Options = createReactClass({
 
-var Options = React.createClass({
+  getInitialState: function() {
+    return {
+      open: false
+    }
+  },
+
+  toggleOptions: function() {
+    this.setState(function(prevState) {
+      return { open: !prevState.open }
+    });
+  },
 
   renderField: function(field, label) {
     var id = 'options-' + field;
@@ -20,8 +32,13 @@ var Options = React.createClass({
 
   render: function() {
     return (<div className="options">
-      {this.renderField('includeQueue', 'Include queued posts')}
-      {this.renderField('includeDrafts', 'Include drafted posts')}
+      <button onClick={this.toggleOptions} className="toggleOptions">
+        options
+      </button>
+      {this.state.open && (<div className="optionsForm">
+        {this.renderField('includeQueue', 'Include queued posts')}
+        {this.renderField('includeDrafts', 'Include drafted posts')}
+      </div>)}
     </div>);
   }
 

@@ -46,6 +46,13 @@ body {
   max-width:640px;
   margin:0 auto;
   padding:4em 0 2em;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+
+  .content {
+    flex:1;
+  }
 }
 
 header {
@@ -58,6 +65,10 @@ header {
     font-family:$font-monospace;
     font-weight:900;
     font-size:2em;
+
+    a {
+      border-width:0;
+    }
   }
 
   nav {
@@ -66,19 +77,36 @@ header {
     text-align:right;
 
     a {
-      text-decoration:none;
-      color:inherit;
       margin-left:1em;
-      cursor:pointer;
-      transition:border-color 200ms ease-in-out;
-      border-bottom:2px solid rgba($color-lightGray, 0);
-      padding-bottom:2px;
-      &:hover, &:focus, &:active {
-        border-color:currentColor;
-      }
     }
   }
 
+}
+
+header, footer {
+  display:flex;
+
+  nav {
+    align-self:flex-end;
+    flex:1;
+    text-align:right;
+
+    a {
+      margin-left:1em;
+    }
+  }
+
+  a {
+    text-decoration:none;
+    color:inherit;
+    cursor:pointer;
+    transition:border-color 200ms ease-in-out;
+    border-bottom:2px solid rgba($color-lightGray, 0);
+    padding-bottom:2px;
+    &:hover, &:focus, &:active {
+      border-color:currentColor;
+    }
+  }
 }
 
 .connect {
@@ -126,6 +154,48 @@ header {
     padding:2px 4px 3px;
   }
 
+}
+
+
+.help {
+  @include window();
+  font-size:18px;
+
+  h2 {
+    font-size:24px;
+    margin-bottom:1em;
+    font-family:$font-monospace;
+    font-weight:bold;
+  }
+
+  .back {
+    font-size:16px;
+    margin-bottom:1em;
+    color:inherit;
+    display:inline-block;
+    opacity:0.75;
+    text-decoration:none;
+    &:hover, &:focus, &:active {
+      color:$highlight;
+    }
+  }
+
+  h3 {
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:1em;
+  }
+
+  p, pre {
+    margin:1em 0;
+  }
+
+  pre {
+    background:rgba(0, 0, 0, 0.05);
+    padding:14px;
+    font-size:14px;
+    font-family:$font-monospace;
+  }
 }
 
 

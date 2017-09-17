@@ -1,9 +1,11 @@
+require('whatwg-fetch');
+
 var React = require('react');
+var createReactClass = require('create-react-class');
 var _ = require('lodash');
 var { MultiSelect, SimpleSelect } = require('./react-selectize');
 
-require('whatwg-fetch');
-
+var Options = require('./options');
 var { apiFetch, mapForSelectize, labelFromSelectize } = require('./util');
 
 
@@ -19,12 +21,16 @@ function notempty(value) {
 
 var DEFAULT_BLOG = process.env.NODE_ENV === 'development' ? process.env.TESTING_BLOG : undefined;
 
-var Replacer = React.createClass({
+var Replacer = createReactClass({
 
   getInitialState: function() {
     return {
       loading: false,
       error: undefined,
+      options: {
+        includeQueue: false,
+        includeDrafts: false
+      },
       blog: DEFAULT_BLOG || this.props.blogs[0].name || undefined,
       find: [],
       replace: [],
@@ -70,6 +76,17 @@ var Replacer = React.createClass({
     this.setState(state);
   },
 
+  handleOptions: function(event) {
+    var options = _.extend({}, this.state.options);
+    var field = event.target.dataset.field;
+
+    options[field] = event.target.checked;
+
+    this.setState({
+      options: options
+    });
+  },
+
   find: function(event) {
 
     if (event) {
@@ -89,7 +106,7 @@ var Replacer = React.createClass({
       apiFetch('POST', '/find', {
         blog: this.state.blog,
         find: this.state.find,
-        config: this.props.options
+        config: this.state.options
       }).then(function(json){
         if (
           json.posts.length > 0 ||
@@ -149,7 +166,7 @@ var Replacer = React.createClass({
         blog: this.state.blog,
         find: this.state.find,
         replace: this.state.replace,
-        config: this.props.options
+        config: this.state.options
       }).then(function(json){
         this.setState({
           loading: false,
@@ -371,6 +388,8 @@ var Replacer = React.createClass({
 
       <div className="form">
 
+        <Options options={this.state.options} handleOptions={this.handleOptions} />
+
         <form className={blogClassNames}>
           <label>blog</label>
           {this.renderBlogs()}
@@ -395,10 +414,10 @@ var Replacer = React.createClass({
         {this.renderReset()}
         {this.renderFound('posts')}
         {this.renderPosts()}
-        {this.props.options.includeQueue && this.renderFound('queued')}
-        {this.props.options.includeQueue && this.renderQueued()}
-        {this.props.options.includeDrafts && this.renderFound('drafts')}
-        {this.props.options.includeDrafts && this.renderDrafts()}
+        {this.state.options.includeQueue && this.renderFound('queued')}
+        {this.state.options.includeQueue && this.renderQueued()}
+        {this.state.options.includeDrafts && this.renderFound('drafts')}
+        {this.state.options.includeDrafts && this.renderDrafts()}
       </div>
 
 

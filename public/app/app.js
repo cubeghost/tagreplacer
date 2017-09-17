@@ -1,27 +1,24 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var { Router, Route, IndexRoute, browserHistory } = require('react-router');
+var createReactClass = require('create-react-class');
+var { BrowserRouter, Route, Link } = require('react-router-dom');
 var _ = require('lodash');
 
 require('whatwg-fetch');
 
+var Home = require('./home');
 var Replacer = require('./replacer');
-var Options = require('./options');
-var { apiFetch, debugError } = require('./util');
+var Help = require('./help');
+var { apiFetch, debugError, formatPosts } = require('./util');
 
 
-var App = React.createClass({
+var App = createReactClass({
 
   getInitialState: function() {
     return {
-      showOptions: false,
       loading: true,
       auth: false, // have we oauthed?
       user: {},
-      options: {
-        includeQueue: false,
-        includeDrafts: false
-      },
       error: undefined
     }
   },
@@ -64,23 +61,6 @@ var App = React.createClass({
     }.bind(this));
   },
 
-  toggleOptions: function() {
-    this.setState({
-      showOptions: !this.state.showOptions
-    });
-  },
-
-  handleOptions: function(event) {
-    var options = _.extend({}, this.state.options);
-    var field = event.target.dataset.field;
-
-    options[field] = event.target.checked;
-
-    this.setState({
-      options: options
-    });
-  },
-
   // render
 
   renderError: function() {
@@ -92,7 +72,7 @@ var App = React.createClass({
   },
 
   renderLoadingState: function() {
-    if (this.state.loading) {
+    if (this.state.loading && location.pathname.indexOf('/help') < 0) {
       return (<div className="loading">
         <p>loading</p>
       </div>);
@@ -100,27 +80,47 @@ var App = React.createClass({
   },
 
   render: function() {
-    var authLink = <a href="/connect/tumblr" className="connect">connect to tumblr</a>;
 
-    return (<div className="app">
-      <header>
-        <h1>tag replacer</h1>
-        <nav>
-          <a onClick={this.toggleHelp}>help</a>
-          {this.state.auth && !this.state.loading ? <a onClick={this.toggleOptions}>options</a> : null}
-          {this.state.auth && !this.state.loading ? <a href="/disconnect">disconnect</a> : null}
-        </nav>
-      </header>
-      {this.renderError()}
-      {this.renderLoadingState()}
-      {this.state.auth && !this.state.loading && this.state.showOptions ? <Options options={this.state.options} handleOptions={this.handleOptions} /> : null}
-      {!this.state.auth && !this.state.loading ? authLink : null}
-      {this.state.auth && !this.state.loading ? <Replacer blogs={this.state.user.blogs} options={this.state.options} /> : null}
-    </div>);
+    return (<BrowserRouter>
+      <div className="app">
+        <header>
+          <h1><Link to="/">tag replacer</Link></h1>
+          <nav>
+            <Link to="/help">help</Link>
+            {this.state.auth && !this.state.loading ? <a href="/disconnect">disconnect</a> : null}
+          </nav>
+        </header>
+
+        <div className="content">
+          {this.renderError()}
+
+          {this.renderLoadingState()}
+
+          <Route path="/help" component={Help} />
+
+          {!this.state.loading && (
+            <Route exact path="/" render={function(routeProps) {
+              if (this.state.auth) {
+                return (<Replacer blogs={this.state.user.blogs} {...routeProps} />);
+              } else {
+                return (<Home {...routeProps} />);
+              }
+            }.bind(this)} />
+          )}
+        </div>
+
+        <footer>
+          <p>by <a href="https://bldwn.co/">alex</a></p>
+          <nav>
+            <a href="https://github.com/goosey/tagreplacer">github</a>
+            <a href="https://tagreplacer.tumblr.com">changelog</a>
+          </nav>
+        </footer>
+      </div>
+    </BrowserRouter>);
   }
 
 });
-
 
 
 
