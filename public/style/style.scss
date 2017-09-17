@@ -66,8 +66,8 @@ header {
     font-weight:900;
     font-size:2em;
 
-    a {
-      border-width:0;
+    a:hover, a:active {
+      border-color:transparent;
     }
   }
 
@@ -201,6 +201,42 @@ header, footer {
 
 .form {
   @include window();
+}
+
+
+.options {
+
+  .toggleOptions {
+    color:darken($lightgray, 10);
+    border:0;
+    padding:0;
+    position:absolute;
+    top:34px;
+    right:14px;
+
+    &:hover, &:focus, &:active {
+      background-color:transparent;
+    }
+    &:hover, &:focus {
+      color:$highlight;
+    }
+
+    svg {
+      fill:currentColor;
+    }
+  }
+
+  .optionsForm {
+    padding-bottom:1.5em;
+    border-bottom:2px solid rgba($lightgray, 0.25);
+    margin-bottom:2em;
+    padding-left:calc(30% - 16px);
+
+    .field {
+      margin:0.5em;
+    }
+  }
+
 }
 
 
