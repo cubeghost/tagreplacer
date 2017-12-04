@@ -365,9 +365,14 @@ var Replacer = createReactClass({
   },
 
   render: function() {
-    var foundPosts = this.state.posts.length > 0 ? true : false;
+    var foundPosts = (
+      (this.state.posts.length > 0) ||
+      (this.state.queued.length > 0) ||
+      (this.state.drafts.length > 0)
+    );
 
     // gotta be a better way here
+    // TODO add classnames package
     var blogClassNames = [
       'blog',
       (foundPosts ? 'disabled' : '')

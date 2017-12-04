@@ -11,10 +11,11 @@ now using a customized version of [react-selectize](https://github.com/furqanZaf
 ### todo
 - [x] add advanced options (incl. "replace queued posts" option)
   - [ ] make these options persist in localstorage
-  - [ ] make them less ugly
+  - [x] make them less ugly
 - [ ] add case insensitive option (or vice versa)
-- [ ] add help page or at least link to a markdown file or s/t
-- [ ] add react-router to facilitate the above
+- [x] add help page or at least link to a markdown file or s/t
+  - [ ] add more to help page
+- [x] add react-router to facilitate the above
 - [ ] explore using react-select instead of customized react-selectize
 - [ ] allow for collapsing of found posts/drafts/queue lists
 - [ ] add copyright/contact info
