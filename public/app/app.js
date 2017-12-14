@@ -112,7 +112,7 @@ var App = createReactClass({
         <footer>
           <p>by <a href="https://bldwn.co/">alex</a></p>
           <nav>
-            <a href="https://github.com/goosey/tagreplacer">github</a>
+            <a href="https://github.com/cubeghost/tagreplacer">github</a>
             <a href="https://tagreplacer.tumblr.com">changelog</a>
           </nav>
         </footer>
