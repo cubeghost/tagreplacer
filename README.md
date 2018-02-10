@@ -13,6 +13,7 @@ now using a customized version of [react-selectize](https://github.com/furqanZaf
   - [ ] make these options persist in localstorage
   - [x] make them less ugly
 - [ ] add case insensitive option (or vice versa)
+- [ ] add "append" option https://tagreplacer.tumblr.com/post/170355934973/hi-i-was-wondering-if-you-have-any-suggestions
 - [x] add help page or at least link to a markdown file or s/t
   - [ ] add more to help page
 - [x] add react-router to facilitate the above

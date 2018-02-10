@@ -14,7 +14,7 @@ var api = require('./src/api');
 
 var app = express();
 
-var grant = grant = new Grant({
+var grant = new Grant({
   server: {
     protocol: process.env.PROTOCOL,
     host: process.env.HOSTNAME,
@@ -22,6 +22,10 @@ var grant = grant = new Grant({
     transport: 'session'
   },
   tumblr: {
+    request_url: 'https://www.tumblr.com/oauth/request_token',
+    authorize_url: 'https://www.tumblr.com/oauth/authorize',
+    access_url: 'https://www.tumblr.com/oauth/access_token',
+    oauth: 1,
     key: process.env.TUMBLR_API_KEY,
     secret: process.env.TUMBLR_API_SECRET,
   }
