@@ -7,15 +7,16 @@ var path = require('path');
 var api = require('./api');
 var TumblrAPI = require('./api_2');
 
+/* eslint-disable new-cap */
 var webRouter = express.Router();
 var apiRouter = express.Router();
 
 // web router
 
-webRouter.use(express.static('/build'));
+webRouter.use(express.static(path.join(process.cwd(), '/build')));
 
 function render(req, res) {
-  res.sendFile('/build/index.html');
+  res.sendFile(path.join(process.cwd(), '/build/index.html'));
 }
 
 webRouter.get('/', render);
