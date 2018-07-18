@@ -1,15 +1,13 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var createReactClass = require('create-react-class');
 var { BrowserRouter, Route, Link } = require('react-router-dom');
-var _ = require('lodash');
 
 require('whatwg-fetch');
 
 var Home = require('./home');
 var Replacer = require('./replacer');
 var Help = require('./help');
-var { apiFetch, debugError, formatPosts } = require('./util');
+var { apiFetch, debugError } = require('./util');
 
 
 var App = createReactClass({
@@ -19,11 +17,11 @@ var App = createReactClass({
       loading: true,
       auth: false, // have we oauthed?
       user: {},
-      error: undefined
-    }
+      error: undefined,
+    };
   },
 
-  componentWillMount: function() {
+  componentDidMount: function() {
 
     this.replaceHash();
     this.getUser();
@@ -32,7 +30,7 @@ var App = createReactClass({
 
   // remove the #_=_ that comes back from tumblr oauth
   replaceHash: function() {
-    if (window.location.hash && window.location.hash == '#_=_') {
+    if (window.location.hash && window.location.hash === '#_=_') {
       window.history.pushState('', document.title, window.location.pathname);
     }
   },
@@ -110,7 +108,7 @@ var App = createReactClass({
         </div>
 
         <footer>
-          <p>by <a href="https://bldwn.co/">alex</a></p>
+          <p>by <a href="https://cubegho.st/">alex</a></p>
           <nav>
             <a href="https://github.com/cubeghost/tagreplacer">github</a>
             <a href="https://tagreplacer.tumblr.com">changelog</a>
@@ -123,5 +121,4 @@ var App = createReactClass({
 });
 
 
-
-ReactDOM.render(<App />, document.querySelector('.container'));
+module.exports = App;

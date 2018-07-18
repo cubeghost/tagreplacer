@@ -7,7 +7,6 @@ var Grant = require('grant-express');
 
 var client = require('./src/redis');
 var router = require('./src/router');
-var api = require('./src/api');
 
 
 // setup
@@ -36,7 +35,7 @@ app.use(session({
     client: client
   }),
   resave: false,
-  secure: (process.env.PROTOCOL === 'https' ? true : false),
+  secure: (process.env.PROTOCOL === 'https'),
   saveUninitialized: false,
   secret: process.env.SECRET
 }));

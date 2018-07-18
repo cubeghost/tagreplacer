@@ -1,5 +1,3 @@
-require('whatwg-fetch');
-
 var React = require('react');
 var createReactClass = require('create-react-class');
 var _ = require('lodash');
@@ -103,7 +101,7 @@ var Replacer = createReactClass({
         loading: true
       });
 
-      apiFetch('POST', '/find2', {
+      apiFetch('POST', '/find', {
         blog: this.state.blog,
         find: this.state.find,
         config: this.state.options

@@ -5,9 +5,27 @@ const tumblr = require('tumblr.js');
 
 const POST_LIMIT = 20;
 
+/**
+ * @typedef {Object} Options
+ * @property {boolean} [includeQueue=false]  include queued posts
+ * @property {boolean} [includeDrafts=false] include drafted posts
+ * @property {boolean} [caseSensitive=true]  case sensitive tag matching
+ */
+const DEFAULT_OPTIONS = {
+  includeQueue: false,
+  includeDrafts: false,
+  caseSensitive: true,
+}
+
 
 class TumblrAPI {
-  constructor({ token, secret, blog, options }) {
+  /**
+   * @param {string} token          oAuth access token
+   * @param {string} secret         oAuth access secret
+   * @param {string} [blog]         blog identifier
+   * @param {Options} [options={}]  api options
+   */
+  constructor({ token, secret, blog, options = {} }) {
     this.client = new tumblr.Client({
       credentials: {
         consumer_key: process.env.TUMBLR_API_KEY,
@@ -19,51 +37,69 @@ class TumblrAPI {
     });
 
     this.blog = blog;
-    this.options = options;
+    this.options = _.assign({}, DEFAULT_OPTIONS, options);
   }
 
+  /**
+   * @typedef {Object} Method
+   * @property {string} key           key to use in results object
+   * @property {string} clientMethod  tumblr.js client method name
+   */
+
+  /**
+   * array of enabled API methods for fetching posts
+   * @return {Method[]}  array of method definitions
+   */
   get methods() {
     var methods = [
       {
-        apiMethod: 'blogPosts',
-        arrayKey: 'posts',
+        // https://www.tumblr.com/docs/en/api/v2#posts
+        key: 'posts',
+        clientMethod: 'blogPosts',
       }
     ];
 
     if (this.options.includeQueue) {
       methods.push({
-        apiMethod: 'blogQueue',
-        arrayKey: 'queued',
+        // https://www.tumblr.com/docs/en/api/v2#blog-queue
+        key: 'queued',
+        clientMethod: 'blogQueue',
       });
     }
 
     if (this.options.includeDrafts) {
+      // https://www.tumblr.com/docs/en/api/v2#blog-drafts
       methods.push({
-        apiMethod: 'blogDrafts',
-        arrayKey: 'drafts',
+        key: 'drafts',
+        clientMethod: 'blogDrafts',
       });
     }
 
     return methods;
   }
 
+  /**
+   * get authenticated user's info
+   * https://www.tumblr.com/docs/en/api/v2#user-methods
+   * @return {Promise<object>} API response
+   */
   getUserInfo() {
     return this.client.userInfo();
   }
 
   /**
-   * [findPosts description]
-   * @param  {[type]} tag          [description]
-   * @param  {[type]} method       [description]
-   * @param  {Number} [offset=0]   [description]
-   * @param  {Array}  [results=[]] [description]
-   * @param  {Object} [params={}]  [description]
-   * @param  {[type]} [retry=false }]            [description]
-   * @return {[type]}              [description]
+   * find all posts with a tag and method
+   * @param  {string} tag             tag to find
+   * @param  {Method} method          method to use
+   * @param  {Number} [offset=0]      post offset
+   * @param  {Array}  [results=[]]    previous results
+   * @param  {Object} [params={}]     additional parameters
+   * @param  {boolean} [retry=false]  whether this attempt is a retry
+   * @return {Promise<Object[]>}      promise resolving an array of posts
    */
   findPosts({ tag, method, offset = 0, results = [], params = {}, retry = false }) {
 
-    return this.client[method.apiMethod](this.blog, _.assign({
+    return this.client[method.clientMethod](this.blog, _.assign({
       tag: tag,
       offset: offset,
       limit: POST_LIMIT,
@@ -84,7 +120,8 @@ class TumblrAPI {
         }
       } else {
         if (response.posts.length > 0) {
-          if (method.apiMethod === 'blogDrafts') { // seriously, what the fuck
+          if (method.clientMethod === 'blogDrafts') {
+            // i hate this
             var before_id = response.posts[response.posts.length - 1].id;
             return this.findPosts({
               tag,
@@ -129,7 +166,7 @@ class TumblrAPI {
     var promises = this.methods.map(method => {
       return this.findPosts({ tag, method })
         .then(result => ({
-          [method.arrayKey]: result
+          [method.key]: result
         }));
     });
 

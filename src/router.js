@@ -12,15 +12,10 @@ var apiRouter = express.Router();
 
 // web router
 
-var webDir = '/public';
-if (process.env.NODE_ENV === 'production') {
-  webDir = '/dist';
-}
-
-webRouter.use(express.static(path.dirname(require.main.filename) + webDir));
+webRouter.use(express.static('/build'));
 
 function render(req, res) {
-  res.sendFile(path.join(path.dirname(require.main.filename) + webDir + '/index.html'));
+  res.sendFile('/build/index.html');
 }
 
 webRouter.get('/', render);
@@ -28,11 +23,6 @@ webRouter.get('/help', render);
 
 // api router
 // prefixed with '/api'
-
-function handleError(error) {
-  console.log(error);
-  res.status(500).send(error);
-}
 
 apiRouter.use(bodyParser.json());
 
@@ -54,7 +44,10 @@ apiRouter.get('/user', function(req, res) {
 
   client.getUserInfo()
     .then(result => res.json(result.user))
-    .catch(handleError);
+    .catch(error => {
+      console.error(error);
+      res.status(500).send(error);
+    });
 });
 
 apiRouter.post('/find', function(req, res) {
@@ -68,7 +61,10 @@ apiRouter.post('/find', function(req, res) {
 
     client.findPostsWithTags(req.body.find)
       .then(result => res.json(result))
-      .catch(handleError);
+      .catch(error => {
+        console.error(error);
+        res.status(500).send(error);
+      });
   } else {
     res.status(400).send('POST body must include "blog" and "find"');
   }
@@ -80,7 +76,10 @@ apiRouter.post('/replace', function(req, res) {
     .replaceTags(req.body.blog, req.body.find, req.body.replace, req.body.config)
     .then(function(result) {
       res.json(result);
-    }).catch(handleError);
+    }).catch(error => {
+      console.error(error);
+      res.status(500).send(error);
+    });
   } else {
     res.status(400).send('POST body must include "blog", "find", and "replace"');
   }
