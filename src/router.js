@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var path = require('path');
 
 var api = require('./api');
+var TumblrAPI = require('./api_2');
 
 var webRouter = express.Router();
 var apiRouter = express.Router();
@@ -46,28 +47,30 @@ apiRouter.use(function(req, res, next) {
 
 
 apiRouter.get('/user', function(req, res) {
-  api(req.session.grant.response.access_token, req.session.grant.response.access_secret)
-  .getUserInfo().then(function(result) {
-    res.json(result.user);
-  }).catch(handleError);
+  const token = req.session.grant.response.access_token;
+  const secret = req.session.grant.response.access_secret;
+
+  const client = new TumblrAPI({ token, secret });
+
+  client.getUserInfo()
+    .then(result => res.json(result.user))
+    .catch(handleError);
 });
 
 apiRouter.post('/find', function(req, res) {
   if (req.body.blog && req.body.find) {
-    var access_token = req.session.grant.response.access_token;
-    var access_secret = req.session.grant.response.access_secret;
+    const token = req.session.grant.response.access_token;
+    const secret = req.session.grant.response.access_secret;
+    const blog = req.body.blog;
+    const options = req.body.config;
 
-    var findFunction = api(access_token, access_secret).findPostsWithTag;
-    if (Array.isArray(req.body.find)) {
-      findFunction = api(access_token, access_secret).findPostsWithTags;
-    }
+    const client = new TumblrAPI({ token, secret, blog, options });
 
-    findFunction(req.body.blog, req.body.find, req.body.config)
-    .then(function returnJSON(result) {
-      res.json(result);
-    }).catch(handleError);
+    client.findPostsWithTags(req.body.find)
+      .then(result => res.json(result))
+      .catch(handleError);
   } else {
-    res.status(400).send('POST body must include "blog" and "tag"');
+    res.status(400).send('POST body must include "blog" and "find"');
   }
 });
 

@@ -103,7 +103,7 @@ var Replacer = createReactClass({
         loading: true
       });
 
-      apiFetch('POST', '/find', {
+      apiFetch('POST', '/find2', {
         blog: this.state.blog,
         find: this.state.find,
         config: this.state.options
