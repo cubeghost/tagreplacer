@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const debugModule = require('debug')('TumblrClient');
+// const debugModule = require('debug')('TumblrClient');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
 

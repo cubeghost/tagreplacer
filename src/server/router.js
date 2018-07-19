@@ -4,8 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const api = require('./api');
-const TumblrClient = require('./api_2');
+const TumblrClient = require('./tumblr');
 
 
 // web router
