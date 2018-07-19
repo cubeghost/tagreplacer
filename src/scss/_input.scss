@@ -121,12 +121,76 @@ input[type=checkbox] {
   }
 }
 
-// selectize stuff
+// react-select
 
-.react-selectize-control {
-  border:$border;
-  border-radius:$border-radius;
+.Select {
+  font-family: $monospace;
+  color: $text;
+  font-size: 1em;
+  flex-basis: 240px;
+  margin-left: 1em;
+  margin-right: 1em;
+
+  .Select-control {
+    border: $border;
+    border-radius: $border-radius;
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+  &.is-open .Select-control {
+    border: $border;
+  }
+
+  &.is-focused:not(.is-open) > .Select-control {
+    border-color: $highlight;
+    box-shadow: 0 0 0 3px rgba($highlight, 0.1);
+    background-color: #fff;
+  }
 }
+
+.Select-menu-outer {
+  border: $border;
+  border-top: 0;
+  margin-top: 0;
+  border-bottom-left-radius: $border-radius;
+  border-bottom-right-radius: $border-radius;
+  box-shadow: none;
+}
+
+.Select--multi .Select-input > input {
+  line-height: 20px;
+}
+
+.Select--multi .Select-value,
+.Select--multi.is-disabled .Select-value {
+  font-size: 1em;
+  background-color: rgba(0,0,0,0.1);
+  color: $text;
+  border-radius: 0.1em;
+  border: 0;
+
+  .Select-value-icon {
+    padding: 2px 5px 1px;
+    float: right;
+    border: 0;
+    color: rgba($text, 0.5);
+    &:hover, &:focus {
+      background-color: rgba($text, 0.1);
+      color: rgba($text, 0.75);
+    }
+  }
+  .Select-value-label {
+    padding: 1px 3px 1px 5px;
+  }
+}
+
+
+
+
+
+
 
 .select-tag {
   padding:3px 6px;

@@ -16,10 +16,10 @@ $font-sansSerif:'Assistant', Helvetica, Arial, sans-serif;
 $border-radius:0.25em;
 
 
+@import '../../node_modules/react-select/dist/react-select.css';
+
 @import 'reset';
 @import 'input';
-
-@import 'selectize';
 
 
 @keyframes pulsate {

@@ -1,9 +1,4 @@
-var { Promise } = require('es6-promise');
-
-require('whatwg-fetch');
-
-
-function apiFetch(method, path, body) {
+export function apiFetch(method, path, body) {
   return new Promise(function(resolve, reject) {
 
     var config = {
@@ -26,20 +21,13 @@ function apiFetch(method, path, body) {
   });
 }
 
-function debugError(error) {
+export function debugError(error) {
   if (window.location.search === '?debug') {
     console.log('debug:');
     console.log(error.stack);
   }
 }
 
-function formatPosts(post) {
+export function formatPosts(post) {
 
 }
-
-
-module.exports = {
-  apiFetch: apiFetch,
-  debugError: debugError,
-  formatPosts: formatPosts
-};

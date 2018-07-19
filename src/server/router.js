@@ -1,29 +1,31 @@
 require('dotenv').config();
 
-var express = require('express');
-var bodyParser = require('body-parser');
-var path = require('path');
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
 
-var api = require('./api');
-var TumblrAPI = require('./api_2');
+const api = require('./api');
+const TumblrClient = require('./api_2');
 
-/* eslint-disable new-cap */
-var webRouter = express.Router();
-var apiRouter = express.Router();
 
 // web router
+/* eslint-disable new-cap */
+const webRouter = express.Router();
+const buildDir = path.resolve('build');
 
-webRouter.use(express.static(path.join(process.cwd(), '/build')));
+webRouter.use(express.static(buildDir));
 
-function render(req, res) {
-  res.sendFile(path.join(process.cwd(), '/build/index.html'));
-}
+const render = (req, res) => {
+  res.sendFile(path.join(buildDir, '/index.html'));
+};
 
+// TODO better routing?
 webRouter.get('/', render);
 webRouter.get('/help', render);
 
 // api router
 // prefixed with '/api'
+const apiRouter = express.Router();
 
 apiRouter.use(bodyParser.json());
 
@@ -36,12 +38,11 @@ apiRouter.use(function(req, res, next) {
   }
 });
 
-
 apiRouter.get('/user', function(req, res) {
   const token = req.session.grant.response.access_token;
   const secret = req.session.grant.response.access_secret;
 
-  const client = new TumblrAPI({ token, secret });
+  const client = new TumblrClient({ token, secret });
 
   client.getUserInfo()
     .then(result => res.json(result.user))
@@ -58,7 +59,7 @@ apiRouter.post('/find', function(req, res) {
     const blog = req.body.blog;
     const options = req.body.config;
 
-    const client = new TumblrAPI({ token, secret, blog, options });
+    const client = new TumblrClient({ token, secret, blog, options });
 
     client.findPostsWithTags(req.body.find)
       .then(result => res.json(result))
@@ -73,14 +74,19 @@ apiRouter.post('/find', function(req, res) {
 
 apiRouter.post('/replace', function(req, res) {
   if (req.body.blog && req.body.find && req.body.replace) {
-    api(req.session.grant.response.access_token, req.session.grant.response.access_secret)
-    .replaceTags(req.body.blog, req.body.find, req.body.replace, req.body.config)
-    .then(function(result) {
-      res.json(result);
-    }).catch(error => {
-      console.error(error);
-      res.status(500).send(error);
-    });
+    const token = req.session.grant.response.access_token;
+    const secret = req.session.grant.response.access_secret;
+    const blog = req.body.blog;
+    const options = req.body.config;
+
+    const client = new TumblrClient({ token, secret, blog, options });
+
+    client.findAndReplaceTags(req.body.find, req.body.replace)
+      .then(result => res.json(result))
+      .catch(error => {
+        console.error(error);
+        res.status(500).send(error);
+      });
   } else {
     res.status(400).send('POST body must include "blog", "find", and "replace"');
   }
@@ -88,6 +94,6 @@ apiRouter.post('/replace', function(req, res) {
 
 
 module.exports = {
-  web: webRouter,
-  api: apiRouter
+  webRouter,
+  apiRouter
 };

@@ -1,15 +1,14 @@
-var React = require('react');
-var createReactClass = require('create-react-class');
+import React from 'react';
+import createReactClass from 'create-react-class';
 
-
-var Home = createReactClass({
-
+const Home = createReactClass({
   render: function() {
-    return (<a href="/connect/tumblr" className="connect">connect to tumblr</a>);
-  }
-
+    return (
+      <a href="/connect/tumblr" className="connect">
+        connect to tumblr
+      </a>
+    );
+  },
 });
 
-
-
-module.exports = Home;
+export default Home;

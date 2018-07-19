@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const debugModule = require('debug')('TumblrClient');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
 
@@ -15,10 +16,16 @@ const DEFAULT_OPTIONS = {
   includeQueue: false,
   includeDrafts: false,
   caseSensitive: true,
-}
+};
+
+const EMPTY_RESPONSE = {
+  posts: [],
+  queued: [],
+  drafts: [],
+};
 
 
-class TumblrAPI {
+class TumblrClient {
   /**
    * @param {string} token          oAuth access token
    * @param {string} secret         oAuth access secret
@@ -78,6 +85,10 @@ class TumblrAPI {
     return methods;
   }
 
+  static castToArray(value) {
+    return _.isArray(value) ? value : [value];
+  }
+
   /**
    * get authenticated user's info
    * https://www.tumblr.com/docs/en/api/v2#user-methods
@@ -129,7 +140,7 @@ class TumblrAPI {
               offset: offset + POST_LIMIT,
               results: appendedResults,
               params: { before_id: before_id },
-            })
+            });
           } else {
             return this.findPosts({
               tag,
@@ -158,11 +169,11 @@ class TumblrAPI {
   }
 
   /**
-   * [findPostsWithTag description]
+   * [findPostsWithSingleTag description]
    * @param  {[type]} tag [description]
    * @return {[type]}     [description]
    */
-  findPostsWithTag(tag) {
+  findPostsWithSingleTag(tag) {
     var promises = this.methods.map(method => {
       return this.findPosts({ tag, method })
         .then(result => ({
@@ -171,7 +182,8 @@ class TumblrAPI {
     });
 
     return Promise.all(promises)
-      .then(results => results.reduce((a, v) => _.assign(a, v), {}));
+      .then(results => results.reduce((a, v) => _.assign(a, v), {}))
+      .then(results => _.assign({}, EMPTY_RESPONSE, results));
   }
 
   /**
@@ -179,18 +191,18 @@ class TumblrAPI {
    * @param  {[type]} input [description]
    * @return {[type]}       [description]
    */
-  findPostsWithTags(input) {
-    const tags = _.chain(input)
-      .thru(value => (
-        _.isArray(value) ? value : [value]
-      ))
+  findPostsWithTags(find) {
+    if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
+
+    const tags = _.chain(find)
+      .thru(TumblrClient.castToArray)
       .sortBy()
       .value();
     const firstTag = tags[0];
 
     if (tags.length > 1) {
       // get first tag then filter
-      return this.findPostsWithTag(firstTag)
+      return this.findPostsWithSingleTag(firstTag)
         .then(results => (
           _.mapValues(results, posts => (
             _.filter(posts, post => {
@@ -203,10 +215,77 @@ class TumblrAPI {
           ))
         ));
     } else {
-      return this.findPostsWithTag(firstTag);
+      return this.findPostsWithSingleTag(firstTag);
     }
+  }
+
+  /**
+   * find and replace in array of tags
+   * @param  {string[]} tags    post tags
+   * @param  {string[]} find    tags to find
+   * @param  {string[]} replace replacement tags
+   * @return {string[]}         replaced tags
+   */
+  replaceTags({ tags, find, replace }) {
+    /* eslint-disable prefer-const */
+    let replaceableTags = _.concat([], replace);
+    let result = _.concat([], tags);
+
+    // loop through find to get matches
+    _.each(find, findTag => {
+      const matchIndex = _.findIndex(result, tag => {
+        if (this.options.caseSensitive) {
+          return tag === findTag;
+        } else {
+          return tag.toLowerCase() === findTag.toLowerCase();
+        }
+      });
+      if (matchIndex > -1) {
+        const replaceTag = replaceableTags.shift();
+        result.splice(matchIndex, 1, replaceTag);
+      }
+    });
+
+    // if anything left over to replace, append to end
+    result = _.concat(result, replaceableTags);
+
+    result = _.compact(result);
+
+    return result;
+  }
+
+  /**
+   * [findAndReplaceTags description]
+   * @param  {[type]} find    [description]
+   * @param  {[type]} replace [description]
+   * @return {[type]}         [description]
+   */
+  findAndReplaceTags(find, replace) {
+    if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
+    if (!_.isArray(replace)) return Promise.reject(`expected 'replace' to be an Array, but it was ${typeof find}`);
+
+    return this.findPostsWithTags(find)
+      .then(results => {
+        const promises = _.chain(this.methods)
+          .flatMap(method => results[method.key])
+          .map(post => {
+            const replacedTags = this.replaceTags({
+              tags: post.tags,
+              find,
+              replace,
+            });
+
+            return this.client.editPost(this.blog, {
+              id: post.id,
+              tags: replacedTags.join(',')
+            });
+          })
+          .value();
+
+        return Promise.all(promises);
+      });
   }
 }
 
 
-module.exports = TumblrAPI;
+module.exports = TumblrClient;
