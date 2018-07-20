@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-// const debugModule = require('debug')('TumblrClient');
+const createDebug = require('debug');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
 
@@ -10,12 +10,12 @@ const POST_LIMIT = 20;
  * @typedef {Object} Options
  * @property {boolean} [includeQueue=false]  include queued posts
  * @property {boolean} [includeDrafts=false] include drafted posts
- * @property {boolean} [caseSensitive=true]  case sensitive tag matching
+ * @property {boolean} [caseSensitive=false] case sensitive tag matching
  */
 const DEFAULT_OPTIONS = {
   includeQueue: false,
   includeDrafts: false,
-  caseSensitive: true,
+  caseSensitive: false,
 };
 
 const EMPTY_RESPONSE = {
@@ -33,6 +33,8 @@ class TumblrClient {
    * @param {Options} [options={}]  api options
    */
   constructor({ token, secret, blog, options = {} }) {
+    const debug = createDebug('tagreplacer:TumblrClient');
+
     this.client = new tumblr.Client({
       credentials: {
         consumer_key: process.env.TUMBLR_API_KEY,
@@ -45,6 +47,8 @@ class TumblrClient {
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
+
+    debug('options %o', this.options);
   }
 
   /**
@@ -109,11 +113,11 @@ class TumblrClient {
    * @return {Promise<Object[]>}      promise resolving an array of posts
    */
   findPosts({ tag, method, offset = 0, results = [], params = {}, retry = false }) {
-
     return this.client[method.clientMethod](this.blog, _.assign({
       tag: tag,
       offset: offset,
       limit: POST_LIMIT,
+      filter: 'text',
     }, params)).then(response => {
 
       const appendedResults = results.concat(response.posts);
@@ -176,6 +180,13 @@ class TumblrClient {
   findPostsWithSingleTag(tag) {
     var promises = this.methods.map(method => {
       return this.findPosts({ tag, method })
+        .then(result => {
+          if (this.options.caseSensitive) {
+            return _.filter(result, post =>  _.includes(post.tags, tag));
+          } else {
+            return result;
+          }
+        })
         .then(result => ({
           [method.key]: result
         }));
@@ -240,6 +251,7 @@ class TumblrClient {
           return tag.toLowerCase() === findTag.toLowerCase();
         }
       });
+
       if (matchIndex > -1) {
         const replaceTag = replaceableTags.shift();
         result.splice(matchIndex, 1, replaceTag);

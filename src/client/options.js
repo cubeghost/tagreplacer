@@ -62,6 +62,7 @@ const Options = createReactClass({
           <div className="optionsForm">
             {this.renderField('includeQueue', 'Include queued posts')}
             {this.renderField('includeDrafts', 'Include drafted posts')}
+            {this.renderField('caseSensitive', 'Case sensitive')}
           </div>
         )}
       </div>

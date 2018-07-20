@@ -30,6 +30,7 @@ class Replacer extends Component {
       options: {
         includeQueue: false,
         includeDrafts: false,
+        caseSensitive: false,
       },
       blog: DEFAULT_BLOG || props.blogs[0].name || undefined,
       find: [],
