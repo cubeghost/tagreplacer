@@ -55,7 +55,11 @@ class Replacer extends Component {
   }
 
   formatTags(tags) {
-    return '#' + tags.join(', #');
+    if (tags.length === 0) {
+      return 'tag';
+    } else {
+      return '#' + tags.join(', #');
+    }
   }
 
   // handlers
@@ -474,11 +478,7 @@ class Replacer extends Component {
 
           <form className={replaceClassNames} onSubmit={this.replace}>
             <label htmlFor="replace">
-              replace{' '}
-              {this.state.find.length > 0
-                ? this.formatTags(this.state.find)
-                : 'tag'}{' '}
-              with
+              replace {this.formatTags(this.state.find)} with
             </label>
             {this.renderMultiSelect('replace', replaceClassNames)}
             <button
@@ -490,6 +490,9 @@ class Replacer extends Component {
               replace
             </button>
           </form>
+          {/* <p className="delete-option">
+            or <a href="#">delete {this.formatTags(this.state.find)}</a>
+          </p> */}
         </div>
 
         <div className="result">
