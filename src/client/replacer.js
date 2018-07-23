@@ -46,11 +46,11 @@ class Replacer extends Component {
 
   // helpers
 
-  mapForSelectize(value) {
+  mapForSelect(value) {
     return { label: value.trim(), value: value.trim() };
   }
 
-  labelFromSelectize(value) {
+  labelFromSelect(value) {
     return value.label;
   }
 
@@ -251,9 +251,9 @@ class Replacer extends Component {
       <Creatable
         ref={input}
         multi={true}
-        value={this.state[input].map(this.mapForSelectize)}
+        value={this.state[input].map(this.mapForSelect)}
         onChange={select => {
-          this.handleSelect(input, select.map(this.labelFromSelectize));
+          this.handleSelect(input, select.map(this.labelFromSelect));
         }}
         valueRenderer={value => `#${value.label}`}
         disabled={parentClassNames.indexOf('disabled') > -1}
@@ -262,60 +262,6 @@ class Replacer extends Component {
         promptTextCreator={label => `add #${label}`}
         arrowRenderer={() => null}
         clearable={false}
-      // values={this.state[input].map(this.mapForSelectize)}
-      // delimiters={[188]}
-      // ref={input}
-      // createFromSearch={function(options, tags, search) {
-      //   var labels = tags.map(this.labelFromSelectize);
-      //   if (search.trim().length === 0 || labels.indexOf(search.trim()) !== -1) {
-      //     return null;
-      //   }
-      //   return { label: search.trim(), value: search.trim() };
-      // }.bind(this)}
-      // valuesFromPaste={function(options, tags, pastedText){
-      //   return pastedText.split(',')
-      //   .filter(function(text){
-      //     var labels = tags.map(this.labelFromSelectize);
-      //     return labels.indexOf(text) === -1;
-      //   }).map(this.mapForSelectize);
-      // }.bind(this)}
-      // renderValue={function(tag) {
-      //   return (<div className="select-tag">
-      //   </div>);
-      // }.bind(this)}
-      // renderOption={function(tag) {
-      //   return (<div className="simple-option">
-      //     <div>{!!tag.newOption ? "add #" + tag.label : tag.label}</div>
-      //   </div>);
-      // }}
-      // renderNoResultsFound={function(tags, search) {
-      //   if (search.trim().length === 0) {
-      //     return null;
-      //   } else if (tags.map(this.labelFromSelectize).indexOf(search.trim()) !== -1) {
-      //     return (
-      //       <div className="no-results-found">Tag already exists</div>
-      //     );
-      //   }
-      // }.bind(this)}
-      // onBlur={function(event) {
-      //   // HAHA WOW
-      //   var search = event.search.trim();
-      //   if (search.length > 0 &&
-      //     (event.values.map(this.labelFromSelectize).indexOf(search) === -1)
-      //   ) {
-      //     var values = event.values.map(this.labelFromSelectize);
-      //     values.push(search);
-      //     this.refs[input].setState({
-      //       search: '',
-      //       anchor: { label: search, value: search }
-      //     });
-      //     this.handleSelect(input, values);
-      //   }
-      // }.bind(this)}
-      // onBlurResetsInput={false}
-      // onValuesChange={function(select) {
-      //   this.handleSelect(input, select.map(this.labelFromSelectize));
-      // }.bind(this)}
       />
     );
   }
