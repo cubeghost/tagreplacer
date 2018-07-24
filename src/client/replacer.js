@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import autobind from 'class-autobind';
 import _ from 'lodash';
+import { connect } from 'react-redux';
+import classNames from 'classnames';
 
 import Select, { Creatable } from 'react-select';
 
 import Options from './options';
+import TagInput from './components/tagInput';
+import BlogSelect from './components/blogSelect';
+
 import { apiFetch } from './util';
 
 const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
@@ -19,6 +24,14 @@ const notempty = value => {
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
 const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
+
+const mapStateToProps = state => ({
+  blogs: state.tumblr.blogs,
+});
+
+const mapDispatchToProps = dispatch => ({
+
+});
 
 class Replacer extends Component {
   constructor(props) {
@@ -40,6 +53,8 @@ class Replacer extends Component {
       drafts: [],
       replaced: [],
     };
+
+    this.inputs = {};
 
     autobind(this);
   }
@@ -65,24 +80,13 @@ class Replacer extends Component {
   // handlers
 
   handleSelect(input, value) {
-    var state = {};
-    state[input] = value;
-    this.setState(
-      state,
-      function() {
-        if (input !== 'blog') {
-          this.refs[input].focus();
-        }
-      }.bind(this)
-    );
-  }
-
-  removeTag(event) {
-    var state = this.state;
-    var input = event.target.dataset.input;
-    var tags = _.without(this.state[input], event.target.dataset.tag);
-    state[input] = tags;
-    this.setState(state);
+    this.setState({
+      [input]: _.isArray(value) ? value.map(s => s.value) : value
+    }, () => {
+      if (this.inputs[input]) {
+        this.inputs[input].focus();
+      }
+    });
   }
 
   handleOptions(event) {
@@ -131,7 +135,7 @@ class Replacer extends Component {
                   drafts: json.drafts,
                 },
                 function() {
-                  this.refs.replace.focus();
+                  this.inputs.replace.focus();
                 }.bind(this)
               );
             } else {
@@ -170,8 +174,8 @@ class Replacer extends Component {
 
     if (
       notempty(this.state.blog) &&
-      notempty(this.state.find) &&
-      notempty(this.state.replace)
+      notempty(this.state.find) //&&
+      // notempty(this.state.replace)
     ) {
       this.setState({
         loading: true,
@@ -229,15 +233,12 @@ class Replacer extends Component {
     if (this.props.blogs) {
       return (
         <Select
-          ref="blog"
           value={{ label: this.state.blog, value: this.state.blog }}
           options={this.props.blogs.map(blog => ({
             label: blog.name,
             value: blog.name,
           }))}
-          onChange={select => {
-            this.handleSelect('blog', select.value);
-          }}
+          onChange={_.partial(this.handleSelect, 'blog')}
           disabled={blogClassNames.indexOf('disabled') > -1}
           clearable={false}
           autoBlur
@@ -252,9 +253,7 @@ class Replacer extends Component {
         ref={input}
         multi={true}
         value={this.state[input].map(this.mapForSelect)}
-        onChange={select => {
-          this.handleSelect(input, select.map(this.labelFromSelect));
-        }}
+        onChange={_.partial(this.handleSelect, input)}
         valueRenderer={value => `#${value.label}`}
         disabled={parentClassNames.indexOf('disabled') > -1}
         placeholder=""
@@ -383,15 +382,9 @@ class Replacer extends Component {
       this.state.queued.length > 0 ||
       this.state.drafts.length > 0;
 
-    // gotta be a better way here
-    // TODO add classnames package
-    var blogClassNames = ['blog', foundPosts ? 'disabled' : ''].join(' ');
-    var findClassNames = [
-      'find',
-      this.state.blog ? '' : 'disabled',
-      foundPosts ? 'disabled' : '',
-    ].join(' ');
-    var replaceClassNames = ['replace', foundPosts ? '' : 'disabled'].join(' ');
+    const disableBlog = !!foundPosts;
+    const disableFind = !this.state.blog || !!foundPosts;
+    const disableReplace = !foundPosts;
 
     return (
       <div className="replacer">
@@ -404,34 +397,54 @@ class Replacer extends Component {
             handleOptions={this.handleOptions}
           />
 
-          <form className={blogClassNames}>
+          <form className={classNames('blog', { disabled: disableBlog })}>
             <label>blog</label>
-            {this.renderBlogs(blogClassNames)}
+            <BlogSelect
+              value={{ value: this.state.blog, label: this.state.blog }}
+              disabled={disableBlog}
+              onChange={_.partial(this.handleSelect, 'blog')}
+            />
           </form>
 
-          <form className={findClassNames} onSubmit={this.find}>
+          <form className={classNames('find', { disabled: disableFind })} onSubmit={this.find}>
             <label htmlFor="find">find tag</label>
-            {this.renderMultiSelect('find', findClassNames)}
+            <TagInput
+              name="find"
+              value={this.state.find.map(this.mapForSelect)}
+              disabled={disableFind}
+              onChange={this.handleSelect}
+              setRef={ref => {
+                this.inputs.find = ref;
+              }}
+            />
             <button
               type="submit"
               className="find"
               onClick={this.find}
-              disabled={findClassNames.indexOf('disabled') > -1}
+              disabled={disableFind}
             >
               find
             </button>
           </form>
 
-          <form className={replaceClassNames} onSubmit={this.replace}>
+          <form className={classNames('replace', { disabled: disableReplace })} onSubmit={this.replace}>
             <label htmlFor="replace">
               replace {this.formatTags(this.state.find)} with
             </label>
-            {this.renderMultiSelect('replace', replaceClassNames)}
+            <TagInput
+              name="replace"
+              value={this.state.replace.map(this.mapForSelect)}
+              disabled={disableReplace}
+              onChange={this.handleSelect}
+              setRef={ref => {
+                this.inputs.replace = ref;
+              }}
+            />
             <button
               type="submit"
               className="replace"
               onClick={this.replace}
-              disabled={replaceClassNames.indexOf('disabled') > -1}
+              disabled={disableReplace}
             >
               replace
             </button>
@@ -456,4 +469,4 @@ class Replacer extends Component {
   }
 };
 
-export default Replacer;
+export default connect(mapStateToProps, mapDispatchToProps)(Replacer);
