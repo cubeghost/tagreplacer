@@ -27,10 +27,10 @@ const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
 const mapStateToProps = state => ({
   blogs: state.tumblr.blogs,
+  options: state.options,
 });
 
 const mapDispatchToProps = dispatch => ({
-
 });
 
 class Replacer extends Component {
@@ -40,14 +40,6 @@ class Replacer extends Component {
     this.state = {
       loading: false,
       error: undefined,
-      options: {
-        includeQueue: false,
-        includeDrafts: false,
-        caseSensitive: false,
-      },
-      blog: DEFAULT_BLOG || props.blogs[0].name || undefined,
-      find: [],
-      replace: [],
       posts: [],
       queued: [],
       drafts: [],
@@ -62,11 +54,7 @@ class Replacer extends Component {
   // helpers
 
   mapForSelect(value) {
-    return { label: value.trim(), value: value.trim() };
-  }
-
-  labelFromSelect(value) {
-    return value.label;
+    return { label: value, value: value };
   }
 
   formatTags(tags) {
@@ -81,7 +69,7 @@ class Replacer extends Component {
 
   handleSelect(input, value) {
     this.setState({
-      [input]: _.isArray(value) ? value.map(s => s.value) : value
+      [input]: _.isArray(value) ? value.map(s => s.value.trim()) : value.trim()
     }, () => {
       if (this.inputs[input]) {
         this.inputs[input].focus();
@@ -377,7 +365,9 @@ class Replacer extends Component {
   }
 
   render() {
-    var foundPosts =
+    const { options } = this.props;
+
+    const foundPosts =
       this.state.posts.length > 0 ||
       this.state.queued.length > 0 ||
       this.state.drafts.length > 0;
@@ -459,10 +449,10 @@ class Replacer extends Component {
           {this.renderReset()}
           {this.renderFound('posts')}
           {this.renderPosts()}
-          {this.state.options.includeQueue && this.renderFound('queued')}
-          {this.state.options.includeQueue && this.renderQueued()}
-          {this.state.options.includeDrafts && this.renderFound('drafts')}
-          {this.state.options.includeDrafts && this.renderDrafts()}
+          {options.includeQueue && this.renderFound('queued')}
+          {options.includeQueue && this.renderQueued()}
+          {options.includeDrafts && this.renderFound('drafts')}
+          {options.includeDrafts && this.renderDrafts()}
         </div>
       </div>
     );

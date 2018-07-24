@@ -3,7 +3,7 @@ import { withRouter } from 'react-router';
 import { Route, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { getTumblrUser } from './state/actions';
+import { getUser } from './state/actions';
 
 import Home from './home';
 import Replacer from './replacer';
@@ -17,7 +17,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  getUser: () => dispatch(getTumblrUser()),
+  getUser: () => dispatch(getUser()),
 });
 
 class App extends Component {
@@ -37,12 +37,15 @@ class App extends Component {
 
   // render
 
-  renderError() {
-    if (this.props.errors.length) {
-      // if (this.state.error.message !== 'No user session') {
-      //   return <div className="error">{this.state.error.message}</div>;
-      // }
-    }
+  renderErrors() {
+    return this.props.errors.map((error, i) => {
+      if (error.statusText === 'No user session') return null;
+      return (
+        <div className="error" key={`error-${i}`}>
+          {JSON.stringify(error)}
+        </div>
+      );
+    });
   }
 
   renderLoadingState() {
@@ -72,7 +75,7 @@ class App extends Component {
         </header>
 
         <div className="content">
-          {this.renderError()}
+          {this.renderErrors()}
 
           {this.renderLoadingState()}
 

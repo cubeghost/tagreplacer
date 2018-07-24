@@ -1,9 +1,19 @@
 import React, { Component } from 'react';
 import autobind from 'class-autobind';
 import PropTypes from 'prop-types';
-
+import { connect } from 'react-redux';
 import { Creatable } from 'react-select';
 
+import { setFormValue } from '../state/actions';
+import { mapForSelect } from '../util';
+
+const mapStateToProps = (state, ownProps) => ({
+  value: state.form[ownProps.name].map(mapForSelect)
+});
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  setFormValue: value => dispatch(setFormValue(ownProps.name, value)),
+});
 
 class TagInput extends Component {
 
@@ -12,8 +22,8 @@ class TagInput extends Component {
     autobind(this);
   }
 
-  handleSelect(select) {
-    this.props.onChange(this.props.name, select);
+  onChange(value) {
+    this.props.setFormValue(value.map(v => v.value));
   }
 
   render() {
@@ -24,7 +34,7 @@ class TagInput extends Component {
         ref={setRef}
         multi={true}
         value={value}
-        onChange={this.handleSelect}
+        onChange={this.onChange}
         valueRenderer={value => `#${value.label}`}
         disabled={disabled}
         placeholder=""
@@ -39,6 +49,7 @@ class TagInput extends Component {
 }
 
 TagInput.propTypes = {
+  name: PropTypes.string.isRequired,
   value: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string,
@@ -50,4 +61,4 @@ TagInput.propTypes = {
   setRef: PropTypes.func,
 };
 
-export default TagInput;
+export default connect(mapStateToProps, mapDispatchToProps)(TagInput);

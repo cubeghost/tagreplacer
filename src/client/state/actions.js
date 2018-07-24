@@ -3,6 +3,7 @@ export const actionTypes = {
   TUMBLR_FIND_TAGS: 'tumblr/FIND_TAGS',
   TUMBLR_REPLACE_TAGS: 'tumblr/REPLACE_TAGS',
   SET_OPTION: 'options/SET',
+  RESET_OPTIONS: 'options/RESET',
   SET_FORM_VALUE: 'form/SET_VALUE',
   ADD_ERROR: 'errors/ADD',
   SET_LOADING: 'loading/SET',
@@ -36,12 +37,18 @@ const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
   return fetch(path, config)
     .then(response => {
       if (!response.ok) {
-        return dispatch({
-          type: actionTypes.ADD_ERROR,
-          response,
-        }).then(() => {
-          throw Error(response.statusText);
+        response.json().then(json => {
+          dispatch({
+            type: actionTypes.ADD_ERROR,
+            response: {
+              status: response.status,
+              statusText: response.statusText,
+              body: json
+            },
+          });
+          dispatch(stopLoading());
         });
+        throw Error(response.statusText);
       }
 
       return response.json();
@@ -55,10 +62,30 @@ const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
     .then(() => dispatch(stopLoading()));
 };
 
-export const getTumblrUser = () => dispatch => {
+export const getUser = () => dispatch => {
   return dispatch(thunkFetch({
     actionType: actionTypes.TUMBLR_GET_USER,
     method: GET,
     path: '/api/user',
   }));
 };
+
+
+
+export const setOption = (key, value) => ({
+  type: actionTypes.SET_OPTION,
+  key,
+  value,
+});
+
+export const resetOptions = () => ({
+  type: actionTypes.RESET_OPTIONS,
+});
+
+
+
+export const setFormValue = (key, value) => ({
+  type: actionTypes.SET_FORM_VALUE,
+  key,
+  value,
+});

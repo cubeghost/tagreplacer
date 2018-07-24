@@ -298,3 +298,11 @@ header, footer {
   margin: 0 auto;
   text-align: right;
 }
+
+
+
+.error {
+  font-family: $monospace;
+  border-left: 4px solid $brightpink;
+  padding-left: 1em;
+}

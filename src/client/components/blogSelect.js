@@ -3,11 +3,21 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Select from 'react-select';
 
+import { setFormValue } from '../state/actions';
+
+const PRODUCTION = process.env.NODE_ENV === 'production';
+const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
+
 const mapStateToProps = (state) => ({
   blogs: state.tumblr.blogs,
+  value: state.form.blog || DEFAULT_BLOG || state.tumblr.blogs[0].name || undefined,
 });
 
-const BlogSelect = ({ blogs, value, disabled, onChange }) => {
+const mapDispatchToProps = dispatch => ({
+  setFormValue: select => dispatch(setFormValue('blog', select.value)),
+});
+
+const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
   return (
     <Select
       value={value}
@@ -15,7 +25,7 @@ const BlogSelect = ({ blogs, value, disabled, onChange }) => {
         label: blog.name,
         value: blog.name,
       }))}
-      onChange={onChange}
+      onChange={setFormValue}
       disabled={disabled}
       clearable={false}
       autoBlur
@@ -24,12 +34,9 @@ const BlogSelect = ({ blogs, value, disabled, onChange }) => {
 };
 
 BlogSelect.propTypes = {
-  value: PropTypes.shape({
-    value: PropTypes.string,
-    label: PropTypes.string,
-  }),
+  value: PropTypes.string,
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
 };
 
-export default connect(mapStateToProps)(BlogSelect);
+export default connect(mapStateToProps, mapDispatchToProps)(BlogSelect);

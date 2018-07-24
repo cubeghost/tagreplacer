@@ -38,15 +38,36 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 };
 
 const formReducer = (state = initialState.form, action) => {
-  return state;
+  switch (action.type) {
+    case actionTypes.SET_FORM_VALUE:
+      return _.assign({}, state, {
+        [action.key]: action.value
+      });
+    default:
+      return state;
+  }
 };
 
 const optionsReducer = (state = initialState.options, action) => {
-  return state;
+  switch (action.type) {
+    case actionTypes.SET_OPTION:
+      return _.assign({}, state, {
+        [action.key]: action.value
+      });
+    case actionTypes.RESET_OPTIONS:
+      return _.assign({}, initialState.options);
+    default:
+      return state;
+  }
 };
 
 const errorsReducer = (state = initialState.errors, action) => {
-  return state;
+  switch (action.type) {
+    case actionTypes.ADD_ERROR:
+      return [...state, { ...action.response }];
+    default:
+      return state;
+  }
 };
 
 const loadingReducer = (state = initialState.loading, action) => {

@@ -1,5 +1,10 @@
-import React from 'react';
-import createReactClass from 'create-react-class';
+import React, { Component } from 'react';
+import autobind from 'class-autobind';
+import { connect } from 'react-redux';
+
+import { setOption } from './state/actions';
+
+import Checkbox from './components/checkboxInput';
 
 // google material icon 'tune'
 const optionsIcon = (
@@ -15,44 +20,43 @@ const optionsIcon = (
   </svg>
 );
 
-const Options = createReactClass({
-  getInitialState: function() {
-    return {
+const mapStateToProps = state => ({
+  options: state.options,
+});
+
+const mapDispatchToProps = dispatch => ({
+  setOption: (key, value) => dispatch(setOption(key, value)),
+});
+
+class Options extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
       open: false,
     };
-  },
 
-  toggleOptions: function() {
-    this.setState(function(prevState) {
-      return { open: !prevState.open };
-    });
-  },
+    autobind(this);
+  }
 
-  renderField: function(field, label) {
-    var id = 'options-' + field;
+  toggle() {
+    this.setState((prevState) => ({ open: !prevState.open }));
+  }
 
-    return (
-      <div className="field checkboxField">
-        <input
-          type="checkbox"
-          checked={!!this.props.options[field]}
-          id={id}
-          data-field={field}
-          onChange={this.props.handleOptions}
-        />
-        <label htmlFor={id}>{label}</label>
-      </div>
-    );
-  },
+  onChange(event) {
+    this.props.setOption(event.target.name, event.target.checked);
+  }
 
-  render: function() {
-    var buttonTitle = this.state.open ? 'Hide options' : 'Show options';
+  render() {
+    const { options } = this.props;
+    const buttonTitle = this.state.open ? 'Hide options' : 'Show options';
+
 
     return (
       <div className="options">
         <button
           title={buttonTitle}
-          onClick={this.toggleOptions}
+          onClick={this.toggle}
           className="toggleOptions"
           ref="toggleOptions"
         >
@@ -60,14 +64,29 @@ const Options = createReactClass({
         </button>
         {this.state.open && (
           <div className="optionsForm">
-            {this.renderField('includeQueue', 'Include queued posts')}
-            {this.renderField('includeDrafts', 'Include drafted posts')}
-            {this.renderField('caseSensitive', 'Case sensitive')}
+            <Checkbox
+              name="includeQueue"
+              label="Include queued posts"
+              value={options.includeQueue}
+              onChange={this.onChange}
+            />
+            <Checkbox
+              name="includeDrafts"
+              label="Include drafted posts"
+              value={options.includeDrafts}
+              onChange={this.onChange}
+            />
+            <Checkbox
+              name="caseSensitive"
+              label="Case sensitive"
+              value={options.caseSensitive}
+              onChange={this.onChange}
+            />
           </div>
         )}
       </div>
     );
-  },
-});
+  }
+};
 
-export default Options;
+export default connect(mapStateToProps, mapDispatchToProps)(Options);
