@@ -27,6 +27,11 @@ const mapStateToProps = state => ({
   blog: state.form.blog,
   find: state.form.find,
   replace: state.form.replace,
+  foundPosts: (
+    state.tumblr.posts.length > 0 ||
+    state.tumblr.queued.length > 0 ||
+    state.tumblr.drafts.length > 0
+  ),
   loading: state.loading,
 });
 
@@ -330,16 +335,14 @@ class Replacer extends Component {
   }
 
   render() {
-    const { options } = this.props;
-
-    const foundPosts =
-      this.state.posts.length > 0 ||
-      this.state.queued.length > 0 ||
-      this.state.drafts.length > 0;
+    const { foundPosts, options, blog, replace } = this.props;
 
     const disableBlog = !!foundPosts;
-    const disableFind = !this.props.blog || !!foundPosts;
+    const disableFind = !blog || !!foundPosts;
     const disableReplace = !foundPosts;
+
+    const disableReplaceButton = replace.length === 0 && !options.allowDelete;
+    const deleteMode = replace.length === 0 && options.allowDelete;
 
     return (
       <div className="replacer">
@@ -347,10 +350,7 @@ class Replacer extends Component {
         {this.renderError()}
 
         <div className="form">
-          <Options
-            options={this.state.options}
-            handleOptions={this.handleOptions}
-          />
+          <Options />
 
           <form className={classNames('blog', { disabled: disableBlog })}>
             <label>blog</label>
@@ -378,7 +378,9 @@ class Replacer extends Component {
 
           <form className={classNames('replace', { disabled: disableReplace })} onSubmit={this.replace}>
             <label htmlFor="replace">
-              replace {this.formatTags(this.props.find)} with
+              {deleteMode ? 'delete' : 'replace'}&nbsp;
+              {this.formatTags(this.props.find)}&nbsp;
+              {deleteMode ? 'or replace with' : 'with'}
             </label>
             <TagInput
               name="replace"
@@ -391,14 +393,11 @@ class Replacer extends Component {
               type="submit"
               className="replace"
               onClick={this.replace}
-              disabled={disableReplace}
+              disabled={disableReplace || disableReplaceButton}
             >
-              replace
+              {deleteMode ? 'delete' : 'replace'}
             </button>
           </form>
-          {/* <p className="delete-option">
-            or <a href="#">delete {this.formatTags(this.props.find)}</a>
-          </p> */}
         </div>
 
         <div className="result">

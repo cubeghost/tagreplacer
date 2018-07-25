@@ -15,6 +15,7 @@ const initialState = {
     includeQueue: false,
     includeDrafts: false,
     caseSensitive: false,
+    allowDelete: false,
   },
   errors: [],
   loading: false,

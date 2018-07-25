@@ -13,7 +13,12 @@ const Post = ({ post }) => (
 );
 
 Post.propTypes = {
-  post: PropTypes.object.isRequired,
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    slug: PropTypes.string,
+    post_url: PropTypes.string,
+    tags: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
 };
 
 export default Post;

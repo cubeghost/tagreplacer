@@ -82,6 +82,12 @@ class Options extends Component {
               value={options.caseSensitive}
               onChange={this.onChange}
             />
+            <Checkbox
+              name="allowDelete"
+              label="Allow deleting tags"
+              value={options.allowDelete}
+              onChange={this.onChange}
+            />
           </div>
         )}
       </div>

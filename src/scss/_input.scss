@@ -68,13 +68,15 @@ form {
 
 }
 
-form.disabled {
-  opacity:0.6;
+form.disabled label {
+  opacity: 0.6;
   pointer-events:none;
-
-  input, button {
-    background-color:$lightgray;
-  }
+}
+input:disabled,
+button:disabled {
+  background-color: $lightgray;
+  pointer-events:none;
+  opacity: 0.6;
 }
 
 @mixin checkmark($color) {
