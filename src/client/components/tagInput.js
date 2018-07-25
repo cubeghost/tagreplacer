@@ -11,9 +11,9 @@ const mapStateToProps = (state, ownProps) => ({
   value: state.form[ownProps.name].map(mapForSelect)
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  setFormValue: value => dispatch(setFormValue(ownProps.name, value)),
-});
+const mapDispatchToProps = {
+  setFormValue: setFormValue,
+};
 
 class TagInput extends Component {
 
@@ -23,7 +23,10 @@ class TagInput extends Component {
   }
 
   onChange(value) {
-    this.props.setFormValue(value.map(v => v.value));
+    this.props.setFormValue(
+      this.props.name,
+      value.map(v => v.value)
+    );
   }
 
   render() {
@@ -57,7 +60,6 @@ TagInput.propTypes = {
     })
   ),
   disabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
   setRef: PropTypes.func,
 };
 

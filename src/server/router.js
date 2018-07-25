@@ -33,7 +33,9 @@ apiRouter.use(function(req, res, next) {
     next();
   } else {
     res.statusMessage = 'No user session';
-    res.status(401).send('No user session');
+    res.status(401).json({
+      message: 'No user session'
+    });
   }
 });
 
@@ -56,7 +58,7 @@ apiRouter.post('/find', function(req, res) {
     const token = req.session.grant.response.access_token;
     const secret = req.session.grant.response.access_secret;
     const blog = req.body.blog;
-    const options = req.body.config;
+    const options = req.body.options;
 
     const client = new TumblrClient({ token, secret, blog, options });
 
@@ -76,7 +78,7 @@ apiRouter.post('/replace', function(req, res) {
     const token = req.session.grant.response.access_token;
     const secret = req.session.grant.response.access_secret;
     const blog = req.body.blog;
-    const options = req.body.config;
+    const options = req.body.options;
 
     const client = new TumblrClient({ token, secret, blog, options });
 

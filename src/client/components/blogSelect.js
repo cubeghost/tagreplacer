@@ -5,12 +5,10 @@ import Select from 'react-select';
 
 import { setFormValue } from '../state/actions';
 
-const PRODUCTION = process.env.NODE_ENV === 'production';
-const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
 const mapStateToProps = (state) => ({
   blogs: state.tumblr.blogs,
-  value: state.form.blog || DEFAULT_BLOG || state.tumblr.blogs[0].name || undefined,
+  value: state.form.blog,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -36,7 +34,6 @@ const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
 BlogSelect.propTypes = {
   value: PropTypes.string,
   disabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlogSelect);

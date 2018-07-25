@@ -32,6 +32,10 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
         username: action.response.name,
         blogs: action.response.blogs,
       });
+    case actionTypes.TUMBLR_FIND_TAGS:
+      return _.assign({}, state, {
+        ...action.response
+      });
     default:
       return state;
   }
