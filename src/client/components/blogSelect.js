@@ -18,15 +18,17 @@ const mapDispatchToProps = dispatch => ({
 const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
   return (
     <Select
-      value={value}
+      value={{ value: value, label: value }}
       options={blogs.map(blog => ({
         label: blog.name,
         value: blog.name,
       }))}
       onChange={setFormValue}
-      disabled={disabled}
-      clearable={false}
-      autoBlur
+      isDisabled={disabled}
+      isClearable={false}
+      className="react-select _specific"
+      classNamePrefix="react-select"
+      blurInputOnSelect
     />
   );
 };

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import autobind from 'class-autobind';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Creatable } from 'react-select';
+import Creatable from 'react-select/lib/Creatable';
 
 import { setFormValue } from '../state/actions';
 import { mapForSelect } from '../util';
@@ -35,16 +35,18 @@ class TagInput extends Component {
     return (
       <Creatable
         ref={setRef}
-        multi={true}
+        isMulti={true}
         value={value}
         onChange={this.onChange}
         valueRenderer={value => `#${value.label}`}
-        disabled={disabled}
+        isDisabled={disabled}
         placeholder=""
-        noResultsText="type to add a tag"
-        promptTextCreator={label => `add #${label}`}
+        noOptionsMessage={() => 'type to add a tag'}
+        formatCreateLabel={label => `add #${label}`}
         arrowRenderer={() => null}
-        clearable={false}
+        isClearable={false}
+        className="react-select _specific"
+        classNamePrefix="react-select"
       />
     );
   }

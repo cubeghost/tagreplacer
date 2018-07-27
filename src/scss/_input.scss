@@ -1,4 +1,4 @@
-$border:$lightgray 2px solid;
+$border: $lightgray 2px solid;
 
 input, button {
   font-family:$monospace;
@@ -21,7 +21,6 @@ input[type=text] {
 }
 
 button {
-  background-size:150%;
   padding:6px 12px 5px;
   color:$text;
   cursor:pointer;
@@ -125,7 +124,7 @@ input[type=checkbox] {
 
 // react-select
 
-.Select {
+.react-select._specific {
   font-family: $monospace;
   color: $text;
   font-size: 1em;
@@ -133,106 +132,93 @@ input[type=checkbox] {
   margin-left: 1em;
   margin-right: 1em;
 
-  .Select-control {
-    border: $border;
-    border-radius: $border-radius;
+  .react-select {
 
-    &:hover {
+    &__control {
+      background-color: white;
+      border: $border;
+      border-top-left-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      box-shadow: none;
+
+      &:last-child {
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+      }
+
+      &--is-focused {
+        border: $border;
+      }
+
+      &--is-focused:last-child {
+        border-color: $highlight;
+        box-shadow: 0 0 0 3px rgba($highlight, 0.1);
+      }
+
+      &:hover {
+        box-shadow: none;
+        &--is-focused {
+          box-shadow: 0 0 0 3px rgba($highlight, 0.1);
+        }
+      }
+    }
+
+    &__indicator-separator {
+      display: none;
+    }
+
+
+    &__menu {
+      border: $border;
+      border-top: 0;
+      margin-top: 0;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
       box-shadow: none;
     }
-  }
-  &.is-open .Select-control {
-    border: $border;
-  }
-
-  &.is-focused:not(.is-open) > .Select-control {
-    border-color: $highlight;
-    box-shadow: 0 0 0 3px rgba($highlight, 0.1);
-    background-color: #fff;
-  }
-}
-
-.Select-menu-outer {
-  border: $border;
-  border-top: 0;
-  margin-top: 0;
-  border-bottom-left-radius: $border-radius;
-  border-bottom-right-radius: $border-radius;
-  box-shadow: none;
-}
-
-.Select--multi .Select-input > input {
-  line-height: 20px;
-}
-
-.Select--multi .Select-value,
-.Select--multi.is-disabled .Select-value {
-  font-size: 1em;
-  background-color: rgba(0,0,0,0.1);
-  color: $text;
-  border-radius: 0.1em;
-  border: 0;
-
-  .Select-value-icon {
-    padding: 2px 5px 1px;
-    float: right;
-    border: 0;
-    color: rgba($text, 0.5);
-    &:hover, &:focus {
-      background-color: rgba($text, 0.1);
-      color: rgba($text, 0.75);
+    &__menu-notice--no-options {
+      text-align: left;
     }
-  }
-  .Select-value-label {
-    padding: 1px 3px 1px 5px;
-  }
-}
 
+    // values/ "tags"
 
+    &__single-value {
+      overflow: visible;
+    }
 
+    &__multi-value {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 0.1em;
+      border: 0;
+      overflow: hidden;
 
+      &__label {
+        color: $text;
+        font-size: 1em;
+        padding: 3px 3px 3px 5px;
+      }
+      &__remove {
+        padding: 2px 2px 1px;
+        float: right;
+        border: 0;
+        color: rgba($text, 0.5);
+        border-radius: 0;
 
+        &:hover, &:focus {
+          background-color: rgba($text, 0.1);
+          color: rgba($text, 0.75);
+        }
+      }
 
+      &--is-disabled &__label {
+        opacity: 0.5;
+      }
+    }
 
-.select-tag {
-  padding:3px 6px;
-  margin-right:5px;
-  background-color:rgba(0,0,0,0.1);
-  color:$text;
-  border-radius:0.1em;
-
-  .delete {
-    margin-left:4px;
-    opacity:0.3;
-  }
-}
-
-.react-selectize.multi-select {
-
-  .dropdown-menu {
-    display:none;
-  }
-
-  &.open .react-selectize-control {
-    border-color:$highlight;
-  }
-
-  .react-selectize-toggle-button-container {
-    display:none!important;
-  }
-}
-
-.react-selectize.simple-select {
-
-  &.open .react-selectize-control {
-    border-bottom-right-radius:0;
-    border-bottom-left-radius:0;
   }
 
-  .dropdown-menu {
-    margin-top:-2px;
-    border:$border;
-    border-bottom-right-radius:$border-radius;
-    border-bottom-left-radius:$border-radius;
-  }
 }
