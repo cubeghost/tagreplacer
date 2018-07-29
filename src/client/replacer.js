@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import autobind from 'class-autobind';
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
@@ -9,17 +8,9 @@ import Results from './components/results';
 import TagInput from './components/tagInput';
 import BlogSelect from './components/blogSelect';
 
-import { find } from './state/actions';
+import { find, replace, reset } from './state/actions';
 
 const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
-
-// const notempty = value => {
-//   if (value !== null && value !== undefined && /\S/.test(value)) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
 
 const mapStateToProps = state => ({
   blogs: state.tumblr.blogs,
@@ -37,6 +28,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
   dispatchFind: find,
+  dispatchReplace: replace,
+  dispatchReset: reset,
 };
 
 class Replacer extends Component {
@@ -71,176 +64,51 @@ class Replacer extends Component {
     }
   }
 
-  // handlers
+  find(event) {
+    if (event) {
+      event.preventDefault();
+    }
 
-  handleSelect(input, value) {
-    this.setState({
-      [input]: _.isArray(value) ? value.map(s => s.value.trim()) : value.trim()
-    }, () => {
-      if (this.inputs[input]) {
-        this.inputs[input].focus();
-      }
-    });
+    this.props.dispatchFind()
+      .then(() => {
+        this.inputs.replace.select.focus();
+      });
   }
 
-  handleOptions(event) {
-    var options = _.extend({}, this.state.options);
-    var field = event.target.dataset.field;
+  replace(event) {
+    if (event) {
+      event.preventDefault();
+    }
 
-    options[field] = event.target.checked;
-
-    this.setState({
-      options: options,
-    });
+    this.props.dispatchReplace()
+      .then(action => {
+        this.setState({
+          replaced: action.response,
+        });
+      });
   }
-
-  // find(event) {
-  //   if (event) {
-  //     event.preventDefault();
-  //   }
-  //
-  //   if (this.state.loading) {
-  //     return;
-  //   }
-  //
-  //   if (notempty(this.props.blog) && notempty(this.props.find)) {
-  //     this.setState({
-  //       loading: true,
-  //     });
-  //
-  //     apiFetch('POST', '/find', {
-  //       blog: this.state.blog,
-  //       find: this.state.find,
-  //       config: this.state.options,
-  //     })
-  //       .then(
-  //         function(json) {
-  //           if (
-  //             json.posts.length > 0 ||
-  //             json.queued.length > 0 ||
-  //             json.drafts.length > 0
-  //           ) {
-  //             this.setState(
-  //               {
-  //                 loading: false,
-  //                 error: undefined,
-  //                 posts: json.posts,
-  //                 queued: json.queued,
-  //                 drafts: json.drafts,
-  //               },
-  //               function() {
-  //                 this.inputs.replace.focus();
-  //               }.bind(this)
-  //             );
-  //           } else {
-  //             this.setState({
-  //               loading: false,
-  //               error:
-  //                 "didn't find any posts tagged " +
-  //                 this.formatTags(this.state.find),
-  //             });
-  //           }
-  //         }.bind(this)
-  //       )
-  //       .catch(
-  //         function(error) {
-  //           this.setState({
-  //             loading: false,
-  //             error: error.message,
-  //           });
-  //         }.bind(this)
-  //       );
-  //   } else {
-  //     this.setState({
-  //       error: 'blog and tag to find are required',
-  //     });
-  //   }
-  // }
-  //
-  // replace(event) {
-  //   if (event) {
-  //     event.preventDefault();
-  //   }
-  //
-  //   if (this.state.loading) {
-  //     return;
-  //   }
-  //
-  //   if (
-  //     notempty(this.state.blog) &&
-  //     notempty(this.state.find) //&&
-  //     // notempty(this.state.replace)
-  //   ) {
-  //     this.setState({
-  //       loading: true,
-  //     });
-  //
-  //     apiFetch('POST', '/replace', {
-  //       blog: this.state.blog,
-  //       find: this.state.find,
-  //       replace: this.state.replace,
-  //       config: this.state.options,
-  //     })
-  //       .then(
-  //         function(json) {
-  //           this.setState({
-  //             loading: false,
-  //             error: undefined,
-  //             replaced: json,
-  //           });
-  //         }.bind(this)
-  //       )
-  //       .catch(
-  //         function(error) {
-  //           this.setState({
-  //             loading: false,
-  //             error: error.message,
-  //           });
-  //         }.bind(this)
-  //       );
-  //   } else {
-  //     this.setState({
-  //       error: 'blog, tag to find, and tag to replace are required',
-  //     });
-  //   }
-  // }
 
   reset(event) {
     if (event) {
       event.preventDefault();
     }
 
+    this.props.dispatchReset();
+
     this.setState({
-      find: [],
-      replace: [],
-      error: undefined,
-      posts: [],
-      queued: [],
-      drafts: [],
       replaced: [],
     });
   }
 
   // render
 
-  renderFound(key) {
-    if (this.state[key].length > 0) {
-      return (
-        <h2>
-          found {this.state[key].length}&nbsp;
-          {key === 'queued' ? 'queued posts' : key} tagged #{this.props.find}
-        </h2>
-      );
-    }
-  }
-
   renderReplaced() {
     if (this.state.replaced.length > 0) {
       return (
         <div>
           <h2>
-            replaced {this.formatTags(this.props.find)}&nbsp; with{' '}
-            {this.formatTags(this.props.replace)}&nbsp; for{' '}
+            replaced {this.formatTags(this.props.find)}&nbsp;with&nbsp;
+            {this.formatTags(this.props.replace)}&nbsp;for&nbsp;
             {this.state.replaced.length} posts
             <br />
           </h2>
@@ -249,77 +117,8 @@ class Replacer extends Component {
     }
   }
 
-  renderPosts() {
-    if (this.state.posts.length > 0) {
-      return this.state.posts.map(
-        function(post) {
-          var key = 'post-' + post.id;
-          return (
-            <div className="post" key={key}>
-              <a href={post.post_url} target="_blank">
-                {post.id}/{post.slug}
-              </a>
-              <span className="tags">{this.formatTags(post.tags)}</span>
-            </div>
-          );
-        }.bind(this)
-      );
-    }
-  }
-
-  renderQueued() {
-    if (this.state.queued.length > 0) {
-      return this.state.queued.map(
-        function(post) {
-          var key = 'post-' + post.id;
-          return (
-            <div className="post" key={key}>
-              <a href={post.post_url} target="_blank">
-                {post.id}/{post.slug}
-              </a>
-              <span className="tags">{this.formatTags(post.tags)}</span>
-            </div>
-          );
-        }.bind(this)
-      );
-    }
-  }
-
-  renderDrafts() {
-    if (this.state.drafts.length > 0) {
-      return this.state.drafts.map(
-        function(post) {
-          var key = 'post-' + post.id;
-          return (
-            <div className="post" key={key}>
-              <a href={post.post_url} target="_blank">
-                {post.id}/{post.slug}
-              </a>
-              <span className="tags">{this.formatTags(post.tags)}</span>
-            </div>
-          );
-        }.bind(this)
-      );
-    }
-  }
-
-  renderLoadingState() {
-    if (this.props.loading) {
-      return (
-        <div className="loading">
-          <p>loading</p>
-          <img src={LOADING} width="100" />
-        </div>
-      );
-    }
-  }
-
   renderReset() {
-    if (
-      this.state.posts.length ||
-      this.state.queued.length ||
-      this.state.drafts.length
-    ) {
+    if (this.props.foundPosts) {
       return (
         <button className="reset" onClick={this.reset}>
           find a different tag?
@@ -328,14 +127,8 @@ class Replacer extends Component {
     }
   }
 
-  renderError() {
-    if (this.state.error) {
-      return <div className="error">{this.state.error}</div>;
-    }
-  }
-
   render() {
-    const { foundPosts, options, blog, replace } = this.props;
+    const { loading, foundPosts, options, blog, replace } = this.props;
 
     const disableBlog = !!foundPosts;
     const disableFind = !blog || !!foundPosts;
@@ -346,8 +139,12 @@ class Replacer extends Component {
 
     return (
       <div className="replacer">
-        {this.renderLoadingState()}
-        {this.renderError()}
+        {loading && (
+          <div className="loading">
+            <p>loading</p>
+            <img src={LOADING} width="100" />
+          </div>
+        )}
 
         <div className="form">
           <Options />
@@ -357,7 +154,7 @@ class Replacer extends Component {
             <BlogSelect disabled={disableBlog} />
           </form>
 
-          <form className={classNames('find', { disabled: disableFind })} onSubmit={this.props.dispatchFind}>
+          <form className={classNames('find', { disabled: disableFind })} onSubmit={this.find}>
             <label htmlFor="find">find tag</label>
             <TagInput
               name="find"

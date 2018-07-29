@@ -169,7 +169,7 @@ input[type=checkbox] {
       display: none;
     }
 
-
+    // options
     &__menu {
       border: $border;
       border-top: 0;
@@ -182,6 +182,14 @@ input[type=checkbox] {
     }
     &__menu-notice--no-options {
       text-align: left;
+    }
+    &__option {
+      &--is-focused {
+        background-color: rgba($highlight, 0.2);
+      }
+      &--is-selected {
+        background-color: rgba($highlight, 0.7);
+      }
     }
 
     // values/ "tags"
@@ -199,7 +207,7 @@ input[type=checkbox] {
       &__label {
         color: $text;
         font-size: 1em;
-        padding: 3px 3px 3px 5px;
+        padding: 3px 4px 3px 5px;
       }
       &__remove {
         padding: 2px 2px 1px;

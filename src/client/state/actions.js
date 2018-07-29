@@ -7,9 +7,11 @@ export const actionTypes = {
   TUMBLR_GET_USER: 'tumblr/GET_USER',
   TUMBLR_FIND_TAGS: 'tumblr/FIND_TAGS',
   TUMBLR_REPLACE_TAGS: 'tumblr/REPLACE_TAGS',
+  TUMBLR_CLEAR_POSTS: 'tumblr/CLEAR_POSTS',
   SET_OPTION: 'options/SET',
   RESET_OPTIONS: 'options/RESET',
   SET_FORM_VALUE: 'form/SET_VALUE',
+  RESET_FORM_VALUE: 'form/RESET_VALUE',
   ADD_ERROR: 'errors/ADD',
   SET_LOADING: 'loading/SET',
 };
@@ -43,6 +45,11 @@ export const setFormValue = (key, value) => ({
   type: actionTypes.SET_FORM_VALUE,
   key,
   value,
+});
+
+export const resetFormValue = (key) => ({
+  type: actionTypes.RESET_FORM_VALUE,
+  key,
 });
 
 
@@ -83,7 +90,10 @@ const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
         response
       })
     ))
-    .then(() => dispatch(stopLoading()));
+    .then(response => {
+      dispatch(stopLoading());
+      return response;
+    });
 };
 
 export const getUser = () => (dispatch, getState) => {
@@ -112,4 +122,30 @@ export const find = () => (dispatch, getState) => {
       options,
     }
   }));
+};
+
+export const replace = () => (dispatch, getState) => {
+  const { form: { blog, find, replace }, options } = getState();
+  return dispatch(thunkFetch({
+    actionType: actionTypes.TUMBLR_REPLACE_TAGS,
+    method: POST,
+    path: '/api/replace',
+    body: {
+      blog,
+      find,
+      replace,
+      options,
+    }
+  }));
+};
+
+
+export const reset = () => dispatch => {
+  return Promise.all([
+    dispatch({
+      type: actionTypes.TUMBLR_CLEAR_POSTS,
+    }),
+    dispatch(resetFormValue('find')),
+    dispatch(resetFormValue('replace')),
+  ]);
 };

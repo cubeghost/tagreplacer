@@ -36,6 +36,12 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
       return _.assign({}, state, {
         ...action.response
       });
+    case actionTypes.TUMBLR_CLEAR_POSTS:
+      return _.assign({}, state, {
+        posts: initialState.tumblr.posts,
+        queued: initialState.tumblr.queued,
+        drafts: initialState.tumblr.drafts
+      });
     default:
       return state;
   }
@@ -46,6 +52,10 @@ const formReducer = (state = initialState.form, action) => {
     case actionTypes.SET_FORM_VALUE:
       return _.assign({}, state, {
         [action.key]: action.value
+      });
+    case actionTypes.RESET_FORM_VALUE:
+      return _.assign({}, state, {
+        [action.key]: initialState.form[action.key]
       });
     default:
       return state;

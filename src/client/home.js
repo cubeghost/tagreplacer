@@ -1,14 +1,24 @@
 import React from 'react';
-import createReactClass from 'create-react-class';
+import { connect } from 'react-redux';
 
-const Home = createReactClass({
-  render: function() {
+const mapStateToProps = state => ({
+  loading: state.loading,
+});
+
+const Home = ({ loading }) => {
+  if (loading) {
+    return (
+      <div className="loading">
+        <p>loading</p>
+      </div>
+    );
+  } else {
     return (
       <a href="/connect/tumblr" className="connect">
         connect to tumblr
       </a>
     );
-  },
-});
+  }
+};
 
-export default Home;
+export default connect(mapStateToProps)(Home);

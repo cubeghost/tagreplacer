@@ -48,17 +48,6 @@ class App extends Component {
     });
   }
 
-  renderLoadingState() {
-    // TODO
-    if (this.props.loading && location.pathname.indexOf('/help') < 0) {
-      return (
-        <div className="loading">
-          <p>loading</p>
-        </div>
-      );
-    }
-  }
-
   render() {
     return (
       <div className="app">
@@ -77,23 +66,19 @@ class App extends Component {
         <div className="content">
           {this.renderErrors()}
 
-          {this.renderLoadingState()}
-
           <Route path="/help" component={Help} />
 
-          {!this.props.loading && (
-            <Route
-              exact
-              path="/"
-              render={function(routeProps) {
-                if (this.props.authed) {
-                  return <Replacer {...routeProps} />;
-                } else {
-                  return <Home {...routeProps} />;
-                }
-              }.bind(this)}
-            />
-          )}
+          <Route
+            exact
+            path="/"
+            render={function(routeProps) {
+              if (this.props.authed) {
+                return <Replacer {...routeProps} />;
+              } else {
+                return <Home {...routeProps} />;
+              }
+            }.bind(this)}
+          />
         </div>
 
         <footer>
