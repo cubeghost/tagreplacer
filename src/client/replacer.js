@@ -110,21 +110,17 @@ class Replacer extends Component {
 
     if (replace.length === 0 && options.allowDelete) {
       return (
-        <div>
-          <h2>
-            deleted {this.formatTags(find)} for {replaced.length} posts
-          </h2>
-        </div>
+        <h2>
+          deleted {this.formatTags(find)} for {replaced.length} posts
+        </h2>
       );
     } else {
       return (
-        <div>
-          <h2>
-            replaced {this.formatTags(find)} with&nbsp;
-            {this.formatTags(replace)} for&nbsp;
-            {this.state.replaced.length} posts
-          </h2>
-        </div>
+        <h2>
+          replaced {this.formatTags(find)} with&nbsp;
+          {this.formatTags(replace)} for&nbsp;
+          {this.state.replaced.length} posts
+        </h2>
       );
     }
   }
@@ -210,8 +206,10 @@ class Replacer extends Component {
         </div>
 
         <div className="result">
-          {this.renderReplaced()}
-          {this.renderReset()}
+          <div>
+            {this.renderReplaced()}
+            {this.renderReset()}
+          </div>
           <Results name="posts" />
           {options.includeQueue && <Results name="queued" />}
           {options.includeDrafts && <Results name="drafts" />}
