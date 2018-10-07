@@ -206,10 +206,12 @@ class Replacer extends Component {
         </div>
 
         <div className="result">
-          <div>
-            {this.renderReplaced()}
-            {this.renderReset()}
-          </div>
+          {foundPosts && (
+            <div>
+              {this.renderReplaced()}
+              {this.renderReset()}
+            </div>
+          )}
           <Results name="posts" />
           {options.includeQueue && <Results name="queued" />}
           {options.includeDrafts && <Results name="drafts" />}

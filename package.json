@@ -45,6 +45,7 @@
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "class-autobind": "^0.1.4",
     "classnames": "^2.2.6",
+    "clean-webpack-plugin": "^0.1.19",
     "create-react-class": "^15.6.3",
     "css-loader": "1.0.0",
     "dotenv": "^2.0.0",

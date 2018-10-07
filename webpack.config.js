@@ -9,6 +9,7 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HappyPack = require('happypack');
 /* eslint-disable new-cap */
 const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
@@ -18,7 +19,7 @@ const PROD = process.env.NODE_ENV === 'production';
 const paths = {
   appBuild: path.resolve(__dirname, './build'),
   appHtml: path.resolve(__dirname, './src/html/index.html'),
-  // appFavicon: path.resolve(__dirname, './src/assets/favicon.ico'),
+  appFavicon: path.resolve(__dirname, './src/assets/favicon.png'),
   appPackageJson: path.resolve(__dirname, './package.json'),
   appSrc: path.resolve(__dirname, './src'),
   appNodeModules: path.resolve(__dirname, './node_modules'),
@@ -169,7 +170,7 @@ const config = {
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
-      // favicon: paths.appFavicon,
+      favicon: paths.appFavicon,
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -189,6 +190,7 @@ const config = {
       format: 'compact',
     }),
     new FriendlyErrorsWebpackPlugin(),
+    new CleanWebpackPlugin([paths.appBuild])
   ]
 };
 
