@@ -10,6 +10,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
+    "start": "npm run watch",
     "watch": "npm-run-all --parallel watch:*",
     "watch:server": "nodemon --watch src ./src/index.js",
     "watch:client": "webpack --watch"

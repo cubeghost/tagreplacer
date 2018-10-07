@@ -114,9 +114,17 @@ class TumblrClient {
       filter: 'text',
     }, params)).then(response => {
 
-      const posts = this.options.caseSensitive ?
-        _.filter(response.posts, post => _.includes(post.tags, tag)) :
-        response.posts;
+      let posts;
+      if (this.options.caseSensitive) {
+        posts = _.filter(response.posts, post => _.includes(post.tags, tag));
+      } else if (method.key !== 'posts') {
+        // draft and queue methods don't actually support the tag param 🙄
+        posts = _.filter(response.posts, post => (
+          _.includes(post.tags.map(t => t.toLowerCase()), tag.toLowerCase())
+        ));
+      } else {
+        posts = response.posts;
+      }
       const appendedResults = results.concat(posts);
 
       if (response.total_posts) {
@@ -132,7 +140,7 @@ class TumblrClient {
         }
       } else {
         if (response.posts.length > 0) {
-          if (method.clientMethod === 'blogDrafts') {
+          if (method.key === 'drafts') {
             // i hate this
             var before_id = response.posts[response.posts.length - 1].id;
             return this.findPosts({

@@ -103,14 +103,26 @@ class Replacer extends Component {
   // render
 
   renderReplaced() {
-    if (this.state.replaced.length > 0) {
+    const { find, replace, options } = this.props;
+    const { replaced } = this.state;
+
+    if (this.state.replaced.length === 0) return;
+
+    if (replace.length === 0 && options.allowDelete) {
       return (
         <div>
           <h2>
-            replaced {this.formatTags(this.props.find)}&nbsp;with&nbsp;
-            {this.formatTags(this.props.replace)}&nbsp;for&nbsp;
+            deleted {this.formatTags(find)} for {replaced.length} posts
+          </h2>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <h2>
+            replaced {this.formatTags(find)} with&nbsp;
+            {this.formatTags(replace)} for&nbsp;
             {this.state.replaced.length} posts
-            <br />
           </h2>
         </div>
       );
@@ -121,7 +133,7 @@ class Replacer extends Component {
     if (this.props.foundPosts) {
       return (
         <button className="reset" onClick={this.reset}>
-          find a different tag?
+          reset
         </button>
       );
     }

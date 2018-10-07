@@ -28,9 +28,4 @@ export function debugError(error) {
   }
 }
 
-export function formatPosts(post) {
-
-}
-
-
 export const mapForSelect = value => ({ label: value, value: value });
