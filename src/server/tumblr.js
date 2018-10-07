@@ -11,11 +11,13 @@ const POST_LIMIT = 20;
  * @property {boolean} [includeQueue=false]  include queued posts
  * @property {boolean} [includeDrafts=false] include drafted posts
  * @property {boolean} [caseSensitive=false] case sensitive tag matching
+ * @property {boolean} [allowDelete=false]   allow deleting tags
  */
 const DEFAULT_OPTIONS = {
   includeQueue: false,
   includeDrafts: false,
   caseSensitive: false,
+  allowDelete: false,
 };
 
 const EMPTY_RESPONSE = {
@@ -201,7 +203,12 @@ class TumblrClient {
 
       if (matchIndex > -1) {
         const replaceTag = replaceableTags.shift();
-        result.splice(matchIndex, 1, replaceTag);
+
+        if (replaceTag) {
+          result.splice(matchIndex, 1, replaceTag);
+        } else {
+          result.splice(matchIndex, 1);
+        }
       }
     });
 
@@ -209,7 +216,6 @@ class TumblrClient {
     result = _.concat(result, replaceableTags);
 
     result = _.compact(result);
-
     return result;
   }
 

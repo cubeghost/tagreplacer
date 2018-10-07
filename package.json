@@ -13,7 +13,8 @@
     "start": "npm run watch",
     "watch": "npm-run-all --parallel watch:*",
     "watch:server": "nodemon --watch src ./src/index.js",
-    "watch:client": "webpack --watch"
+    "watch:client": "webpack --watch",
+    "build": "webpack"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
