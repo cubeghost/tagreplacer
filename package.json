@@ -26,7 +26,7 @@
     "es6-promise": "^3.2.1",
     "express": "^4.14.0",
     "express-session": "^1.14.1",
-    "grant-express": "^3.8.1",
+    "grant-express": "^4.1.2",
     "history": "^4.7.2",
     "lodash": "^4.15.0",
     "raven-js": "3.26.3",
