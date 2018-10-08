@@ -1,0 +1,232 @@
+$border: $lightgray 2px solid;
+
+input, button {
+  font-family:$monospace;
+  font-weight:300;
+  font-size:1em;
+  background-color:transparent;
+  border-radius:$border-radius;
+  border:$border;
+
+  &:focus, &:active {
+    outline:none;
+    border-color:$highlight;
+  }
+
+}
+
+input[type=text] {
+  padding:5px 6px;
+  color:$text;
+}
+
+button {
+  padding:6px 12px 5px;
+  color:$text;
+  cursor:pointer;
+
+  &:focus, &:active, &:hover {
+    color:$background;
+    border-color:$highlight;
+    background-color:$highlight;
+  }
+}
+
+form {
+  display:flex;
+  align-items:center;
+  margin-bottom:3em;
+  &:last-of-type {
+    margin-bottom:0;
+  }
+
+  label {
+    text-align:right;
+    flex:0 0 30%;
+  }
+
+  & > input {
+    width:100%;
+    flex:1 0 40%;
+    margin:0 1em;
+  }
+
+  .react-selectize.root-node {
+    min-width:40%;
+    margin:0 1em;
+  }
+
+  .react-selectize.multi-select {
+    flex:1 0 40%;
+  }
+
+  button {
+    text-align:center;
+    flex:1 0 8%;
+  }
+
+}
+
+form.disabled label {
+  opacity: 0.6;
+  pointer-events:none;
+}
+input:disabled,
+button:disabled {
+  background-color: $lightgray;
+  pointer-events:none;
+  opacity: 0.6;
+}
+
+@mixin checkmark($color) {
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><path fill="#{$color}" stroke-width="20" d="M434.442 58.997L195.56 297.88l-118.006-118L0 257.438l195.56 195.565L512 136.55"/></svg>');
+}
+
+input[type=checkbox] {
+  opacity:0;
+  width:0;
+  margin:0;
+
+  &+label {
+    font-size:16px;
+    margin-left:-2px;
+    margin-right:8px;
+    display:inline-block;
+    padding-top:6px;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+
+    &:before {
+      content:'';
+      display:inline-block;
+      width:18px;
+      height:18px;
+      background-size:10px 10px;
+      border:$border;
+      background-repeat:no-repeat;
+      background-position:center center;
+      vertical-align:-3px;
+      margin-right:6px;
+    }
+  }
+  &:active + label:before,
+  &:focus + label:before {
+    background-color:rgba(0,0,0,0.05);
+  }
+
+  &:checked + label {
+    &:before {
+      border-color:$highlight;
+      @include checkmark($highlight);
+    }
+  }
+}
+
+// react-select
+
+.react-select._specific {
+  font-family: $monospace;
+  color: $text;
+  font-size: 1em;
+  flex-basis: 240px;
+  margin-left: 1em;
+  margin-right: 1em;
+
+  .react-select {
+
+    &__control {
+      background-color: white;
+      border: $border;
+      border-top-left-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      box-shadow: none;
+
+      &:last-child {
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+      }
+
+      &--is-focused {
+        border: $border;
+      }
+
+      &--is-focused:last-child {
+        border-color: $highlight;
+        box-shadow: 0 0 0 3px rgba($highlight, 0.1);
+      }
+
+      &:hover {
+        box-shadow: none;
+        &--is-focused {
+          box-shadow: 0 0 0 3px rgba($highlight, 0.1);
+        }
+      }
+    }
+
+    &__indicator-separator {
+      display: none;
+    }
+
+    // options
+    &__menu {
+      border: $border;
+      border-top: 0;
+      margin-top: 0;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+      box-shadow: none;
+    }
+    &__menu-notice--no-options {
+      text-align: left;
+    }
+    &__option {
+      &--is-focused {
+        background-color: rgba($highlight, 0.2);
+      }
+      &--is-selected {
+        background-color: rgba($highlight, 0.7);
+      }
+    }
+
+    // values/ "tags"
+
+    &__single-value {
+      overflow: visible;
+    }
+
+    &__multi-value {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 0.1em;
+      border: 0;
+      overflow: hidden;
+
+      &__label {
+        color: $text;
+        font-size: 1em;
+        padding: 3px 4px 3px 5px;
+      }
+      &__remove {
+        padding: 2px 2px 1px;
+        float: right;
+        border: 0;
+        color: rgba($text, 0.5);
+        border-radius: 0;
+
+        &:hover, &:focus {
+          background-color: rgba($text, 0.1);
+          color: rgba($text, 0.75);
+        }
+      }
+
+      &--is-disabled &__label {
+        opacity: 0.5;
+      }
+    }
+
+  }
+
+}
