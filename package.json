@@ -14,7 +14,8 @@
     "watch": "npm-run-all --parallel watch:*",
     "watch:server": "nodemon --watch src ./src/index.js",
     "watch:client": "webpack --watch",
-    "build": "webpack"
+    "build": "webpack",
+    "test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
@@ -44,6 +45,7 @@
     "babel-loader": "^8.0.0-beta.4",
     "babel-plugin-transform-runtime": "^6.23.0",
     "case-sensitive-paths-webpack-plugin": "2.1.2",
+    "chai": "^4.2.0",
     "class-autobind": "^0.1.4",
     "classnames": "^2.2.6",
     "clean-webpack-plugin": "^0.1.19",
@@ -61,6 +63,7 @@
     "happypack": "^5.0.0",
     "html-webpack-plugin": "3.2.0",
     "mini-css-extract-plugin": "0.4.1",
+    "mocha": "^5.2.0",
     "node-sass": "4.9.2",
     "npm-run-all": "^4.1.3",
     "postcss-loader": "2.1.6",

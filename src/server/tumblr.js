@@ -197,18 +197,16 @@ class TumblrClient {
         if (this.options.caseSensitive) {
           return tag === findTag;
         } else {
-          return tag.toLowerCase() === findTag.toLowerCase();
+          return (
+            (tag && tag.toLowerCase()) ===
+            (findTag && findTag.toLowerCase())
+          );
         }
       });
 
       if (matchIndex > -1) {
         const replaceTag = replaceableTags.shift();
-
-        if (replaceTag) {
-          result.splice(matchIndex, 1, replaceTag);
-        } else {
-          result.splice(matchIndex, 1);
-        }
+        result.splice(matchIndex, 1, replaceTag);
       }
     });
 

@@ -1,3 +1,17 @@
+### deleting tags
+if you check the `Allow deleting tags` option, replacing tags with nothing will result in the tags being removed.
+
+### appending tags
+to add tags, find posts with a tag and then replace the tag with itself *and* the new tag. for example:
+```
+tags on post: tag1, tag2
+
+find: tag2
+replace: tag2, tag3
+
+tags on post: tag1, tag2, tag3
+```
+
 ### ordering of tags
 if you find and replace the same number of tags, the first tag will replace the first,
 the second the second, and so on. for example:
