@@ -4,12 +4,19 @@ const express = require('express');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const Grant = require('grant-express');
+const Sentry = require('@sentry/node');
+const helmet = require('helmet');
 
 const client = require('./server/redis');
 const { webRouter, apiRouter } = require('./server/router');
 
 // setup
 const app = express();
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 const grant = new Grant({
   server: {
@@ -42,6 +49,8 @@ app.use(
 
 app.use(grant);
 
+app.use(helmet());
+
 // routes
 app.use('/', webRouter);
 app.use('/api', apiRouter);
@@ -58,6 +67,8 @@ app.get('/callback', (req, res) => res.redirect('/'));
 app.get('/disconnect', (req, res) => {
   req.session.destroy(err => res.redirect('/'));
 });
+
+app.use(Sentry.Handlers.errorHandler());
 
 // listen
 app.listen(process.env.PORT, () => {
