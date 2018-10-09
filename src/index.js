@@ -9,6 +9,7 @@ const helmet = require('helmet');
 
 const client = require('./server/redis');
 const { webRouter, apiRouter } = require('./server/router');
+const logger = require('./server/logger');
 
 // setup
 const app = express();
@@ -68,9 +69,12 @@ app.get('/disconnect', (req, res) => {
   req.session.destroy(err => res.redirect('/'));
 });
 
-app.use(Sentry.Handlers.errorHandler());
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 
 // listen
 app.listen(process.env.PORT, () => {
-  console.log(`⌘ listening on port ${process.env.PORT}`);
+  logger.info('express server started', { port: process.env.PORT });
 });

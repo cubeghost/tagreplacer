@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const TumblrClient = require('./tumblr');
+const logger = require('./logger');
 
 
 // web router
@@ -48,7 +49,7 @@ apiRouter.get('/user', function(req, res) {
   client.getUserInfo()
     .then(result => res.json(result.user))
     .catch(error => {
-      console.error(error);
+      logger.error(error, { request: req });
       res.status(500).send(error);
     });
 });
@@ -65,7 +66,7 @@ apiRouter.post('/find', function(req, res) {
     client.findPostsWithTags(req.body.find)
       .then(result => res.json(result))
       .catch(error => {
-        console.error(error);
+        logger.error(error, { request: req });
         res.status(500).send(error);
       });
   } else {
@@ -85,7 +86,7 @@ apiRouter.post('/replace', function(req, res) {
     client.findAndReplaceTags(req.body.find, req.body.replace)
       .then(result => res.json(result))
       .catch(error => {
-        console.error(error);
+        logger.error(error, { request: req });
         res.status(500).send(error);
       });
   } else {

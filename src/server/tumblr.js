@@ -1,8 +1,9 @@
 require('dotenv').config();
 
-const debug = require('debug')('tagreplacer:TumblrClient');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
+
+const logger = require('./logger');
 
 const POST_LIMIT = 20;
 
@@ -47,8 +48,16 @@ class TumblrClient {
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
+  }
 
-    debug('options %o', this.options);
+  /**
+   * wrap default logger with blog and options context
+   */
+  log(message, context = {}) {
+    logger.info(`Tumblr.${message}`, Object.assign({
+      blog: this.blog,
+      options: this.options,
+    }, context));
   }
 
   /**
@@ -225,7 +234,7 @@ class TumblrClient {
   findPostsWithTags(find) {
     if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
 
-    debug('find %o', find);
+    this.log('find', { find });
 
     const tags = _.chain(find)
       .sortBy()
@@ -270,7 +279,8 @@ class TumblrClient {
 
     return this.findPostsWithTags(find)
       .then(results => {
-        debug('replace %o', replace);
+        this.log('replace', { find, replace });
+
         const promises = _.chain(this.methods)
           .flatMap(method => results[method.key])
           .map(post => {
