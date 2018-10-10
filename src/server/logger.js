@@ -6,6 +6,9 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
   ],
+  exceptionHandlers: [
+    new winston.transports.Console(),
+  ],
   format: IS_PRODUCTION ?
     winston.format.json() :
     winston.format.combine(

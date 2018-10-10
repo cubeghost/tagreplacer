@@ -73,6 +73,13 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
+    stack: error.stack,
+  });
+  res.status(500).json({
+    level: 'error',
+    message: error.message
+  });
+});
 
 // listen
 app.listen(process.env.PORT, () => {
