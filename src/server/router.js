@@ -49,7 +49,7 @@ apiRouter.get('/user', function(req, res) {
   client.getUserInfo()
     .then(result => res.json(result.user))
     .catch(error => {
-      logger.error(error, { request: req });
+      logger.error(error.message, { error: error, request: req });
       res.status(500).send(error);
     });
 });
@@ -66,7 +66,7 @@ apiRouter.post('/find', function(req, res) {
     client.findPostsWithTags(req.body.find)
       .then(result => res.json(result))
       .catch(error => {
-        logger.error(error, { request: req });
+        logger.error(error.message, { error: error, request: req });
         res.status(500).send(error);
       });
   } else {
@@ -86,7 +86,7 @@ apiRouter.post('/replace', function(req, res) {
     client.findAndReplaceTags(req.body.find, req.body.replace)
       .then(result => res.json(result))
       .catch(error => {
-        logger.error(error, { request: req });
+        logger.error(error.message, { error: error, request: req });
         res.status(500).send(error);
       });
   } else {
