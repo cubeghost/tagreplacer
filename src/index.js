@@ -73,6 +73,8 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
+app.use((error, req, res, next) => {
+  logger.error(error.message, {
     stack: error.stack,
   });
   res.status(500).json({
