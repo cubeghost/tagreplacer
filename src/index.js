@@ -78,7 +78,7 @@ app.use((error, req, res, next) => {
     stack: error.stack,
   });
   res.status(500).json({
-    level: 'error',
+    code: error.code,
     message: error.message
   });
 });

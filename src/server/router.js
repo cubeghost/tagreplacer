@@ -40,7 +40,7 @@ apiRouter.use(function(req, res, next) {
   }
 });
 
-apiRouter.get('/user', function(req, res) {
+apiRouter.get('/user', function(req, res, next) {
   const token = req.session.grant.response.access_token;
   const secret = req.session.grant.response.access_secret;
 
@@ -48,13 +48,10 @@ apiRouter.get('/user', function(req, res) {
 
   client.getUserInfo()
     .then(result => res.json(result.user))
-    .catch(error => {
-      logger.error(error.message, { error: error, request: req });
-      res.status(500).send(error);
-    });
+    .catch(error => next(error));
 });
 
-apiRouter.post('/find', function(req, res) {
+apiRouter.post('/find', function(req, res, next) {
   if (req.body.blog && req.body.find) {
     const token = req.session.grant.response.access_token;
     const secret = req.session.grant.response.access_secret;
@@ -65,16 +62,13 @@ apiRouter.post('/find', function(req, res) {
 
     client.findPostsWithTags(req.body.find)
       .then(result => res.json(result))
-      .catch(error => {
-        logger.error(error.message, { error: error, request: req });
-        res.status(500).send(error);
-      });
+      .catch(error => next(error));
   } else {
     res.status(400).send('POST body must include "blog" and "find"');
   }
 });
 
-apiRouter.post('/replace', function(req, res) {
+apiRouter.post('/replace', function(req, res, next) {
   if (req.body.blog && req.body.find && req.body.replace) {
     const token = req.session.grant.response.access_token;
     const secret = req.session.grant.response.access_secret;
@@ -85,13 +79,27 @@ apiRouter.post('/replace', function(req, res) {
 
     client.findAndReplaceTags(req.body.find, req.body.replace)
       .then(result => res.json(result))
-      .catch(error => {
-        logger.error(error.message, { error: error, request: req });
-        res.status(500).send(error);
-      });
+      .catch(error => next(error));
   } else {
     res.status(400).send('POST body must include "blog", "find", and "replace"');
   }
+});
+
+// error handling
+apiRouter.use(function(error, req, res, next) {
+  logger.error(error.message, {
+    error: {
+      stack: error.stack,
+      code: error.code,
+    },
+    request: {
+      headers: req.headers,
+      method: req.method,
+      body: req.body,
+      originalUrl: req.originalUrl,
+    }
+  });
+  res.status(500).send(error);
 });
 
 
