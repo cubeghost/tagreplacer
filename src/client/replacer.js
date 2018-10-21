@@ -136,12 +136,13 @@ class Replacer extends Component {
   }
 
   render() {
-    const { loading, foundPosts, options, blog, replace } = this.props;
+    const { loading, foundPosts, options, blog, find, replace } = this.props;
 
     const disableBlog = !!foundPosts;
     const disableFind = !blog || !!foundPosts;
     const disableReplace = !foundPosts;
 
+    const disableFindButton = find.length === 0 || disableFind;
     const disableReplaceButton = replace.length === 0 && !options.allowDelete;
     const deleteMode = replace.length === 0 && options.allowDelete;
 
@@ -175,7 +176,7 @@ class Replacer extends Component {
               type="submit"
               className="find"
               onClick={this.find}
-              disabled={disableFind}
+              disabled={disableFindButton}
             >
               find
             </button>
