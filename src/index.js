@@ -6,6 +6,8 @@ const RedisStore = require('connect-redis')(session);
 const Grant = require('grant-express');
 const Sentry = require('@sentry/node');
 const helmet = require('helmet');
+const memwatch = require('@airbnb/node-memwatch');
+const heapdump = require('heapdump');
 
 const client = require('./server/redis');
 const { webRouter, apiRouter } = require('./server/router');
@@ -86,4 +88,18 @@ app.use((error, req, res, next) => {
 // listen
 app.listen(process.env.PORT, () => {
   logger.info('express server started', { port: process.env.PORT });
+});
+
+// snapshot as memory grows
+memwatch.on('leak', info => {
+  logger.warning('memwatch: Memory leak detected', {
+    leak: info,
+  });
+  heapdump.writeSnapshot((err, filename) => {
+    if (err) {
+      logger.error(err);
+    } else {
+      logger.warning(`Wrote snapshot: ${filename}`);
+    }
+  });
 });
