@@ -234,8 +234,6 @@ class TumblrClient {
   findPostsWithTags(find) {
     if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
 
-    this.log('find', { find });
-
     const tags = _.chain(find)
       .sortBy()
       .value();
@@ -264,7 +262,16 @@ class TumblrClient {
 
     return Promise.all(promises)
       .then(results => results.reduce((a, v) => _.assign(a, v), {}))
-      .then(results => _.assign({}, EMPTY_RESPONSE, results));
+      .then(results => _.assign({}, EMPTY_RESPONSE, results))
+      .then(results => {
+        this.log('find', {
+          find,
+          results: {
+            length: Object.keys(results).reduce((a, v) => a + results[v].length, 0)
+          }
+        });
+        return results;
+      });
   }
 
   /**
@@ -279,8 +286,6 @@ class TumblrClient {
 
     return this.findPostsWithTags(find)
       .then(results => {
-        this.log('replace', { find, replace });
-
         const promises = _.chain(this.methods)
           .flatMap(method => results[method.key])
           .map(post => {
@@ -297,7 +302,17 @@ class TumblrClient {
           })
           .value();
 
-        return Promise.all(promises);
+        return Promise.all(promises)
+        .then(replaced => {
+          this.log('replace', {
+            find,
+            replace,
+            replaced: {
+              length: replaced.length
+            }
+          });
+          return results;
+        });
       });
   }
 }
