@@ -1,17 +1,17 @@
 {
   "name": "tagreplacer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "tumblr tag replacer",
   "main": "index.js",
-  "author": "Alex Baldwin <alex@bldwn.co> (http://bldwn.co/)",
+  "author": "Alex Baldwin <alex@cubegho.st> (https://cubegho.st/)",
   "repository": {
     "type": "git",
-    "url": "git@github.com:goosey/tagreplacer.git"
+    "url": "git@github.com:cubeghost/tagreplacer.git"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "start": "npm run watch",
-    "watch": "npm-run-all --parallel watch:*",
+    "watch": "echo $PATH && ls -la && npm-run-all --parallel watch:*",
     "watch:server": "nodemon --watch src ./src/index.js",
     "watch:client": "webpack --watch",
     "build": "webpack",

@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+
+  web:
+    environment:
+      NODE_ENV: production
+    command: npm run build && node index.js
