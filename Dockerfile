@@ -11,5 +11,5 @@ WORKDIR /usr/src/app
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
 COPY . ./
 
-RUN chown -R node: /webapp
+RUN chown -R node: /usr/src/app
 USER node

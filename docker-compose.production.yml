@@ -7,4 +7,6 @@ services:
       - NODE_ENV=production
       - PROTOCOL=https
       - HOSTNAME=tags.circumfluo.us
+    ports:
+      - 4000:80
     command: npm run build && node index.js
