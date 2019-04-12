@@ -10,9 +10,6 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const HappyPack = require('happypack');
-/* eslint-disable new-cap */
-const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -49,64 +46,7 @@ const config = {
         enforce: 'pre',
         exclude: [/node_modules/],
         include: [paths.appSrc],
-        use: ['happypack/loader?id=eslint'],
-      },
-      {
-        test: /\.jsx?$/,
-        include: [paths.appSrc],
-        use: ['happypack/loader?id=babel'],
-      },
-      {
-        test: /\.scss$/,
-        exclude: /node_modules/,
-        use: (() => {
-          const loaders = ['happypack/loader?id=sass'];
-          if (PROD) {
-            loaders.unshift(MiniCssExtractPlugin.loader);
-          }
-          return loaders;
-        })(),
-      },
-      {
-        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
-        include: [paths.appSrc],
-        loader: 'file-loader',
-      },
-      {
-        test: /\.md/,
-        include: [paths.appSrc],
-        loader: 'raw-loader',
-      },
-    ],
-  },
-  optimization: {
-    namedModules: true,
-    concatenateModules: true,
-  },
-  plugins: [
-    new HappyPack({
-      id: 'babel',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
-          loader: 'babel-loader',
-          query: {
-            cacheDirectory: findCacheDir({
-              name: 'tagreplacer-happypack-cache',
-            }),
-          },
-        },
-      ],
-    }),
-    new HappyPack({
-      id: 'eslint',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
+        use: [{
           loader: 'eslint-loader',
           options: {
             configFile: path.join(__dirname, 'eslint.js'),
@@ -114,16 +54,37 @@ const config = {
             cache: false,
             formatter: require('eslint-formatter-pretty'),
           },
-        },
-      ],
-    }),
-    new HappyPack({
-      id: 'sass',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: (() => {
-        const loaders = [
+        }],
+      },
+      {
+        test: /\.jsx?$/,
+        include: [paths.appSrc],
+        use: [{
+          loader: 'babel-loader',
+          // query: {
+          //   cacheDirectory: findCacheDir({
+          //     name: 'tagreplacer-babel-cache',
+          //   }),
+          // },
+        }],
+      },
+      {
+        test: /\.scss$/,
+        exclude: /node_modules/,
+        use: [
+          (() => {
+            if (PROD) {
+              return MiniCssExtractPlugin.loader;
+            } else {
+              return {
+                loader: 'style-loader',
+                options: {
+                  sourceMap: true,
+                  singleton: false,
+                },
+              };
+            }
+          })(),
           {
             loader: 'css-loader',
             options: {
@@ -154,19 +115,25 @@ const config = {
               outputStyle: PROD ? 'compressed' : 'expanded',
             },
           },
-        ];
-        if (!PROD) {
-          loaders.unshift({
-            loader: 'style-loader',
-            options: {
-              sourceMap: true,
-              singleton: false,
-            },
-          });
-        }
-        return loaders;
-      })(),
-    }),
+        ],
+      },
+      {
+        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
+        include: [paths.appSrc],
+        loader: 'file-loader',
+      },
+      {
+        test: /\.md/,
+        include: [paths.appSrc],
+        loader: 'raw-loader',
+      },
+    ],
+  },
+  optimization: {
+    namedModules: true,
+    concatenateModules: true,
+  },
+  plugins: [
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
@@ -195,6 +162,7 @@ const config = {
 };
 
 if (process.env.NODE_ENV === 'production') {
+
   config.mode = 'production';
   config.devtool = 'source-map';
   config.optimization = {
@@ -229,6 +197,7 @@ if (process.env.NODE_ENV === 'production') {
       filename: '[name].[hash:8].css',
     })
   );
+
 }
 
 module.exports = config;

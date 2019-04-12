@@ -4,5 +4,7 @@ services:
 
   web:
     environment:
-      NODE_ENV: production
+      - NODE_ENV=production
+      - PROTOCOL=https
+      - HOSTNAME=tags.circumfluo.us
     command: npm run build && node index.js

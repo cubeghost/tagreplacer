@@ -13,8 +13,10 @@ services:
     ports:
       - 4000:4000
     environment:
-        - REDIS_PORT=6379
-        - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - PROTOCOL=http
+      - HOSTNAME=localhost:4000
     depends_on:
         - redis
     command: npm run watch

@@ -10,3 +10,6 @@ FROM base as build
 WORKDIR /usr/src/app
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
 COPY . ./
+
+RUN chown -R node: /webapp
+USER node
