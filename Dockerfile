@@ -15,3 +15,7 @@ RUN chown -R node: /usr/src/app
 USER node
 
 EXPOSE 4000
+
+FROM nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+

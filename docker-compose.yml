@@ -7,7 +7,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_HOST=redis
     depends_on:
-        - redis
+      - redis
 
   redis:
     image: redis

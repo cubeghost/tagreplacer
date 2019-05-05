@@ -6,10 +6,18 @@ services:
     image: 'cubeghost/tagreplacer:latest'
     volumes:
       - /home/.env:/usr/src/app/.env
-    ports:
-      - 4000:80
+    expose:
+      - "4000"
     environment:
       - NODE_ENV=production
       - PROTOCOL=https
-      - HOSTNAME=tags.circumfluo.us
+      - HOSTNAME=142.93.67.26
     command: npm run start
+
+  nginx:
+    image: nginx
+    depends_on:
+      - web
+    ports:
+      - 80:80
+      - 443:443
