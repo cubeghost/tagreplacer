@@ -25,6 +25,11 @@ const paths = {
 const config = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
+  watchOptions: {
+    ignored: /node_modules/,
+    aggregateTimeout: 300,
+    poll: 500
+  },
   entry: {
     client: path.join(paths.appSrc, 'client.js')
   },

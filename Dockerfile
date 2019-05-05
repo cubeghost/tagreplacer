@@ -1,9 +1,12 @@
+FROM nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
 FROM node:10-alpine AS base
 
 FROM base AS dependencies
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN apk add --no-cache --virtual .gyp python make g++
+RUN apk add --no-cache --virtual .gyp python make g++ inotify-tools
 RUN npm install
 
 FROM base as build
@@ -15,7 +18,3 @@ RUN chown -R node: /usr/src/app
 USER node
 
 EXPOSE 4000
-
-FROM nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-

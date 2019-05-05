@@ -13,7 +13,8 @@ services:
     ports:
       - 4000:4000
     environment:
+      - NODE_ENV=development
       - PROTOCOL=http
-      - HOSTNAME=localhost:4000
+      - HOSTNAME=192.168.99.100:4000
     command: npm run watch
 
