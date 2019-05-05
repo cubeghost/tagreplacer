@@ -13,3 +13,5 @@ COPY . ./
 
 RUN chown -R node: /usr/src/app
 USER node
+
+EXPOSE 4000

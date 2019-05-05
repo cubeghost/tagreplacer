@@ -6,6 +6,8 @@ services:
     image: 'cubeghost/tagreplacer:latest'
     volumes:
       - /home/.env:/usr/src/app/.env
+    ports:
+      - 4000:80
     environment:
       - NODE_ENV=production
       - PROTOCOL=https
