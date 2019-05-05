@@ -85,6 +85,13 @@ app.use((error, req, res, next) => {
   });
 });
 
+// temp logging
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.originalUrl} ${res.statusCode}`);
+  next();
+});
+
+
 // listen
 app.listen(process.env.PORT, () => {
   logger.info('express server started', { port: process.env.PORT });
