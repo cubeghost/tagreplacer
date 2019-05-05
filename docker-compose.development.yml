@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app:cached
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 4000:4000
+    environment:
+      - PROTOCOL=http
+      - HOSTNAME=localhost:4000
+    command: npm run watch
+

@@ -3,10 +3,11 @@ version: '3'
 services:
 
   web:
+    image: 'cubeghost/tagreplacer:latest'
+    volumes:
+      - /home/.env:/usr/src/app/.env
     environment:
       - NODE_ENV=production
       - PROTOCOL=https
       - HOSTNAME=tags.circumfluo.us
-    ports:
-      - 4000:80
-    command: npm run build && node index.js
+    command: npm run start
