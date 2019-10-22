@@ -13,11 +13,3 @@ services:
       - PROTOCOL=https
       - HOSTNAME=142.93.67.26
     command: npm run start
-
-  nginx:
-    image: nginx
-    depends_on:
-      - web
-    ports:
-      - 80:80
-      - 443:443

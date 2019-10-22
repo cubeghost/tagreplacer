@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const path = require('path');
 const webpack = require('webpack');
-const findCacheDir = require('find-cache-dir');
+// const findCacheDir = require('find-cache-dir');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
@@ -10,6 +10,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const isDocker = require('is-docker');
 
 const PROD = process.env.NODE_ENV === 'production';
 
@@ -159,14 +160,14 @@ const config = {
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
     new CaseSensitivePathsPlugin(),
     new SimpleProgressWebpackPlugin({
-      format: 'compact',
+      format: (isDocker() || PROD) ? 'expanded' : 'compact',
     }),
     new FriendlyErrorsWebpackPlugin(),
     new CleanWebpackPlugin([paths.appBuild])
   ]
 };
 
-if (process.env.NODE_ENV === 'production') {
+if (PROD) {
 
   config.mode = 'production';
   config.devtool = 'source-map';
