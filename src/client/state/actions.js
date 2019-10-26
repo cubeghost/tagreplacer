@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get } from 'lodash';
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
 const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
@@ -103,7 +103,7 @@ export const getUser = () => (dispatch, getState) => {
     path: '/api/user',
   })).then(() => {
     const { tumblr: { blogs } } = getState();
-    const defaultBlog = DEFAULT_BLOG || _.get(blogs, '[0].name');
+    const defaultBlog = DEFAULT_BLOG || get(blogs, '[0].name');
     if (defaultBlog) {
       return dispatch(setFormValue('blog', defaultBlog));
     }

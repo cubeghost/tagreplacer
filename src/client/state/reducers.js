@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { assign } from 'lodash';
 import { combineReducers } from 'redux';
 
 import initialState from './initial';
@@ -28,16 +28,16 @@ errors: [],
 const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
     case actionTypes.TUMBLR_GET_USER:
-      return _.assign({}, state, {
+      return assign({}, state, {
         username: action.response.name,
         blogs: action.response.blogs,
       });
     case actionTypes.TUMBLR_FIND_TAGS:
-      return _.assign({}, state, {
+      return assign({}, state, {
         ...action.response
       });
     case actionTypes.TUMBLR_CLEAR_POSTS:
-      return _.assign({}, state, {
+      return assign({}, state, {
         posts: initialState.tumblr.posts,
         queued: initialState.tumblr.queued,
         drafts: initialState.tumblr.drafts
@@ -50,11 +50,11 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 const formReducer = (state = initialState.form, action) => {
   switch (action.type) {
     case actionTypes.SET_FORM_VALUE:
-      return _.assign({}, state, {
+      return assign({}, state, {
         [action.key]: action.value
       });
     case actionTypes.RESET_FORM_VALUE:
-      return _.assign({}, state, {
+      return assign({}, state, {
         [action.key]: initialState.form[action.key]
       });
     default:
@@ -65,11 +65,11 @@ const formReducer = (state = initialState.form, action) => {
 const optionsReducer = (state = initialState.options, action) => {
   switch (action.type) {
     case actionTypes.SET_OPTION:
-      return _.assign({}, state, {
+      return assign({}, state, {
         [action.key]: action.value
       });
     case actionTypes.RESET_OPTIONS:
-      return _.assign({}, initialState.options);
+      return assign({}, initialState.options);
     default:
       return state;
   }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import autobind from 'class-autobind';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
+import { flow, values, map, sum } from 'lodash/fp';
 
 import Options from './options';
 import Results from './components/results';
@@ -96,7 +97,7 @@ class Replacer extends Component {
     this.props.dispatchReset();
 
     this.setState({
-      replaced: [],
+      replaced: {},
     });
   }
 
@@ -105,13 +106,19 @@ class Replacer extends Component {
   renderReplaced() {
     const { find, replace, options } = this.props;
     const { replaced } = this.state;
+    const totalReplaced = flow([
+      values,
+      map('length'),
+      sum,
+    ])(replaced);
+    console.log({totalReplaced})
 
-    if (this.state.replaced.length === 0) return;
+    if (totalReplaced === 0) return;
 
     if (replace.length === 0 && options.allowDelete) {
       return (
         <h2>
-          deleted {this.formatTags(find)} for {replaced.length} posts
+          deleted {this.formatTags(find)} for {totalReplaced} posts
         </h2>
       );
     } else {
@@ -119,7 +126,7 @@ class Replacer extends Component {
         <h2>
           replaced {this.formatTags(find)} with&nbsp;
           {this.formatTags(replace)} for&nbsp;
-          {this.state.replaced.length} posts
+          {totalReplaced} posts
         </h2>
       );
     }
