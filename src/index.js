@@ -22,7 +22,7 @@ if (process.env.SENTRY_DSN) {
 const grant = new Grant({
   server: {
     protocol: process.env.PROTOCOL,
-    host: process.env.HOSTNAME,
+    host: process.env.HOST_HOSTNAME,
     callback: '/callback',
     transport: 'session',
   },

@@ -10,6 +10,4 @@ services:
       - "4000"
     environment:
       - NODE_ENV=production
-      - PROTOCOL=https
-      - HOSTNAME=142.93.67.26
     command: npm run start
