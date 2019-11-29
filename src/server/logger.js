@@ -9,12 +9,7 @@ const logger = winston.createLogger({
   exceptionHandlers: [
     new winston.transports.Console(),
   ],
-  format: IS_PRODUCTION ?
-    winston.format.json() :
-    winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
+  format: winston.format.json(),
 });
 
 module.exports = logger;
