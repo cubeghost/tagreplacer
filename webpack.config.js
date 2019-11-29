@@ -13,6 +13,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const isDocker = require('is-docker');
 
 const PROD = process.env.NODE_ENV === 'production';
+const DOCKER = isDocker();
 
 const paths = {
   appBuild: path.resolve(__dirname, './build'),
@@ -159,13 +160,22 @@ const config = {
     }),
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
     new CaseSensitivePathsPlugin(),
-    new SimpleProgressWebpackPlugin({
-      format: (isDocker() || PROD) ? 'expanded' : 'compact',
-    }),
     new FriendlyErrorsWebpackPlugin(),
     new CleanWebpackPlugin([paths.appBuild])
   ]
 };
+
+if (DOCKER && PROD) {
+
+  config.stats = 'errors-only';
+
+} else {
+
+  config.plugins.push(new SimpleProgressWebpackPlugin({
+    format: (DOCKER || PROD) ? 'expanded' : 'compact',
+  }));
+
+}
 
 if (PROD) {
 
