@@ -167,7 +167,15 @@ const config = {
 
 if (DOCKER && PROD) {
 
-  config.stats = 'errors-only';
+  config.stats = {
+    errors: true,
+    errorDetails: true,
+    logging: 'error',
+    loggingTrace: true,
+  };
+  config.performance = {
+    hints: false
+  };
 
 } else {
 
