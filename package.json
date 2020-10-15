@@ -17,6 +17,9 @@
     "start": "npm run build && node src/index.js",
     "test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
+  "engines": {
+    "node": "12.x"
+  },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
     "@sentry/node": "^4.6.6",
