@@ -31,3 +31,5 @@ npm start
 - [x] add copyright/contact info
 - [ ] add sentry
 - [ ] improve error and "no results" handling in the ui
+- [ ] add confirmation on replace/delete 
+- [ ] fix checkbox styles
