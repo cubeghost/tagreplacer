@@ -49,21 +49,6 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        enforce: 'pre',
-        exclude: [/node_modules/],
-        include: [paths.appSrc],
-        use: [{
-          loader: 'eslint-loader',
-          options: {
-            configFile: path.join(__dirname, 'eslint.js'),
-            useEslintrc: false,
-            cache: false,
-            formatter: require('eslint-formatter-pretty'),
-          },
-        }],
-      },
-      {
         test: /\.jsx?$/,
         include: [paths.appSrc],
         use: [{
@@ -167,15 +152,15 @@ const config = {
 
 if (DOCKER && PROD) {
 
-  config.stats = {
-    errors: true,
-    errorDetails: true,
-    logging: 'error',
-    loggingTrace: true,
-  };
-  config.performance = {
-    hints: false
-  };
+  // config.stats = {
+  //   errors: true,
+  //   errorDetails: true,
+  //   logging: 'error',
+  //   loggingTrace: true,
+  // };
+  // config.performance = {
+  //   hints: false
+  // };
 
 } else {
 
@@ -221,6 +206,24 @@ if (PROD) {
       filename: '[name].[hash:8].css',
     })
   );
+
+} else {
+
+  config.rules.unshift({
+    test: /\.js$/,
+    enforce: 'pre',
+    exclude: [/node_modules/],
+    include: [paths.appSrc],
+    use: [{
+      loader: 'eslint-loader',
+      options: {
+        configFile: path.join(__dirname, 'eslint.js'),
+        useEslintrc: false,
+        cache: false,
+        formatter: require('eslint-formatter-pretty'),
+      },
+    }],
+  });
 
 }
 
