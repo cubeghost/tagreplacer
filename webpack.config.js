@@ -146,7 +146,7 @@ const config = {
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
     new CaseSensitivePathsPlugin(),
     new FriendlyErrorsWebpackPlugin(),
-    new CleanWebpackPlugin([paths.appBuild])
+    // new CleanWebpackPlugin([paths.appBuild])
   ]
 };
 
@@ -189,6 +189,7 @@ if (PROD) {
   config.plugins.push(
     new UglifyJsPlugin({
       sourceMap: true,
+      cache: true,
       parallel: true,
       uglifyOptions: {
         // React doesn't support IE8
