@@ -186,22 +186,22 @@ if (PROD) {
     },
   };
 
-  config.plugins.push(
-    new UglifyJsPlugin({
-      sourceMap: true,
-      cache: true,
-      parallel: true,
-      uglifyOptions: {
-        // React doesn't support IE8
-        ie8: false,
-        ecma: 7,
-        warnings: true,
-        output: {
-          comments: false,
-        },
-      },
-    })
-  );
+  // config.plugins.push(
+  //   new UglifyJsPlugin({
+  //     sourceMap: true,
+  //     cache: true,
+  //     parallel: true,
+  //     uglifyOptions: {
+  //       // React doesn't support IE8
+  //       ie8: false,
+  //       ecma: 7,
+  //       warnings: true,
+  //       output: {
+  //         comments: false,
+  //       },
+  //     },
+  //   })
+  // );
   config.plugins.push(
     new MiniCssExtractPlugin({
       filename: '[name].[hash:8].css',
