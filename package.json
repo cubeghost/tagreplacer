@@ -14,7 +14,7 @@
     "watch:server": "nodemon --watch src ./src/index.js",
     "watch:client": "webpack --watch",
     "build": "webpack",
-    "start": "npm run build && node src/index.js",
+    "start": "node src/index.js",
     "test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "engines": {
