@@ -90,6 +90,7 @@
     "sass-loader": "7.3.1",
     "simple-progress-webpack-plugin": "1.1.2",
     "style-loader": "0.21.0",
+    "terser-webpack-plugin": "4",
     "tether": "^1.4.7",
     "uglifyjs-webpack-plugin": "1.2.7",
     "webpack": "4",
