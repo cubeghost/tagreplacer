@@ -5,6 +5,7 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const Grant = require('grant-express');
 const Sentry = require('@sentry/node');
+const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
 
 const client = require('./server/redis');
@@ -15,8 +16,16 @@ const logger = require('./server/logger');
 const app = express();
 
 if (process.env.SENTRY_DSN) {
-  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Tracing.Integrations.Express({ app }),
+    ],
+    tracesSampleRate: 1.0,
+  });
   app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
 }
 
 const grant = new Grant({
