@@ -30,7 +30,7 @@ const apiRouter = express.Router();
 apiRouter.use(bodyParser.json());
 
 apiRouter.use(function(req, res, next) {
-  if (req.session.grant && req.session.grant.response) {
+  if (req.session && req.session.grant && req.session.grant.response) {
     next();
   } else {
     res.statusMessage = 'No user session';

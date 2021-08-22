@@ -78,8 +78,19 @@ button:disabled {
   opacity: 0.6;
 }
 
+@function encodecolor($string) {
+  @if type-of($string) == 'color' and str-index(#{$string}, '#') == 1 {
+    $hex: str-slice(ie-hex-str($string), 4);
+    $string: unquote('#{$hex}');
+
+    @return '%23' + $string;
+  }
+
+  @return $string;
+}
+
 @mixin checkmark($color) {
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><path fill="#{$color}" stroke-width="20" d="M434.442 58.997L195.56 297.88l-118.006-118L0 257.438l195.56 195.565L512 136.55"/></svg>');
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"%3E%3Cpath fill="#{encodecolor($color)}" stroke-width="20" d="M434.442 58.997L195.56 297.88l-118.006-118L0 257.438l195.56 195.565L512 136.55"/%3E%3C/svg%3E');
 }
 
 input[type=checkbox] {
