@@ -29,7 +29,7 @@ npm start
 - [x] explore using react-select instead of customized react-selectize
 - [ ] allow for collapsing of found posts/drafts/queue lists
 - [x] add copyright/contact info
-- [ ] add sentry
+- [x] add sentry
 - [ ] improve error and "no results" handling in the ui
 - [ ] add confirmation on replace/delete 
-- [ ] fix checkbox styles
+- [x] fix checkbox styles
