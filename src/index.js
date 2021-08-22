@@ -20,7 +20,9 @@ if (process.env.SENTRY_DSN) {
     dsn: process.env.SENTRY_DSN,
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
-      new Tracing.Integrations.Express({ app }),
+      new Tracing.Integrations.Express({
+        router: apiRouter,
+      }),
     ],
     tracesSampleRate: 1.0,
   });
