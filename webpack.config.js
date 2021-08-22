@@ -8,7 +8,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
-const TerserWebpackPlugin = require('terser-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const isDocker = require('is-docker');
 
@@ -146,7 +146,7 @@ const config = {
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
     new CaseSensitivePathsPlugin(),
     new FriendlyErrorsWebpackPlugin(),
-    // new CleanWebpackPlugin([paths.appBuild])
+    new CleanWebpackPlugin([paths.appBuild])
   ]
 };
 
@@ -175,6 +175,14 @@ if (PROD) {
   config.mode = 'production';
   config.devtool = 'source-map';
   config.optimization = {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+      })
+    ],
     splitChunks: {
       cacheGroups: {
         commons: {
@@ -186,22 +194,6 @@ if (PROD) {
     },
   };
 
-  // config.plugins.push(
-  //   new UglifyJsPlugin({
-  //     sourceMap: true,
-  //     cache: true,
-  //     parallel: true,
-  //     uglifyOptions: {
-  //       // React doesn't support IE8
-  //       ie8: false,
-  //       ecma: 7,
-  //       warnings: true,
-  //       output: {
-  //         comments: false,
-  //       },
-  //     },
-  //   })
-  // );
   config.plugins.push(
     new MiniCssExtractPlugin({
       filename: '[name].[hash:8].css',
