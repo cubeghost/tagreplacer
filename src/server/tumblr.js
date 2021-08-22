@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
+const Sentry = require('@sentry/node');
 
 const logger = require('./logger');
 
@@ -36,7 +37,7 @@ class TumblrClient {
    * @param {Options} [options={}]  api options
    */
   constructor({ token, secret, blog, options = {} }) {
-    this.client = new tumblr.Client({
+    this.client = this.wrapClient(new tumblr.Client({
       credentials: {
         consumer_key: process.env.TUMBLR_API_KEY,
         consumer_secret: process.env.TUMBLR_API_SECRET,
@@ -44,7 +45,7 @@ class TumblrClient {
         token_secret: secret
       },
       returnPromises: true
-    });
+    }));
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
@@ -58,6 +59,25 @@ class TumblrClient {
       blog: this.blog,
       options: this.options,
     }, context));
+  }
+
+  wrapClient(client) {
+    const proxyHandler = {
+      get: function (target, prop, receiver) {
+        const promise = Reflect.get(...arguments);
+        return function() {
+          return promise(...arguments).catch((error) => {
+            Sentry.captureException(error, {
+              contexts: {
+                tumblr: { response: JSON.stringify(error.body, null, 2) },
+              },
+            });
+            throw error;
+          });
+        };
+      },
+    };
+    return new Proxy(client, proxyHandler);
   }
 
   /**
