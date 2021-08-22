@@ -2,19 +2,18 @@ require('dotenv').config();
 
 const path = require('path');
 const webpack = require('webpack');
-const findCacheDir = require('find-cache-dir');
+// const findCacheDir = require('find-cache-dir');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const HappyPack = require('happypack');
-/* eslint-disable new-cap */
-const happyThreadPool = HappyPack.ThreadPool({ size: 8 });
+const isDocker = require('is-docker');
 
 const PROD = process.env.NODE_ENV === 'production';
+const DOCKER = isDocker();
 
 const paths = {
   appBuild: path.resolve(__dirname, './build'),
@@ -28,6 +27,11 @@ const paths = {
 const config = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
+  watchOptions: {
+    ignored: /node_modules/,
+    aggregateTimeout: 300,
+    poll: 500
+  },
   entry: {
     client: path.join(paths.appSrc, 'client.js')
   },
@@ -45,85 +49,34 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        enforce: 'pre',
-        exclude: [/node_modules/],
-        include: [paths.appSrc],
-        use: ['happypack/loader?id=eslint'],
-      },
-      {
         test: /\.jsx?$/,
         include: [paths.appSrc],
-        use: ['happypack/loader?id=babel'],
+        use: [{
+          loader: 'babel-loader',
+          // query: {
+          //   cacheDirectory: findCacheDir({
+          //     name: 'tagreplacer-babel-cache',
+          //   }),
+          // },
+        }],
       },
       {
         test: /\.scss$/,
         exclude: /node_modules/,
-        use: (() => {
-          const loaders = ['happypack/loader?id=sass'];
-          if (PROD) {
-            loaders.unshift(MiniCssExtractPlugin.loader);
-          }
-          return loaders;
-        })(),
-      },
-      {
-        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
-        include: [paths.appSrc],
-        loader: 'file-loader',
-      },
-      {
-        test: /\.md/,
-        include: [paths.appSrc],
-        loader: 'raw-loader',
-      },
-    ],
-  },
-  optimization: {
-    namedModules: true,
-    concatenateModules: true,
-  },
-  plugins: [
-    new HappyPack({
-      id: 'babel',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
-          loader: 'babel-loader',
-          query: {
-            cacheDirectory: findCacheDir({
-              name: 'tagreplacer-happypack-cache',
-            }),
-          },
-        },
-      ],
-    }),
-    new HappyPack({
-      id: 'eslint',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: [
-        {
-          loader: 'eslint-loader',
-          options: {
-            configFile: path.join(__dirname, 'eslint.js'),
-            useEslintrc: false,
-            cache: false,
-            formatter: require('eslint-formatter-pretty'),
-          },
-        },
-      ],
-    }),
-    new HappyPack({
-      id: 'sass',
-      threadPool: happyThreadPool,
-      verbose: false,
-      debug: false,
-      loaders: (() => {
-        const loaders = [
+        use: [
+          (() => {
+            if (PROD) {
+              return MiniCssExtractPlugin.loader;
+            } else {
+              return {
+                loader: 'style-loader',
+                options: {
+                  sourceMap: true,
+                  singleton: false,
+                },
+              };
+            }
+          })(),
           {
             loader: 'css-loader',
             options: {
@@ -154,19 +107,25 @@ const config = {
               outputStyle: PROD ? 'compressed' : 'expanded',
             },
           },
-        ];
-        if (!PROD) {
-          loaders.unshift({
-            loader: 'style-loader',
-            options: {
-              sourceMap: true,
-              singleton: false,
-            },
-          });
-        }
-        return loaders;
-      })(),
-    }),
+        ],
+      },
+      {
+        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
+        include: [paths.appSrc],
+        loader: 'file-loader',
+      },
+      {
+        test: /\.md/,
+        include: [paths.appSrc],
+        loader: 'raw-loader',
+      },
+    ],
+  },
+  optimization: {
+    namedModules: true,
+    concatenateModules: true,
+  },
+  plugins: [
     new HtmlWebpackPlugin({
       inject: true,
       template: paths.appHtml,
@@ -186,18 +145,44 @@ const config = {
     }),
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
     new CaseSensitivePathsPlugin(),
-    new SimpleProgressWebpackPlugin({
-      format: 'compact',
-    }),
     new FriendlyErrorsWebpackPlugin(),
     new CleanWebpackPlugin([paths.appBuild])
   ]
 };
 
-if (process.env.NODE_ENV === 'production') {
+if (DOCKER && PROD) {
+
+  // config.stats = {
+  //   errors: true,
+  //   errorDetails: true,
+  //   logging: 'error',
+  //   loggingTrace: true,
+  // };
+  // config.performance = {
+  //   hints: false
+  // };
+
+} else {
+
+  config.plugins.push(new SimpleProgressWebpackPlugin({
+    format: (DOCKER || PROD) ? 'expanded' : 'compact',
+  }));
+
+}
+
+if (PROD) {
+
   config.mode = 'production';
   config.devtool = 'source-map';
   config.optimization = {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+      })
+    ],
     splitChunks: {
       cacheGroups: {
         commons: {
@@ -210,25 +195,29 @@ if (process.env.NODE_ENV === 'production') {
   };
 
   config.plugins.push(
-    new UglifyJsPlugin({
-      sourceMap: true,
-      parallel: true,
-      uglifyOptions: {
-        // React doesn't support IE8
-        ie8: false,
-        ecma: 7,
-        warnings: true,
-        output: {
-          comments: false,
-        },
-      },
-    })
-  );
-  config.plugins.push(
     new MiniCssExtractPlugin({
       filename: '[name].[hash:8].css',
     })
   );
+
+} else {
+
+  config.module.rules.unshift({
+    test: /\.js$/,
+    enforce: 'pre',
+    exclude: [/node_modules/],
+    include: [paths.appSrc],
+    use: [{
+      loader: 'eslint-loader',
+      options: {
+        configFile: path.join(__dirname, 'eslint.js'),
+        useEslintrc: false,
+        cache: false,
+        formatter: require('eslint-formatter-pretty'),
+      },
+    }],
+  });
+
 }
 
 module.exports = config;

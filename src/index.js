@@ -5,9 +5,8 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const Grant = require('grant-express');
 const Sentry = require('@sentry/node');
+const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
-const memwatch = require('@airbnb/node-memwatch');
-const heapdump = require('heapdump');
 
 const client = require('./server/redis');
 const { webRouter, apiRouter } = require('./server/router');
@@ -17,14 +16,25 @@ const logger = require('./server/logger');
 const app = express();
 
 if (process.env.SENTRY_DSN) {
-  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Tracing.Integrations.Express({
+        router: apiRouter,
+      }),
+    ],
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  });
   app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
 }
 
 const grant = new Grant({
   server: {
     protocol: process.env.PROTOCOL,
-    host: process.env.HOSTNAME,
+    host: process.env.HOST_HOSTNAME,
     callback: '/callback',
     transport: 'session',
   },
@@ -88,18 +98,4 @@ app.use((error, req, res, next) => {
 // listen
 app.listen(process.env.PORT, () => {
   logger.info('express server started', { port: process.env.PORT });
-});
-
-// snapshot as memory grows
-memwatch.on('leak', info => {
-  logger.warning('memwatch: Memory leak detected', {
-    leak: info,
-  });
-  heapdump.writeSnapshot((err, filename) => {
-    if (err) {
-      logger.error(err);
-    } else {
-      logger.warning(`Wrote snapshot: ${filename}`);
-    }
-  });
 });
