@@ -111,7 +111,6 @@ class Replacer extends Component {
       map('length'),
       sum,
     ])(replaced);
-    console.log({totalReplaced})
 
     if (totalReplaced === 0) return;
 
