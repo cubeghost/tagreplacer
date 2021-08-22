@@ -162,7 +162,7 @@ class Replacer extends Component {
           </div>
         )}
 
-        <div className="form">
+        <div className="window form">
           <Options />
 
           <form className={classNames('blog', { disabled: disableBlog })}>
@@ -213,7 +213,7 @@ class Replacer extends Component {
           </form>
         </div>
 
-        <div className="result">
+        <div className="window result">
           {foundPosts && (
             <div>
               {this.renderReplaced()}

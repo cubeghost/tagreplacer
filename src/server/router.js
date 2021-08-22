@@ -22,6 +22,7 @@ const render = (req, res) => {
 // TODO better routing?
 webRouter.get('/', render);
 webRouter.get('/help', render);
+webRouter.get('/privacy', render);
 
 // api router
 // prefixed with '/api'

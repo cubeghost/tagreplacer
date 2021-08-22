@@ -8,6 +8,7 @@ import { getUser } from './state/actions';
 import Home from './home';
 import Replacer from './replacer';
 import Help from './help';
+import Privacy from './privacy';
 
 
 const mapStateToProps = state => ({
@@ -67,6 +68,7 @@ class App extends Component {
           {this.renderErrors()}
 
           <Route path="/help" component={Help} />
+          <Route path="/privacy" component={Privacy} />
 
           <Route
             exact
@@ -86,6 +88,7 @@ class App extends Component {
             by <a href="https://cubegho.st/">alex</a>
           </p>
           <nav>
+            <Link to="/privacy">privacy</Link>
             <a href="https://github.com/cubeghost/tagreplacer">github</a>
             <a href="https://tagreplacer.tumblr.com">changelog</a>
           </nav>

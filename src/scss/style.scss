@@ -133,7 +133,7 @@ header, footer {
   margin-bottom:2em;
 }
 
-@mixin window() {
+.window {
   position:relative;
   padding:3em 2em 2em;
   background-color:$background;
@@ -156,9 +156,9 @@ header, footer {
 }
 
 
-.help {
-  @include window();
+.markdown {
   font-size:18px;
+  line-height: 1.25;
 
   h2 {
     font-size:24px;
@@ -192,16 +192,21 @@ header, footer {
   pre {
     background:rgba(0, 0, 0, 0.05);
     padding:14px;
+  }
+
+  code {
     font-size:14px;
     font-family:$font-monospace;
   }
+
+  p > code {
+    background:rgba(0, 0, 0, 0.05);
+  }
+
+  em {
+    font-style: italic;
+  }
 }
-
-
-.form {
-  @include window();
-}
-
 
 .options {
 
@@ -240,7 +245,6 @@ header, footer {
 
 
 .result {
-  @include window();
 
   &:empty {
     display:none;
@@ -296,7 +300,6 @@ header, footer {
   margin: 0 auto;
   text-align: right;
 }
-
 
 
 .error {

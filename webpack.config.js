@@ -202,7 +202,7 @@ if (PROD) {
 
 } else {
 
-  config.rules.unshift({
+  config.module.rules.unshift({
     test: /\.js$/,
     enforce: 'pre',
     exclude: [/node_modules/],
