@@ -164,7 +164,7 @@ class TumblrClient {
             tag,
             method,
             offset: offset + POST_LIMIT,
-            results: appendedResults
+            results: appendedResults // is passing this around recursively causing the memory leak?
           });
         } else {
           return appendedResults;

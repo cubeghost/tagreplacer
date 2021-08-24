@@ -15,9 +15,10 @@ const mapDispatchToProps = dispatch => ({
   setFormValue: select => dispatch(setFormValue('blog', select.value)),
 });
 
-const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
+const BlogSelect = ({ id, blogs, value, disabled, setFormValue }) => {
   return (
     <Select
+      id={id}
       value={{ value: value, label: value }}
       options={blogs.map(blog => ({
         label: blog.name,

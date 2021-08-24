@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parser: 'babel-eslint',
-  plugins: ['jsx-a11y', 'react'],
+  plugins: ['jsx-a11y', 'react', 'react-hooks'],
 
   env: {
     browser: true,
@@ -29,6 +29,12 @@ module.exports = {
       },
     },
   },
+
+  extends: [
+    'plugin:react/recommended',
+    'plugin:jsx-a11y/recommended',
+    'plugin:react-hooks/recommended'
+  ],
 
   rules: {
     // http://eslint.org/docs/rules/

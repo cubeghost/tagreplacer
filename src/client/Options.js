@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import { setOption } from './state/actions';
 
-import Checkbox from './components/checkboxInput';
+import Checkbox from './components/CheckboxInput';
 
 // google material icon 'tune'
 const optionsIcon = (

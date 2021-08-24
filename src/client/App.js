@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 
 import { getUser } from './state/actions';
 
-import Home from './home';
-import Replacer from './replacer';
-import Help from './help';
-import Privacy from './privacy';
+import Home from './Home';
+import Replacer from './Replacer';
+import Help from './Help';
+import Privacy from './Privacy';
 
 
 const mapStateToProps = state => ({

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import Post from './post';
+import Post from './Post';
 
 const mapStateToProps = (state, ownProps) => ({
   find: state.form.find,
