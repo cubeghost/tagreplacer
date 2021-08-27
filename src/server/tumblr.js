@@ -84,6 +84,7 @@ class TumblrClient {
    * @typedef {Object} Method
    * @property {string} key           key to use in results object
    * @property {string} clientMethod  tumblr.js client method name
+   * @property {string} nextParam     pagination key found in _links.next.query_params
    */
 
   /**
@@ -96,6 +97,7 @@ class TumblrClient {
         // https://www.tumblr.com/docs/en/api/v2#posts
         key: 'posts',
         clientMethod: 'blogPosts',
+        nextParam: 'page_number',
       }
     ];
 
@@ -104,6 +106,7 @@ class TumblrClient {
         // https://www.tumblr.com/docs/en/api/v2#blog-queue
         key: 'queued',
         clientMethod: 'blogQueue',
+        nextParam: 'offset',
       });
     }
 
@@ -112,6 +115,7 @@ class TumblrClient {
       methods.push({
         key: 'drafts',
         clientMethod: 'blogDrafts',
+        nextParam: 'before_id',
       });
     }
 
@@ -137,10 +141,9 @@ class TumblrClient {
    * @param  {boolean} [retry=false]  whether this attempt is a retry
    * @return {Promise<Object[]>}      promise resolving an array of posts
    */
-  findPosts({ tag, method, offset = 0, results = [], params = {}, retry = false }) {
+  findPosts({ tag, method, results = [], params = {}, retry = false }) {
     return this.client[method.clientMethod](this.blog, _.assign({
       tag: tag,
-      offset: offset,
       limit: POST_LIMIT,
       filter: 'text',
     }, params)).then(response => {
@@ -158,40 +161,20 @@ class TumblrClient {
       }
       const appendedResults = results.concat(posts);
 
-      if (response.total_posts) {
-        if (response.total_posts > POST_LIMIT && offset < response.total_posts) {
-          return this.findPosts({
-            tag,
-            method,
-            offset: offset + POST_LIMIT,
-            results: appendedResults
-          });
-        } else {
-          return appendedResults;
-        }
+      if (_.get(response, '_links.next')) {
+        const next = response._links.next;
+        const nextParams = {
+          [method.nextParam]: next.query_params[method.nextParam],
+        };
+
+        return this.findPosts({
+          tag,
+          method,
+          results: appendedResults,
+          params: nextParams,
+        });
       } else {
-        if (response.posts.length > 0) {
-          if (method.key === 'drafts') {
-            // i hate this
-            var before_id = response.posts[response.posts.length - 1].id;
-            return this.findPosts({
-              tag,
-              method,
-              offset: offset + POST_LIMIT,
-              results: appendedResults,
-              params: { before_id: before_id },
-            });
-          } else {
-            return this.findPosts({
-              tag,
-              method,
-              offset: offset + POST_LIMIT,
-              results: appendedResults,
-            });
-          }
-        } else {
-          return appendedResults;
-        }
+        return appendedResults;
       }
     }).catch(error => {
       // retry once
@@ -199,7 +182,6 @@ class TumblrClient {
         return this.findPosts({
           tag,
           method,
-          offset,
           retry: true
         });
       } else {
