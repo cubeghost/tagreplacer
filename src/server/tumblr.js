@@ -28,6 +28,12 @@ const EMPTY_RESPONSE = {
   drafts: [],
 };
 
+const METHODS = {
+  posts: 'posts',
+  queued: 'queued',
+  drafts: 'drafts',
+};
+
 
 class TumblrClient {
   /**
@@ -49,6 +55,7 @@ class TumblrClient {
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
+    this._results = {};
   }
 
   /**
@@ -95,7 +102,7 @@ class TumblrClient {
     var methods = [
       {
         // https://www.tumblr.com/docs/en/api/v2#posts
-        key: 'posts',
+        key: METHODS.posts,
         clientMethod: 'blogPosts',
         nextParam: 'page_number',
       }
@@ -104,7 +111,7 @@ class TumblrClient {
     if (this.options.includeQueue) {
       methods.push({
         // https://www.tumblr.com/docs/en/api/v2#blog-queue
-        key: 'queued',
+        key: METHODS.queued,
         clientMethod: 'blogQueue',
         nextParam: 'offset',
       });
@@ -113,7 +120,7 @@ class TumblrClient {
     if (this.options.includeDrafts) {
       // https://www.tumblr.com/docs/en/api/v2#blog-drafts
       methods.push({
-        key: 'drafts',
+        key: METHODS.drafts,
         clientMethod: 'blogDrafts',
         nextParam: 'before_id',
       });
@@ -135,13 +142,19 @@ class TumblrClient {
    * find all posts with a tag and method
    * @param  {string} tag             tag to find
    * @param  {Method} method          method to use
-   * @param  {Number} [offset=0]      post offset
-   * @param  {Array}  [results=[]]    previous results
    * @param  {Object} [params={}]     additional parameters
    * @param  {boolean} [retry=false]  whether this attempt is a retry
    * @return {Promise<Object[]>}      promise resolving an array of posts
    */
-  findPosts({ tag, method, results = [], params = {}, retry = false }) {
+  findPosts({ tag, method, params = {}, retry = false }) {
+    if (!_.get(this._results, method.key)) {
+      /*
+        TODO: pagination client should be separate from 'tag replacing' client so
+        this can be naive. or just use a while loop instead of recursion. lmao
+       */
+      this._results[method.key] = [];
+    }
+
     return this.client[method.clientMethod](this.blog, _.assign({
       tag: tag,
       limit: POST_LIMIT,
@@ -151,15 +164,16 @@ class TumblrClient {
       let posts;
       if (this.options.caseSensitive) {
         posts = _.filter(response.posts, post => _.includes(post.tags, tag));
-      } else if (method.key !== 'posts') {
-        // draft and queue methods don't actually support the tag param 🙄
+      } else if (method.key !== METHODS.posts) {
+        // draft and queue methods don't support the tag param 🙄
         posts = _.filter(response.posts, post => (
           _.includes(post.tags.map(t => t.toLowerCase()), tag.toLowerCase())
         ));
       } else {
         posts = response.posts;
       }
-      const appendedResults = results.concat(posts);
+
+      this._results[method.key].push(...posts);
 
       if (_.get(response, '_links.next')) {
         const next = response._links.next;
@@ -170,11 +184,10 @@ class TumblrClient {
         return this.findPosts({
           tag,
           method,
-          results: appendedResults,
           params: nextParams,
         });
       } else {
-        return appendedResults;
+        return this._results[method.key];
       }
     }).catch(error => {
       // retry once
