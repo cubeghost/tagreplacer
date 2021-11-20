@@ -40,7 +40,7 @@ class App extends Component {
 
   renderErrors() {
     return this.props.errors.map((error, i) => {
-      if (error.statusText === 'No user session') return null;
+      if (error.body.message === 'No user session') return null;
       return (
         <div className="error" key={`error-${i}`}>
           {JSON.stringify(error)}
