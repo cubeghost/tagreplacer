@@ -1,3 +1,5 @@
+/* eslint-disable new-cap */
+
 require('dotenv').config();
 
 const express = require('express');
@@ -9,7 +11,6 @@ const logger = require('./logger');
 
 
 // web router
-/* eslint-disable new-cap */
 const webRouter = express.Router();
 const buildDir = path.resolve('build');
 
@@ -19,7 +20,7 @@ const render = (req, res) => {
   res.sendFile(path.join(buildDir, '/index.html'));
 };
 
-// TODO better routing?
+// TODO smarter routing?
 webRouter.get('/', render);
 webRouter.get('/help', render);
 webRouter.get('/privacy', render);
@@ -31,7 +32,7 @@ const apiRouter = express.Router();
 apiRouter.use(bodyParser.json());
 
 apiRouter.use(function(req, res, next) {
-  if (req.session && req.session.grant && req.session.grant.response) {
+  if (req.session && req.session.grant && req.session.grant.response && !req.session.grant.response.error) {
     next();
   } else {
     res.statusMessage = 'No user session';

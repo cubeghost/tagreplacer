@@ -32,17 +32,17 @@ if (process.env.SENTRY_DSN) {
 }
 
 const grant = new Grant({
-  server: {
+  defaults: {
     protocol: process.env.PROTOCOL,
     host: process.env.HOST_HOSTNAME,
     callback: '/callback',
     transport: 'session',
+    state: true,
   },
   tumblr: {
-    request_url: 'https://www.tumblr.com/oauth/request_token',
-    authorize_url: 'https://www.tumblr.com/oauth/authorize',
-    access_url: 'https://www.tumblr.com/oauth/access_token',
-    oauth: 1,
+    authorize_url: 'https://www.tumblr.com/oauth2/authorize',
+    access_url: 'https://api.tumblr.com/v2/oauth2/token',
+    oauth: 2,
     key: process.env.TUMBLR_API_KEY,
     secret: process.env.TUMBLR_API_SECRET,
   },

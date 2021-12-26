@@ -7747,7 +7747,7 @@ tty-browserify@0.0.0:
 
 "tumblr.js@https://github.com/cubeghost/tumblr.js":
   version "3.0.0"
-  resolved "https://github.com/cubeghost/tumblr.js#89b49fad4b64656f6abcb8df9bc3a1096ea4138d"
+  resolved "https://github.com/cubeghost/tumblr.js#7eab34bc4bb793ec43ada76801ce33d73756b36f"
   dependencies:
     lodash "^4.17.11"
     query-string "^6.1.0"

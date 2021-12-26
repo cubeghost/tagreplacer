@@ -47,8 +47,8 @@ class TumblrClient {
       credentials: {
         consumer_key: process.env.TUMBLR_API_KEY,
         consumer_secret: process.env.TUMBLR_API_SECRET,
-        token: token,
-        token_secret: secret
+        // this is not officially supported
+        bearer: token,
       },
       returnPromises: true
     }));
