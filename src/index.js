@@ -53,7 +53,9 @@ app.use(
   session({
     store: new RedisStore({
       client: client,
+      disableTouch: true,
     }),
+    name: 'tagreplacer_session',
     resave: false,
     secure: process.env.PROTOCOL === 'https',
     saveUninitialized: false,
@@ -76,7 +78,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/callback', (req, res) => res.redirect('/'));
+app.get('/callback', (req, res) => {
+  if (req.session.grant.response && !req.session.grant.response.error) {
+    req.session.cookie.maxAge = req.session.grant.response.raw.expires_in * 1000;
+    req.session.save(() => res.redirect('/'));
+  } else {
+    res.redirect('/');
+  }
+});
 
 app.get('/disconnect', (req, res) => {
   req.session.destroy(err => res.redirect('/'));
