@@ -8,9 +8,10 @@ import { actionTypes } from './actions';
 tumblr: {
   username: undefined,
   blogs: [],
-  posts: [],
-  queued: [],
-  drafts: [],
+  find: [],
+  posts: undefined,
+  queued: undefined,
+  drafts: undefined,
 },
 form: {
   blog: undefined,
@@ -34,10 +35,12 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
       });
     case actionTypes.TUMBLR_FIND_TAGS:
       return assign({}, state, {
-        ...action.response
+        ...action.response,
+        find: action.meta.body.find,
       });
     case actionTypes.TUMBLR_CLEAR_POSTS:
       return assign({}, state, {
+        find: initialState.tumblr.find,
         posts: initialState.tumblr.posts,
         queued: initialState.tumblr.queued,
         drafts: initialState.tumblr.drafts

@@ -2,9 +2,10 @@ const initialState = {
   tumblr: {
     username: undefined,
     blogs: [],
-    posts: [],
-    queued: [],
-    drafts: [],
+    find: [],
+    posts: undefined,
+    queued: undefined,
+    drafts: undefined,
   },
   form: {
     blog: undefined,

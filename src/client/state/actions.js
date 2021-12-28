@@ -87,7 +87,10 @@ const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
     .then(response => (
       dispatch({
         type: actionType,
-        response
+        response,
+        meta: {
+          body,
+        },
       })
     ))
     .then(response => {

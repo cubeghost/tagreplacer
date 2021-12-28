@@ -9,6 +9,7 @@ import Results from './components/results';
 import TagInput from './components/tagInput';
 import BlogSelect from './components/blogSelect';
 
+import { formatTags } from './util';
 import { find, replace, reset } from './state/actions';
 
 const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
@@ -20,9 +21,9 @@ const mapStateToProps = state => ({
   find: state.form.find,
   replace: state.form.replace,
   foundPosts: (
-    state.tumblr.posts.length > 0 ||
-    state.tumblr.queued.length > 0 ||
-    state.tumblr.drafts.length > 0
+    state.tumblr.posts?.length > 0 ||
+    state.tumblr.queued?.length > 0 ||
+    state.tumblr.drafts?.length > 0
   ),
   loading: state.loading,
 });
@@ -40,9 +41,6 @@ class Replacer extends Component {
     this.state = {
       loading: false,
       error: undefined,
-      posts: [],
-      queued: [],
-      drafts: [],
       replaced: [],
     };
 
@@ -55,14 +53,6 @@ class Replacer extends Component {
 
   mapForSelect(value) {
     return { label: value, value: value };
-  }
-
-  formatTags(tags) {
-    if (tags.length === 0) {
-      return 'tag';
-    } else {
-      return '#' + tags.join(', #');
-    }
   }
 
   find(event) {
@@ -117,14 +107,14 @@ class Replacer extends Component {
     if (replace.length === 0 && options.allowDelete) {
       return (
         <h2>
-          deleted {this.formatTags(find)} for {totalReplaced} posts
+          deleted {formatTags(find)} for {totalReplaced} posts
         </h2>
       );
     } else {
       return (
         <h2>
-          replaced {this.formatTags(find)} with&nbsp;
-          {this.formatTags(replace)} for&nbsp;
+          replaced {formatTags(find)} with&nbsp;
+          {formatTags(replace)} for&nbsp;
           {totalReplaced} posts
         </h2>
       );
@@ -191,7 +181,7 @@ class Replacer extends Component {
           <form className={classNames('replace', { disabled: disableReplace })} onSubmit={this.replace}>
             <label htmlFor="replace">
               {deleteMode ? 'delete' : 'replace'}&nbsp;
-              {this.formatTags(this.props.find)}&nbsp;
+              {formatTags(this.props.find)}&nbsp;
               {deleteMode ? 'or replace with' : 'with'}
             </label>
             <TagInput
