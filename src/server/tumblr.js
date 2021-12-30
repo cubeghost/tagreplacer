@@ -4,6 +4,7 @@ const _ = require('lodash');
 const tumblr = require('tumblr.js');
 const Sentry = require('@sentry/node');
 
+const Tags = require('./tags');
 const logger = require('./logger');
 
 const POST_LIMIT = 20;
@@ -52,6 +53,9 @@ class TumblrClient {
       },
       returnPromises: true
     }));
+    
+    const tags = new Tags(options);
+    this.replaceTags = tags.replace;
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
@@ -201,44 +205,6 @@ class TumblrClient {
         throw error;
       }
     });
-  }
-
-  /**
-   * find and replace in array of tags
-   * @param  {string[]} tags    post tags
-   * @param  {string[]} find    tags to find
-   * @param  {string[]} replace replacement tags
-   * @return {string[]}         replaced tags
-   */
-  replaceTags({ tags, find, replace }) {
-    /* eslint-disable prefer-const */
-    let replaceableTags = _.concat([], replace);
-    let result = _.concat([], tags);
-
-    // loop through find to get matches
-    _.each(find, findTag => {
-      const matchIndex = _.findIndex(result, tag => {
-        if (this.options.caseSensitive) {
-          return tag === findTag;
-        } else {
-          return (
-            (tag && tag.toLowerCase()) ===
-            (findTag && findTag.toLowerCase())
-          );
-        }
-      });
-
-      if (matchIndex > -1) {
-        const replaceTag = replaceableTags.shift();
-        result.splice(matchIndex, 1, replaceTag);
-      }
-    });
-
-    // if anything left over to replace, append to end
-    result = _.concat(result, replaceableTags);
-
-    result = _.compact(result);
-    return result;
   }
 
   /**
