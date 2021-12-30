@@ -15,7 +15,8 @@
     "watch:client": "webpack --watch",
     "build": "webpack",
     "start": "node src/index.js",
-    "test": "mocha --watch --recursive \"./src/**/tests/*.js\""
+    "test": "mocha \"./src/**/tests/*.js\"",
+    "watch:test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "engines": {
     "node": "14.x"
