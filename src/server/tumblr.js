@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const EventEmitter = require('events');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
 const Sentry = require('@sentry/node');
@@ -8,6 +9,7 @@ const Tags = require('./tags');
 const logger = require('./logger');
 
 const POST_LIMIT = 20;
+const REPLACE_SOFT_LIMIT = 500 - POST_LIMIT;
 
 /**
  * @typedef {Object} Options
@@ -23,18 +25,48 @@ const DEFAULT_OPTIONS = {
   allowDelete: false,
 };
 
-const EMPTY_RESPONSE = {
-  posts: [],
-  queued: [],
-  drafts: [],
-};
+const sleep = ms => new Promise(resolve => {
+  setTimeout(resolve, ms);
+});
 
+/**
+ * @typedef MethodName
+ * @property {string} POSTS posts
+ * @property {string} QUEUED queued
+ * @property {string} DRAFTS drafts
+ */
 const METHODS = {
-  posts: 'posts',
-  queued: 'queued',
-  drafts: 'drafts',
+  POSTS: 'posts',
+  QUEUED: 'queued',
+  DRAFTS: 'drafts',
 };
 
+/**
+ * @typedef {Object} Method
+ * @property {MethodName} key
+ * @property {string}     clientMethod  tumblr.js client method name
+ * @property {string}     nextParam     pagination key found in _links.next.query_params
+ */
+const METHODS_CONFIG = {
+  // https://www.tumblr.com/docs/en/api/v2#posts
+  [METHODS.POSTS]: {
+    key: METHODS.POSTS,
+    clientMethod: 'blogPosts',
+    nextParam: 'page_number',
+  },
+  // https://www.tumblr.com/docs/en/api/v2#blog-queue
+  [METHODS.QUEUED]: {
+    key: METHODS.QUEUED,
+    clientMethod: 'blogQueue',
+    nextParam: 'offset',
+  },
+  // https://www.tumblr.com/docs/en/api/v2#blog-drafts
+  [METHODS.DRAFTS]: {
+    key: METHODS.DRAFTS,
+    clientMethod: 'blogDrafts',
+    nextParam: 'before_id',
+  }
+};
 
 class TumblrClient {
   /**
@@ -59,8 +91,9 @@ class TumblrClient {
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
-    this._results = {};
   }
+
+  static methods = METHODS_CONFIG;
 
   /**
    * wrap default logger with blog and options context
@@ -91,49 +124,7 @@ class TumblrClient {
     return new Proxy(client, proxyHandler);
   }
 
-  /**
-   * @typedef {Object} Method
-   * @property {string} key           key to use in results object
-   * @property {string} clientMethod  tumblr.js client method name
-   * @property {string} nextParam     pagination key found in _links.next.query_params
-   */
-
-  /**
-   * array of enabled API methods for fetching posts
-   * @return {Method[]}  array of method definitions
-   */
-  get methods() {
-    var methods = [
-      {
-        // https://www.tumblr.com/docs/en/api/v2#posts
-        key: METHODS.posts,
-        clientMethod: 'blogPosts',
-        nextParam: 'page_number',
-      }
-    ];
-
-    if (this.options.includeQueue) {
-      methods.push({
-        // https://www.tumblr.com/docs/en/api/v2#blog-queue
-        key: METHODS.queued,
-        clientMethod: 'blogQueue',
-        nextParam: 'offset',
-      });
-    }
-
-    if (this.options.includeDrafts) {
-      // https://www.tumblr.com/docs/en/api/v2#blog-drafts
-      methods.push({
-        key: METHODS.drafts,
-        clientMethod: 'blogDrafts',
-        nextParam: 'before_id',
-      });
-    }
-
-    return methods;
-  }
-
-  /**
+   /**
    * get authenticated user's info
    * https://www.tumblr.com/docs/en/api/v2#user-methods
    * @return {Promise<object>} API response
@@ -144,131 +135,125 @@ class TumblrClient {
 
   /**
    * find all posts with a tag and method
-   * @param  {string} tag             tag to find
+   * @param  {String} tag             tag to find
    * @param  {Method} method          method to use
-   * @param  {Object} [params={}]     additional parameters
-   * @param  {boolean} [retry=false]  whether this attempt is a retry
-   * @return {Promise<Object[]>}      promise resolving an array of posts
+   * @return {EventEmitter}
    */
-  findPosts({ tag, method, params = {}, retry = false }) {
-    if (!_.get(this._results, method.key)) {
-      /*
-        TODO: pagination client should be separate from 'tag replacing' client so
-        this can be naive. or just use a while loop instead of recursion. lmao
-       */
-      this._results[method.key] = [];
-    }
+  findPosts({ tag, method }) {
+    const results = [];
+    const emitter = new EventEmitter();
 
-    return this.client[method.clientMethod](this.blog, _.assign({
-      tag: tag,
-      limit: POST_LIMIT,
-      filter: 'text',
-    }, params)).then(response => {
+    (async () => {
+      let next = undefined;
+      let retry = false;
 
-      let posts;
-      if (this.options.caseSensitive) {
-        posts = _.filter(response.posts, post => _.includes(post.tags, tag));
-      } else if (method.key !== METHODS.posts) {
-        // draft and queue methods don't support the tag param 🙄
-        posts = _.filter(response.posts, post => (
-          _.includes(post.tags.map(t => t.toLowerCase()), tag.toLowerCase())
-        ));
-      } else {
-        posts = response.posts;
+      while (next !== false) {
+        try {
+          const response = await this.client[method.clientMethod](this.blog, {
+            tag: tag,
+            limit: POST_LIMIT,
+            filter: 'text',
+            [method.nextParam]: next,
+          });
+
+          let posts;
+          if (this.options.caseSensitive) {
+            posts = _.filter(response.posts, post => _.includes(post.tags, tag));
+          } else if (method.key !== METHODS.posts) {
+            // draft and queue methods don't support the tag param 🙄
+            posts = _.filter(response.posts, post => (
+              _.includes(post.tags.map(t => t.toLowerCase()), tag.toLowerCase())
+            ));
+          } else {
+            posts = response.posts;
+          }
+
+          results.push(...posts);
+          emitter.emit('data', posts);
+
+          if (_.get(response, '_links.next')) {
+            next = response._links.next.query_params[method.nextParam];
+            await sleep(500);
+          } else {
+            next = false;
+            emitter.emit('end', results);
+          }
+        } catch (error) {
+          // retry once
+          if (!retry) {
+            retry = true;
+            await sleep(500);
+          } else {
+            emitter.emit('error', error);
+            break;
+          }
+        }
       }
+    })();
 
-      this._results[method.key].push(...posts);
-
-      if (_.get(response, '_links.next')) {
-        const next = response._links.next;
-        const nextParams = {
-          [method.nextParam]: next.query_params[method.nextParam],
-        };
-
-        return this.findPosts({
-          tag,
-          method,
-          params: nextParams,
-        });
-      } else {
-        return this._results[method.key];
-      }
-    }).catch(error => {
-      // retry once
-      if (!retry) {
-        return this.findPosts({
-          tag,
-          method,
-          retry: true
-        });
-      } else {
-        throw error;
-      }
-    });
+    return emitter;
   }
 
   /**
    * [findPostsWithTags description]
-   * @param  {[type]} input [description]
-   * @return {[type]}       [description]
+   * @param  {MethodName}  methodName
+   * @param  {String[]}    find 
+   * @return {EventEmitter}
    */
-  findPostsWithTags(find) {
-    if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
+  findPostsWithTags(methodName, find) {
+    if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
+
+    const emitter = new EventEmitter();
 
     const tags = _.chain(find)
       .sortBy()
       .value();
     const firstTag = tags[0];
+    const method = METHODS_CONFIG[methodName];
 
-    var promises = this.methods.map(method => {
-      return this.findPosts({ tag: firstTag, method })
-        .then(posts => {
-          // if multiple tags, filter on results from first tag
-          if (tags.length > 1) {
-            return _.filter(posts, post => {
-              const sortedPostTags = _.sortBy(post.tags);
-              return _.isEqual(
-                _.intersection(sortedPostTags, tags),
-                tags
-              );
-            });
-          } else {
-            return posts;
-          }
-        })
-        .then(posts => ({
-          [method.key]: posts
-        }));
-    });
+    this.findPosts({ tag: firstTag, method })
+      .on('data', (posts) => {
+        // if multiple tags, filter on results from first tag
+        if (tags.length > 1) {
+          const postsWithAllTags = _.filter(posts, post => {
+            const sortedPostTags = _.sortBy(post.tags);
+            return _.isEqual(
+              _.intersection(sortedPostTags, tags),
+              tags
+            );
+          });
+          emitter.emit('data', postsWithAllTags);
+        } else {
+          emitter.emit('data', posts);
+        }
+      })
+      .on('error', error => (
+        emitter.emit('error', error)
+      ))
+      .on('end', posts => (
+        emitter.emit('end', posts)
+      ));
 
-    return Promise.all(promises)
-      .then(results => results.reduce((a, v) => _.assign(a, v), {}))
-      .then(results => _.assign({}, EMPTY_RESPONSE, results))
-      .then(results => {
-        this.log('find', {
-          find,
-          results: {
-            length: Object.keys(results).reduce((a, v) => a + results[v].length, 0)
-          }
-        });
-        return results;
-      });
+    return emitter;
   }
 
   /**
    * [findAndReplaceTags description]
-   * @param  {[type]} find    [description]
-   * @param  {[type]} replace [description]
-   * @return {[type]}         [description]
+   * @param  {MethodName}  methodName
+   * @param  {String[]}    find    
+   * @param  {String[]}    replace
+   * @return {EventEmitter}
    */
-  findAndReplaceTags(find, replace) {
-    if (!_.isArray(find)) return Promise.reject(`expected 'find' to be an Array, but it was ${typeof find}`);
-    if (!_.isArray(replace)) return Promise.reject(`expected 'replace' to be an Array, but it was ${typeof find}`);
+  findAndReplaceTags(methodName, find, replace) {
+    if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
+    if (!_.isArray(replace)) throw new Error(`expected 'replace' to be an Array, but it was ${typeof find}`);
 
-    return this.findPostsWithTags(find)
-      .then(results => {
-        const promises = _.chain(this.methods)
-          .flatMap(method => results[method.key])
+    const emitter = new EventEmitter();
+
+    this.findPostsWithTags(methodName, find)
+      .on('end', (posts) => {
+        const promises = posts
+          .slice(0, REPLACE_SOFT_LIMIT)
           .map(post => {
             const replacedTags = this.replaceTags({
               tags: post.tags,
@@ -278,25 +263,21 @@ class TumblrClient {
 
             return this.client.editPost(this.blog, {
               id: post.id,
-              tags: replacedTags.join(',')
+              tags: replacedTags.join(','),
+            }).then((response) => {
+              emitter.emit('data', response);
+              return response;
             });
-          })
-          .value();
-
-        return Promise.all(promises)
-        .then(replaced => {
-          this.log('replace', {
-            find,
-            replace,
-            replaced: {
-              length: replaced.length
-            }
           });
-          return results;
-        });
+
+        Promise.all(promises)
+          .then(replaced => (
+            emitter.emit('end', replaced)
+          ));
       });
+
+    return emitter;
   }
 }
-
 
 module.exports = TumblrClient;
