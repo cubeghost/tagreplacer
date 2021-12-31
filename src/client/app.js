@@ -23,6 +23,15 @@ const mapDispatchToProps = dispatch => ({
   getUser: () => dispatch(getUser()),
 });
 
+const socket = new WebSocket(process.env.WEBSOCKET_HOST);
+socket.onopen = (event) => {
+  console.log('event', event)
+  console.log('socket', socket)
+};
+socket.addEventListener('message', (event) => {
+  console.log('ws', event.data);
+});
+
 class App extends Component {
 
   componentDidMount() {

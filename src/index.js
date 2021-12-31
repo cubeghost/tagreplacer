@@ -1,19 +1,24 @@
 require('dotenv').config();
 
+const http = require('http');
 const express = require('express');
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+const Session = require('express-session');
+const RedisStore = require('connect-redis')(Session);
 const Grant = require('grant-express');
 const Sentry = require('@sentry/node');
 const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
+const WebSocket = require('ws');
 
 const client = require('./server/redis');
 const { webRouter, apiRouter } = require('./server/router');
+const webSocketHandler = require('./server/websockets');
 const logger = require('./server/logger');
 
 // setup
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -42,6 +47,7 @@ const grant = new Grant({
   tumblr: {
     authorize_url: 'https://www.tumblr.com/oauth2/authorize',
     access_url: 'https://api.tumblr.com/v2/oauth2/token',
+    origin: `${process.env.PROTOCOL}://${process.env.HOST_HOSTNAME}`,
     oauth: 2,
     scope: ['write'],
     key: process.env.TUMBLR_API_KEY,
@@ -49,19 +55,18 @@ const grant = new Grant({
   },
 });
 
-app.use(
-  session({
-    store: new RedisStore({
-      client: client,
-      disableTouch: true,
-    }),
-    name: 'tagreplacer_session',
-    resave: false,
-    secure: process.env.PROTOCOL === 'https',
-    saveUninitialized: false,
-    secret: process.env.SECRET,
-  })
-);
+const session = Session({
+  store: new RedisStore({
+    client: client,
+    disableTouch: true,
+  }),
+  name: 'tagreplacer_session',
+  resave: false,
+  secure: process.env.PROTOCOL === 'https',
+  saveUninitialized: false,
+  secret: process.env.SECRET,
+});
+app.use(session);
 
 app.use(grant);
 
@@ -91,6 +96,12 @@ app.get('/disconnect', (req, res) => {
   req.session.destroy(err => res.redirect('/'));
 });
 
+wss.on('connection', (ws, req) => (
+  session(req, {}, () => (
+    webSocketHandler(ws, req)
+  ))
+));
+
 if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
@@ -106,6 +117,6 @@ app.use((error, req, res, next) => {
 });
 
 // listen
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   logger.info('express server started', { port: process.env.PORT });
 });

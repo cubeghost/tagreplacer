@@ -144,6 +144,9 @@ const config = {
       },
     }),
     new webpack.EnvironmentPlugin(['NODE_ENV', 'TESTING_BLOG', 'SENTRY_DSN']),
+    new webpack.DefinePlugin({
+      'process.env.WEBSOCKET_HOST': `'${process.env.PROTOCOL.replace('http', 'ws')}://${process.env.HOST_HOSTNAME}'`,
+    }),
     new CaseSensitivePathsPlugin(),
     new FriendlyErrorsWebpackPlugin(),
     new CleanWebpackPlugin([paths.appBuild])
