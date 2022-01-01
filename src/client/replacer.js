@@ -5,9 +5,9 @@ import classNames from 'classnames';
 import { flow, values, map, sum } from 'lodash/fp';
 
 import Options from './options';
-import Results from './components/results';
+import Results from './components/Results';
 import TagInput from './components/TagInput';
-import BlogSelect from './components/blogSelect';
+import BlogSelect from './components/BlogSelect';
 
 import { formatTags } from './util';
 import { find, replace, reset } from './state/actions';

@@ -1,16 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import Post from './post';
+import Post from './Post';
 import { formatTags } from '../util';
 
-const mapStateToProps = (state, ownProps) => ({
-  find: state.tumblr.find,
-  results: state.tumblr[ownProps.name]
-});
+const Results = ({ name }) => {
+  const find = useSelector(state => state.tumblr.find);
+  const results = useSelector(state => state.tumblr[name]);
 
-const Results = ({ name, find, results }) => {
   if (results) {
     const noun = name === 'queued' ? 'queued posts' : name;
 
@@ -33,4 +31,4 @@ Results.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-export default connect(mapStateToProps)(Results);
+export default React.memo(Results);

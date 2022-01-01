@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-
-const CheckboxInput = (props) => {
-  const { name, label, value, onChange } = props;
+const CheckboxInput = ({ name, label, value, onChange }) => {
   const id = `checkbox-${name}`;
 
   return (
@@ -27,4 +25,4 @@ CheckboxInput.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-export default CheckboxInput;
+export default React.memo(CheckboxInput);
