@@ -2,15 +2,13 @@ require('dotenv').config();
 
 const http = require('http');
 const express = require('express');
-const Session = require('express-session');
-const RedisStore = require('connect-redis')(Session);
 const Grant = require('grant-express');
 const Sentry = require('@sentry/node');
 const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
 const WebSocket = require('ws');
 
-const client = require('./server/redis');
+const { session } = require('./server/session');
 const { webRouter, apiRouter } = require('./server/router');
 const webSocketHandler = require('./server/websockets');
 const logger = require('./server/logger');
@@ -55,17 +53,6 @@ const grant = new Grant({
   },
 });
 
-const session = Session({
-  store: new RedisStore({
-    client: client,
-    disableTouch: true,
-  }),
-  name: 'tagreplacer_session',
-  resave: false,
-  secure: process.env.PROTOCOL === 'https',
-  saveUninitialized: false,
-  secret: process.env.SECRET,
-});
 app.use(session);
 
 app.use(grant);

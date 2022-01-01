@@ -86,8 +86,7 @@ class TumblrClient {
       returnPromises: true
     }));
     
-    const tags = new Tags(options);
-    this.replaceTags = tags.replace;
+    this.tags = new Tags(options);
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
@@ -134,107 +133,86 @@ class TumblrClient {
   }
 
   /**
-   * find all posts with a tag and method
-   * @param  {String} tag             tag to find
-   * @param  {Method} method          method to use
-   * @return {EventEmitter}
+   * @typedef Post
+   * @property id
+   * @property id_string
+   * @property post_url
+   * @property slug
+   * @property tags
+   * @property timestamp
    */
-  findPosts({ tag, method }) {
-    const results = [];
-    const emitter = new EventEmitter();
-
-    (async () => {
-      let next = undefined;
-      let retry = false;
-
-      while (next !== false) {
-        try {
-          const response = await this.client[method.clientMethod](this.blog, {
-            tag: tag,
-            limit: POST_LIMIT,
-            filter: 'text',
-            [method.nextParam]: next,
-          });
-
-          let posts;
-          if (this.options.caseSensitive) {
-            posts = _.filter(response.posts, post => _.includes(post.tags, tag));
-          } else if (method.key !== METHODS.posts) {
-            // draft and queue methods don't support the tag param 🙄
-            posts = _.filter(response.posts, post => (
-              _.includes(post.tags.map(t => t.toLowerCase()), tag.toLowerCase())
-            ));
-          } else {
-            posts = response.posts;
-          }
-
-          results.push(...posts);
-          emitter.emit('data', posts);
-
-          if (_.get(response, '_links.next')) {
-            next = response._links.next.query_params[method.nextParam];
-            await sleep(500);
-          } else {
-            next = false;
-            emitter.emit('end', results);
-          }
-        } catch (error) {
-          // retry once
-          if (!retry) {
-            retry = true;
-            await sleep(500);
-          } else {
-            emitter.emit('error', error);
-            break;
-          }
-        }
-      }
-    })();
-
-    return emitter;
-  }
 
   /**
-   * [findPostsWithTags description]
-   * @param  {MethodName}  methodName
-   * @param  {String[]}    find 
-   * @return {EventEmitter}
+   * @typedef FindResponse
+   * @property {Post[]}   posts
+   * @property {Object}   params next page params
+   * @property {boolean}  complete
    */
-  findPostsWithTags(methodName, find) {
-    if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
 
-    const emitter = new EventEmitter();
-
-    const tags = _.chain(find)
-      .sortBy()
-      .value();
-    const firstTag = tags[0];
+  /**
+   * find all posts with a tag and method
+   * @param  {Method} methodName      method to use
+   * @param  {String[]} tags          tags to find
+   * @param  {Object} params          api params
+   * @return {Promise<FindResponse>}
+   */
+  async findPostsWithTags(methodName, tags, params = {}) {
     const method = METHODS_CONFIG[methodName];
 
-    this.findPosts({ tag: firstTag, method })
-      .on('data', (posts) => {
-        // if multiple tags, filter on results from first tag
-        if (tags.length > 1) {
-          const postsWithAllTags = _.filter(posts, post => {
-            const sortedPostTags = _.sortBy(post.tags);
-            return _.isEqual(
-              _.intersection(sortedPostTags, tags),
-              tags
-            );
-          });
-          emitter.emit('data', postsWithAllTags);
-        } else {
-          emitter.emit('data', posts);
-        }
-      })
-      .on('error', error => (
-        emitter.emit('error', error)
-      ))
-      .on('end', posts => (
-        emitter.emit('end', posts)
-      ));
+    const sortedTags = _.chain(tags)
+      .sortBy()
+      .value();
+    const firstTag = sortedTags[0];
 
-    return emitter;
+    const response = await this.client[method.clientMethod](this.blog, {
+      tag: firstTag,
+      limit: POST_LIMIT,
+      filter: 'text',
+      ...params,
+    });
+
+    let posts;
+    if (method.key !== METHODS.posts) {
+      // draft and queue methods don't support the tag param 🙄
+      posts = _.filter(response.posts, post => (
+        _.includes(post.tags.map(t => t.toLowerCase()), firstTag.toLowerCase())
+      ));
+    } else {
+      posts = response.posts;
+    }
+
+    if (this.options.caseSensitive) {
+      posts = _.filter(posts, post => {
+        const sortedPostTags = _.sortBy(post.tags);
+        return _.isEqual(
+          _.intersection(sortedPostTags, tags),
+          tags
+        );
+      });
+    } else if (tags.length > 1) {
+      const lowerCaseTags = _.map(tags, t => t.toLowerCase());
+      posts = _.filter(posts, post => {
+        const sortedLowerCasePostTags = _.chain(post.tags).map(t => t.toLowerCase()).sortBy().value();
+        return _.isEqual(
+          _.intersection(sortedLowerCasePostTags, lowerCaseTags),
+          lowerCaseTags,
+        );
+      });
+    }
+
+    let returnValue = {
+      posts,
+      params: {},
+      complete: false,
+    };
+
+    if (_.get(response, '_links.next')) {
+      returnValue.params[method.nextParam] = response._links.next.query_params[method.nextParam];
+    } else {
+      returnValue.complete = true;
+    }
+
+    return returnValue;
   }
 
   /**
@@ -255,7 +233,7 @@ class TumblrClient {
         const promises = posts
           .slice(0, REPLACE_SOFT_LIMIT)
           .map(post => {
-            const replacedTags = this.replaceTags({
+            const replacedTags = this.tags.replace({
               tags: post.tags,
               find,
               replace,

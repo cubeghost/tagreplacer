@@ -5,6 +5,13 @@ class Tags {
     this.caseSensitive = options.caseSensitive || false;
     this.allowDelete = options.allowDelete || false;
   }
+
+  /**
+   * Replaces a set of tags with other tags
+   * @param {String[]} tags
+   * @param {String[]} find
+   * @param {String[]} replace 
+   */
   replace({ tags, find, replace }) {
     /* eslint-disable prefer-const */
     let replaceableTags = _.concat([], replace);
@@ -38,6 +45,31 @@ class Tags {
 
     result = _.compact(result);
     return result;
+  }
+
+  filterPosts({ find, posts }) {
+    const tags = _.sortBy(find);
+
+    if (this.options.caseSensitive) {
+      return _.filter(posts, post => {
+        const sortedPostTags = _.sortBy(post.tags);
+        return _.isEqual(
+          _.intersection(sortedPostTags, tags),
+          tags
+        );
+      });
+    } else if (tags.length > 1) {
+      const lowerCaseTags = _.map(tags, t => t.toLowerCase());
+      return _.filter(posts, post => {
+        const sortedLowerCasePostTags = _.chain(post.tags).map(t => t.toLowerCase()).sortBy().value();
+        return _.isEqual(
+          _.intersection(sortedLowerCasePostTags, lowerCaseTags),
+          lowerCaseTags,
+        );
+      });
+    } else {
+      return posts;
+    }
   }
 
 }
