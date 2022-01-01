@@ -216,6 +216,7 @@ if (PROD) {
         configFile: path.join(__dirname, 'eslint.js'),
         useEslintrc: false,
         cache: false,
+        emitWarning: true,
         formatter: require('eslint-formatter-pretty'),
       },
     }],

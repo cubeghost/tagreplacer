@@ -6,7 +6,7 @@ import { flow, values, map, sum } from 'lodash/fp';
 
 import Options from './options';
 import Results from './components/results';
-import TagInput from './components/tagInput';
+import TagInput from './components/TagInput';
 import BlogSelect from './components/blogSelect';
 
 import { formatTags } from './util';
