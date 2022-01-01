@@ -69,6 +69,7 @@
     "eslint-loader": "2.0.0",
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-react": "7.10.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "file-loader": "^1.1.11",
     "find-cache-dir": "^2.1.0",
     "friendly-errors-webpack-plugin": "1.7.0",

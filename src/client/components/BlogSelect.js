@@ -1,21 +1,19 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Select from 'react-select';
 
 import { setFormValue } from '../state/actions';
 
+const BlogSelect = ({ disabled }) => {
+  const dispatch = useDispatch();
+  const blogs = useSelector(state => state.tumblr.blogs);
+  const value = useSelector(state => state.form.blog);
 
-const mapStateToProps = (state) => ({
-  blogs: state.tumblr.blogs,
-  value: state.form.blog,
-});
+  const onChange = useCallback(select => (
+    dispatch(setFormValue('blog', select.value))
+  ), [dispatch]);
 
-const mapDispatchToProps = dispatch => ({
-  setFormValue: select => dispatch(setFormValue('blog', select.value)),
-});
-
-const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
   return (
     <Select
       value={{ value: value, label: value }}
@@ -23,7 +21,7 @@ const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
         label: blog.name,
         value: blog.name,
       }))}
-      onChange={setFormValue}
+      onChange={onChange}
       isDisabled={disabled}
       isClearable={false}
       className="react-select _specific"
@@ -34,8 +32,7 @@ const BlogSelect = ({ blogs, value, disabled, setFormValue }) => {
 };
 
 BlogSelect.propTypes = {
-  value: PropTypes.string,
   disabled: PropTypes.bool,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(BlogSelect);
+export default React.memo(BlogSelect);

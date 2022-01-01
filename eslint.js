@@ -1,10 +1,11 @@
 module.exports = {
   root: true,
   parser: 'babel-eslint',
-  plugins: ['jsx-a11y', 'react'],
+  plugins: ['jsx-a11y', 'react', 'react-hooks'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
   ],
 
