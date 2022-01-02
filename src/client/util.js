@@ -21,13 +21,6 @@ export function apiFetch(method, path, body) {
   });
 }
 
-export function debugError(error) {
-  if (window.location.search === '?debug') {
-    console.log('debug:');
-    console.log(error.stack);
-  }
-}
-
 export const mapForSelect = value => ({ label: value, value: value });
 
 export const formatTags = (tags) => {

@@ -5,6 +5,7 @@ import { setOption } from './state/actions';
 
 import Checkbox from './components/CheckboxInput';
 
+/* eslint-disable react/no-multi-comp */
 // Google Material icon 'tune'
 const OptionsIcon = () => (
   <svg

@@ -37,6 +37,7 @@ module.exports = {
   },
 
   rules: {
+    'react/no-multi-comp': 1,
     'jsx-a11y/label-has-for': [2, {
       required: {
         some: ['nesting', 'id'],

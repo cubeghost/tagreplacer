@@ -13,6 +13,7 @@ import * as actions from './state/actions';
 
 const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
 
+/* eslint-disable react/no-multi-comp */
 const Replaced = ({ replaced }) => {
   const options = useSelector(state => state.options);
   const find = useSelector(state => state.form.find);
