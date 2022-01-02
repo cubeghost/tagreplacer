@@ -14,4 +14,4 @@ const Privacy = () => (
   </div>
 );
 
-export default Privacy;
+export default React.memo(Privacy);

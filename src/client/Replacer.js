@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { flow, values, map, sum } from 'lodash/fp';
 
-import Options from './options';
+import Options from './Options';
 import Results from './components/Results';
 import TagInput from './components/TagInput';
 import BlogSelect from './components/BlogSelect';
@@ -106,12 +106,12 @@ const Replacer = () => {
       <div className="window form">
         <Options />
 
-        <form className={classNames('blog', { disabled: disableBlog })}>
+        <form className={clsx('blog', { disabled: disableBlog })}>
           <label htmlFor="blog">blog</label>
           <BlogSelect disabled={disableBlog} />
         </form>
 
-        <form className={classNames('find', { disabled: disableFind })} onSubmit={handleFind}>
+        <form className={clsx('find', { disabled: disableFind })} onSubmit={handleFind}>
           <label htmlFor="find">find tag</label>
           <TagInput
             name="find"
@@ -127,7 +127,7 @@ const Replacer = () => {
             </button>
         </form>
 
-        <form className={classNames('replace', { disabled: disableReplace })} onSubmit={handleReplace}>
+        <form className={clsx('replace', { disabled: disableReplace })} onSubmit={handleReplace}>
           <label htmlFor="replace">
             {deleteMode ? 'delete' : 'replace'}&nbsp;
               {formatTags(find)}&nbsp;

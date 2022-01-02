@@ -8,8 +8,8 @@ import { getUser } from './state/actions';
 
 import Home from './Home';
 import Replacer from './Replacer';
-import Help from './help';
-import Privacy from './privacy';
+import Help from './Help';
+import Privacy from './Privacy';
 
 import noticeMarkdown from './2021-12-26-notice.md';
 

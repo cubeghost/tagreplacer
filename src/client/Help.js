@@ -14,4 +14,4 @@ const Help = () => (
   </div>
 );
 
-export default Help;
+export default React.memo(Help);
