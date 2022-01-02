@@ -12,15 +12,6 @@ import Privacy from './Privacy';
 
 import noticeMarkdown from './2021-12-26-notice.md';
 
-const socket = new WebSocket(process.env.WEBSOCKET_HOST);
-socket.onopen = (event) => {
-  console.log('event', event)
-  console.log('socket', socket)
-};
-socket.addEventListener('message', (event) => {
-  console.log('ws', event.data);
-});
-
 const replaceHash = () => {
   const location = window.location;
   if (location.hash && location.hash === '#_=_') {
@@ -30,14 +21,11 @@ const replaceHash = () => {
 
 const Errors = () => {
   const errors = useSelector(state => state.errors);
-  return errors.map((error, i) => {
-    if (error.body.message === 'No user session') return null;
-    return (
-      <div className="error" key={`error-${i}`}>
-        {JSON.stringify(error)}
-      </div>
-    );
-  });
+  return errors.map((error, i) => (
+    <div className="error" key={`error-${i}`}>
+      {JSON.stringify(error)}
+    </div>
+  ));
 }
 
 const App = () => {

@@ -3,16 +3,13 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
-import initialState from './client/state/initial';
-import configureStore from './client/state/store';
+import store from './client/state/store';
 
 import App from './client/App';
 
 import './scss/style.scss';
 
-const store = configureStore(initialState);
-
-const ROOT = (
+const Client = () => (
   <Provider store={store}>
     <BrowserRouter>
       <App />
@@ -20,4 +17,4 @@ const ROOT = (
   </Provider>
 );
 
-ReactDOM.render(ROOT, document.querySelector('#react-root'));
+ReactDOM.render(<Client />, document.querySelector('#react-root'));

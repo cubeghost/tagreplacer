@@ -1,7 +1,7 @@
-import { get } from 'lodash';
+import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
+import pick from 'lodash/pick';
 
-const PRODUCTION = process.env.NODE_ENV === 'production';
-const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
+import { apiFetch } from '../api';
 
 export const actionTypes = {
   TUMBLR_GET_USER: 'tumblr/GET_USER',
@@ -16,43 +16,28 @@ export const actionTypes = {
   SET_LOADING: 'loading/SET',
 };
 
-const GET = 'GET';
-const POST = 'POST';
+export const setOption = createAction('options/SET', (key, value) => ({
+  payload: { key, value },
+}));
+
+export const resetOptions = createAction('options/RESET');
+
+export const setFormValue = createAction('form/SET_VALUE', (key, value) => ({
+  payload: { key, value },
+}));
+
+export const resetFormValue = createAction('form/RESET_VALUE', key => ({
+  payload: { key },
+}));
 
 const startLoading = () => ({
   type: actionTypes.SET_LOADING,
   loading: true,
 });
-
 const stopLoading = () => ({
   type: actionTypes.SET_LOADING,
   loading: false,
 });
-
-export const setOption = (key, value) => ({
-  type: actionTypes.SET_OPTION,
-  key,
-  value,
-});
-
-export const resetOptions = () => ({
-  type: actionTypes.RESET_OPTIONS,
-});
-
-
-
-export const setFormValue = (key, value) => ({
-  type: actionTypes.SET_FORM_VALUE,
-  key,
-  value,
-});
-
-export const resetFormValue = (key) => ({
-  type: actionTypes.RESET_FORM_VALUE,
-  key,
-});
-
-
 const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
   const config = {
     method: method,
@@ -99,25 +84,23 @@ const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
     });
 };
 
-export const getUser = () => (dispatch, getState) => {
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_GET_USER,
-    method: GET,
-    path: '/api/user',
-  })).then(() => {
-    const { tumblr: { blogs } } = getState();
-    const defaultBlog = DEFAULT_BLOG || get(blogs, '[0].name');
-    if (defaultBlog) {
-      return dispatch(setFormValue('blog', defaultBlog));
+export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) => {
+  try {
+    return await apiFetch('GET', '/user')
+  } catch (error) {
+    if (error.statusText === 'No user session') {
+      throw new Error('');
     }
-  });
-};
+
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']));
+  }
+});
 
 export const find = () => (dispatch, getState) => {
   const { form: { blog, find }, options } = getState();
   return dispatch(thunkFetch({
     actionType: actionTypes.TUMBLR_FIND_TAGS,
-    method: POST,
+    method: 'POST',
     path: '/api/find',
     body: {
       blog,
@@ -131,7 +114,7 @@ export const replace = () => (dispatch, getState) => {
   const { form: { blog, find, replace }, options } = getState();
   return dispatch(thunkFetch({
     actionType: actionTypes.TUMBLR_REPLACE_TAGS,
-    method: POST,
+    method: 'POST',
     path: '/api/replace',
     body: {
       blog,

@@ -1,8 +1,19 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
+import get from 'lodash/get';
 
 import initialState from './initial';
-import { actionTypes } from './actions';
+import {
+  actionTypes,
+  getUser,
+  setFormValue,
+  resetFormValue,
+  setOption,
+  resetOptions,
+} from './actions';
+
+const PRODUCTION = process.env.NODE_ENV === 'production';
+const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
 /**
 tumblr: {
@@ -26,12 +37,13 @@ options: {
 errors: [],
  */
 
+/** TODO we need to persist/cache the blogs list */
 const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
-    case actionTypes.TUMBLR_GET_USER:
+    case getUser.fulfilled.toString():
       return assign({}, state, {
-        username: action.response.name,
-        blogs: action.response.blogs,
+        username: action.payload.name,
+        blogs: action.payload.blogs,
       });
     case actionTypes.TUMBLR_FIND_TAGS:
       return assign({}, state, {
@@ -52,13 +64,17 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 
 const formReducer = (state = initialState.form, action) => {
   switch (action.type) {
-    case actionTypes.SET_FORM_VALUE:
+    case getUser.fulfilled.toString(): {
+      const defaultBlog = DEFAULT_BLOG || get(action.payload.blogs, '[0].name');
+      return { ...state, blog: defaultBlog };
+    }
+    case setFormValue.toString():
       return assign({}, state, {
-        [action.key]: action.value
+        [action.payload.key]: action.payload.value
       });
-    case actionTypes.RESET_FORM_VALUE:
+    case resetFormValue.toString():
       return assign({}, state, {
-        [action.key]: initialState.form[action.key]
+        [action.payload.key]: initialState.form[action.payload.key]
       });
     default:
       return state;
@@ -67,11 +83,11 @@ const formReducer = (state = initialState.form, action) => {
 
 const optionsReducer = (state = initialState.options, action) => {
   switch (action.type) {
-    case actionTypes.SET_OPTION:
+    case setOption.toString():
       return assign({}, state, {
-        [action.key]: action.value
+        [action.payload.key]: action.payload.value
       });
-    case actionTypes.RESET_OPTIONS:
+    case resetOptions.toString():
       return assign({}, initialState.options);
     default:
       return state;
@@ -79,29 +95,30 @@ const optionsReducer = (state = initialState.options, action) => {
 };
 
 const errorsReducer = (state = initialState.errors, action) => {
-  switch (action.type) {
-    case actionTypes.ADD_ERROR:
-      return [...state, { ...action.response }];
-    default:
-      return state;
+  if (/\/rejected$/.test(action.type) && action.payload) {
+    return [...state, { ...action.payload }];
+  } else {
+    return state;
   }
 };
 
 const loadingReducer = (state = initialState.loading, action) => {
-  switch (action.type) {
-    case actionTypes.SET_LOADING:
-      return action.loading;
+  const postfix = action.type.match(/\/(pending|fulfilled|rejected)$/)?.[1];
+  switch (postfix) {
+    case 'pending':
+      return true;
+    case 'fulfilled':
+    case 'rejected':
+      return false;
     default:
       return state;
   }
 };
 
-const reducers = combineReducers({
+export default combineReducers({
   tumblr: tumblrReducer,
   form: formReducer,
   options: optionsReducer,
   errors: errorsReducer,
   loading: loadingReducer,
 });
-
-export default reducers;
