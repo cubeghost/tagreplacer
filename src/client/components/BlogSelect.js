@@ -16,6 +16,7 @@ const BlogSelect = ({ disabled }) => {
 
   return (
     <Select
+      id="blog"
       value={{ value: value, label: value }}
       options={blogs.map(blog => ({
         label: blog.name,

@@ -6,8 +6,8 @@ import ReactMarkdown from 'react-markdown';
 
 import { getUser } from './state/actions';
 
-import Home from './home';
-import Replacer from './replacer';
+import Home from './Home';
+import Replacer from './Replacer';
 import Help from './help';
 import Privacy from './privacy';
 

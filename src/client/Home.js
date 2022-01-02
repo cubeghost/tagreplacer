@@ -1,12 +1,10 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-const mapStateToProps = state => ({
-  loading: state.loading,
-});
+const Home = () => {
+  const isLoading = useSelector(state => state.loading);
 
-const Home = ({ loading }) => {
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="loading">
         <p>loading</p>
@@ -21,4 +19,4 @@ const Home = ({ loading }) => {
   }
 };
 
-export default connect(mapStateToProps)(Home);
+export default React.memo(Home);

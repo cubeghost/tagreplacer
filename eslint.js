@@ -35,4 +35,12 @@ module.exports = {
       },
     },
   },
+
+  rules: {
+    'jsx-a11y/label-has-for': [2, {
+      required: {
+        some: ['nesting', 'id'],
+      },
+    }]
+  }
 };

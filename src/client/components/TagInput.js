@@ -20,11 +20,12 @@ const TagInput = ({ name, disabled, setRef }) => {
       name,
       value.map(v => v.value)
     ));
-  }, [dispatch, setFormValue, name]);
+  }, [dispatch, name]);
 
   return (
     <Creatable
       ref={setRef}
+      id={name}
       isMulti={true}
       value={value}
       onChange={onChange}
