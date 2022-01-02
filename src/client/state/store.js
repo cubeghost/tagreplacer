@@ -2,14 +2,11 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import reducers from './reducers';
 import initialState from './initial';
-
-const testMiddleware = () => next => action => {
-  return next(action);
-};
+import socketMiddleware from './socket';
 
 const store = configureStore({
   reducer: reducers,
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), testMiddleware],
+  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), socketMiddleware],
   preloadedState: initialState,
 })
 

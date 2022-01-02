@@ -16,6 +16,11 @@ export const actionTypes = {
   SET_LOADING: 'loading/SET',
 };
 
+export const websocketConnect = createAction('websocket/CONNECT');
+export const websocketDisconnect = createAction('websocket/DISCONNECT');
+export const websocketSend = createAction('websocket/SEND');
+export const websocketReceive = createAction('websocket/RECEIVE');
+
 export const setOption = createAction('options/SET', (key, value) => ({
   payload: { key, value },
 }));

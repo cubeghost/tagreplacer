@@ -3,7 +3,7 @@ import { Route, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 
-import { getUser } from './state/actions';
+import { getUser, websocketConnect } from './state/actions';
 
 import Home from './Home';
 import Replacer from './Replacer';
@@ -36,6 +36,7 @@ const App = () => {
 
   useEffect(() => {
     replaceHash();
+    dispatch(websocketConnect());
     dispatch(getUser());
   }, [dispatch]);
 
