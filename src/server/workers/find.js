@@ -37,7 +37,8 @@ module.exports = async (job) => {
 
   const response = await client.findPostsWithTags(methodName, find, params);
 
-  await messageQueue.add('posts', {
+  await messageQueue.add('message', {
+    queueName: FIND_QUEUE,
     methodName,
     blog,
     posts: response.posts,

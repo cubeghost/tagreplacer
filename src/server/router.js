@@ -2,13 +2,18 @@
 
 require('dotenv').config();
 
-const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
+const express = require('express');
+const asyncHandler = require('express-async-handler');
+const bodyParser = require('body-parser');
+const { Queue } = require('bullmq');
 
 const TumblrClient = require('./tumblr');
+const { FIND_QUEUE, REPLACE_QUEUE } = require('./queues');
 const logger = require('./logger');
 
+const findQueue = new Queue(FIND_QUEUE);
+const replaceQueue = new Queue(REPLACE_QUEUE);
 
 // web router
 const webRouter = express.Router();
@@ -53,22 +58,24 @@ apiRouter.get('/user', function(req, res, next) {
     .catch(error => next(error));
 });
 
-apiRouter.post('/find', function(req, res, next) {
+apiRouter.post('/find', asyncHandler(async (req, res) => {
   if (req.body.blog && req.body.find) {
-    const token = req.session.grant.response.access_token;
-    const secret = req.session.grant.response.access_secret;
+    const sessionId = req.session.id;
     const blog = req.body.blog;
+    const find = req.body.find;
     const options = req.body.options;
 
-    const client = new TumblrClient({ token, secret, blog, options });
+    const params = { sessionId, blog, find, options };
 
-    client.findPostsWithTags(req.body.find)
-      .then(result => res.json(result))
-      .catch(error => next(error));
+    // TODO do we want to create jobs for `drafts` and `queued` here, or should
+    // the front end decide that and send multiple post requests?
+    const job = await findQueue.add('find', { ...params, methodName: 'posts' });
+
+    res.json({ jobId: job.id });
   } else {
     res.status(400).send('POST body must include "blog" and "find"');
   }
-});
+}));
 
 apiRouter.post('/replace', function(req, res, next) {
   if (req.body.blog && req.body.find && req.body.replace) {
@@ -88,7 +95,7 @@ apiRouter.post('/replace', function(req, res, next) {
 });
 
 // error handling
-apiRouter.use(function(error, req, res, next) {
+apiRouter.use(function(error, req, res) {
   logger.error(error.message, {
     error: {
       stack: error.stack,

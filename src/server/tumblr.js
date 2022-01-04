@@ -13,21 +13,13 @@ const REPLACE_SOFT_LIMIT = 500 - POST_LIMIT;
 
 /**
  * @typedef {Object} Options
- * @property {boolean} [includeQueue=false]  include queued posts
- * @property {boolean} [includeDrafts=false] include drafted posts
  * @property {boolean} [caseSensitive=false] case sensitive tag matching
  * @property {boolean} [allowDelete=false]   allow deleting tags
  */
 const DEFAULT_OPTIONS = {
-  includeQueue: false,
-  includeDrafts: false,
   caseSensitive: false,
   allowDelete: false,
 };
-
-const sleep = ms => new Promise(resolve => {
-  setTimeout(resolve, ms);
-});
 
 /**
  * @typedef MethodName
@@ -70,12 +62,11 @@ const METHODS_CONFIG = {
 
 class TumblrClient {
   /**
-   * @param {string} token          oAuth access token
-   * @param {string} secret         oAuth access secret
-   * @param {string} [blog]         blog identifier
-   * @param {Options} [options={}]  api options
+   * @param {string} token     oAuth access token
+   * @param {string} blog      blog identifier
+   * @param {Options} options  api options
    */
-  constructor({ token, secret, blog, options = {} }) {
+  constructor({ token, blog, options = {} }) {
     this.client = this.wrapClient(new tumblr.Client({
       credentials: {
         consumer_key: process.env.TUMBLR_API_KEY,

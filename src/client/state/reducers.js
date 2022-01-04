@@ -6,6 +6,7 @@ import initialState from './initial';
 import {
   actionTypes,
   getUser,
+  find,
   setFormValue,
   resetFormValue,
   setOption,
@@ -45,9 +46,9 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
         username: action.payload.name,
         blogs: action.payload.blogs,
       });
-    case actionTypes.TUMBLR_FIND_TAGS:
+    case find.fulfilled.toString():
       return assign({}, state, {
-        ...action.response,
+        // ...action.response,
         find: action.meta.body.find,
       });
     case actionTypes.TUMBLR_CLEAR_POSTS:

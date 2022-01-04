@@ -31,6 +31,7 @@
     "envify": "^4.1.0",
     "es6-promise": "^3.2.1",
     "express": "^4.17.1",
+    "express-async-handler": "^1.2.0",
     "express-session": "^1.17.0",
     "grant-express": "^4.6.4",
     "helmet": "^3.21.2",

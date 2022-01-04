@@ -101,19 +101,18 @@ export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) =
   }
 });
 
-export const find = () => (dispatch, getState) => {
-  const { form: { blog, find }, options } = getState();
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_FIND_TAGS,
-    method: 'POST',
-    path: '/api/find',
-    body: {
-      blog,
-      find,
-      options,
-    }
-  }));
-};
+export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => {
+  const { form: { blog, find }, options } = thunkAPI.getState();
+  const body = { blog, find, options };
+
+  try {
+    const response = await apiFetch('POST', '/find', body);
+    return thunkAPI.fulfillWithValue(response, { body });
+  } catch (error) {
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
+  }
+});
+
 
 export const replace = () => (dispatch, getState) => {
   const { form: { blog, find, replace }, options } = getState();

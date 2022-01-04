@@ -8,6 +8,8 @@ import {
 
 const debug = createDebug('tagreplacer:ws');
 
+const expectedCloseCodes = [4000];
+
 const socketMiddleware = () => {
   let socket = null;
 
@@ -16,9 +18,14 @@ const socketMiddleware = () => {
     // store.dispatch(actions.wsConnected(event.target.url));
   };
 
+  const onError = store => (event) => {
+    debug('error', event);
+  };
+  
   const onClose = store => (event) => {
     debug('closed', event);
-    // store.dispatch(actions.wsDisconnected());
+    if (expectedCloseCodes.includes(event.code)) return;
+    store.dispatch(websocketConnect()); // TODO there should be a retry limit
   };
 
   const onMessage = store => (event) => {
@@ -38,6 +45,7 @@ const socketMiddleware = () => {
 
         socket.onmessage = onMessage(store);
         socket.onclose = onClose(store);
+        socket.onerror = onError(store);
         socket.onopen = onOpen(store);
 
         break;
