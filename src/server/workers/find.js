@@ -1,7 +1,7 @@
 const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
-const { FIND_QUEUE, MESSAGE_QUEUE } = require('../queues');
+const { FIND_QUEUE, MESSAGE_QUEUE } = require('../../queues');
 const { getSession } = require('../session');
 const TumblrClient = require('../tumblr');
 
@@ -41,6 +41,7 @@ module.exports = async (job) => {
     queueName: FIND_QUEUE,
     methodName,
     blog,
+    find,
     posts: response.posts,
     complete: response.complete,
   });

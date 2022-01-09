@@ -4,6 +4,7 @@ import {
   websocketDisconnect,
   websocketReceive,
   websocketSend,
+  queueActionMap,
 } from './actions';
 
 const debug = createDebug('tagreplacer:ws');
@@ -31,7 +32,12 @@ const socketMiddleware = () => {
   const onMessage = store => (event) => {
     const payload = JSON.parse(event.data);
     debug('message', payload);
-    store.dispatch(websocketReceive(payload));
+    if (payload.queueName && queueActionMap.hasOwnProperty(payload.queueName)) {
+      const action = queueActionMap[payload.queueName];
+      store.dispatch(action(payload));
+    } else {
+      store.dispatch(websocketReceive(payload));
+    }
   };
 
   return store => next => action => {

@@ -1,7 +1,7 @@
 const path = require('path');
 const { Worker } = require('bullmq');
 
-const { FIND_QUEUE, REPLACE_QUEUE } = require('../queues');
+const { FIND_QUEUE, REPLACE_QUEUE } = require('../../queues');
 
 const findProcessor = path.join(__dirname, 'find.js');
 const findWorker = new Worker(FIND_QUEUE, findProcessor);

@@ -11,6 +11,7 @@ import {
   resetFormValue,
   setOption,
   resetOptions,
+  queueFoundPosts,
 } from './actions';
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
@@ -51,6 +52,11 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
         // ...action.response,
         find: action.meta.body.find,
       });
+    case queueFoundPosts.toString():
+      return {
+        ...state,
+        posts: (state.posts || []).concat(action.payload.posts),
+      };
     case actionTypes.TUMBLR_CLEAR_POSTS:
       return assign({}, state, {
         find: initialState.tumblr.find,
@@ -105,14 +111,20 @@ const errorsReducer = (state = initialState.errors, action) => {
 
 const loadingReducer = (state = initialState.loading, action) => {
   const postfix = action.type.match(/\/(pending|fulfilled|rejected)$/)?.[1];
-  switch (postfix) {
-    case 'pending':
-      return true;
-    case 'fulfilled':
-    case 'rejected':
-      return false;
-    default:
-      return state;
+  if (postfix && !action.meta?.waitingForQueue) {
+    switch (postfix) {
+      case 'pending':
+        return true;
+      case 'fulfilled':
+      case 'rejected':
+        return false;
+      default:
+        return state;
+    }
+  } else if (action.type.startsWith('queue')) {
+    return !action.payload.complete;
+  } else {
+    return state;
   }
 };
 

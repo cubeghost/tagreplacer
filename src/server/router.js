@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 const { Queue } = require('bullmq');
 
 const TumblrClient = require('./tumblr');
-const { FIND_QUEUE, REPLACE_QUEUE } = require('./queues');
+const { FIND_QUEUE, REPLACE_QUEUE } = require('../queues');
 const logger = require('./logger');
 
 const findQueue = new Queue(FIND_QUEUE);

@@ -1,6 +1,6 @@
 const { QueueScheduler } = require('bullmq');
 
-const { FIND_QUEUE, REPLACE_QUEUE } = require('./server/queues');
+const { FIND_QUEUE, REPLACE_QUEUE } = require('./queues');
 
 const findScheduler = new QueueScheduler(FIND_QUEUE);
 const replaceScheduler = new QueueScheduler(REPLACE_QUEUE);

@@ -107,7 +107,7 @@ export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => 
 
   try {
     const response = await apiFetch('POST', '/find', body);
-    return thunkAPI.fulfillWithValue(response, { body });
+    return thunkAPI.fulfillWithValue(response, { body, waitingForQueue: true });
   } catch (error) {
     return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
   }
@@ -138,4 +138,12 @@ export const reset = () => dispatch => {
     dispatch(resetFormValue('find')),
     dispatch(resetFormValue('replace')),
   ]);
+};
+
+export const queueFoundPosts = createAction('queue/find/POSTS');
+
+import queues from '../../queues';
+
+export const queueActionMap = {
+  [queues.FIND_QUEUE]: queueFoundPosts,
 };

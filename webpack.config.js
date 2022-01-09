@@ -43,7 +43,7 @@ const config = {
     publicPath: '/',
   },
   resolve: {
-    modules: [paths.appSrc, paths.appNodeModules],
+    modules: [paths.appNodeModules],
     extensions: ['.js', '.jsx', '.json'],
   },
   module: {

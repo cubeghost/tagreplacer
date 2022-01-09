@@ -77,7 +77,7 @@ const Replacer = () => {
 
     dispatch(actions.find())
       .then(() => {
-        replaceInputRef.current?.select.focus();
+        replaceInputRef.current?.focus();
       });
   }, [dispatch])
 
