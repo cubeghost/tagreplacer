@@ -1,6 +1,7 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
 import get from 'lodash/get';
+import pick from 'lodash/pick';
 
 import initialState from './initial';
 import {
@@ -11,11 +12,11 @@ import {
   resetFormValue,
   setOption,
   resetOptions,
-  queueFoundPosts,
+  findQueueMessage,
 } from './actions';
 
-const PRODUCTION = process.env.NODE_ENV === 'production';
-const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const DEFAULT_BLOG = IS_PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
 /**
 tumblr: {
@@ -43,27 +44,22 @@ errors: [],
 const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
     case getUser.fulfilled.toString():
-      return assign({}, state, {
+      return { ...state,
         username: action.payload.name,
-        blogs: action.payload.blogs,
-      });
+        blogs: action.payload.blogs.map(blog => blog.name),
+      };
     case find.fulfilled.toString():
-      return assign({}, state, {
-        // ...action.response,
-        find: action.meta.body.find,
-      });
-    case queueFoundPosts.toString():
+      return { ...state, find: action.meta.body.find };
+    case findQueueMessage.toString():
       return {
         ...state,
         posts: (state.posts || []).concat(action.payload.posts),
       };
     case actionTypes.TUMBLR_CLEAR_POSTS:
-      return assign({}, state, {
-        find: initialState.tumblr.find,
-        posts: initialState.tumblr.posts,
-        queued: initialState.tumblr.queued,
-        drafts: initialState.tumblr.drafts
-      });
+      return {
+        ...state,
+        ...pick(initialState.tumblr, ['find', 'posts', 'queued', 'drafts']),
+      };
     default:
       return state;
   }
@@ -76,13 +72,13 @@ const formReducer = (state = initialState.form, action) => {
       return { ...state, blog: defaultBlog };
     }
     case setFormValue.toString():
-      return assign({}, state, {
-        [action.payload.key]: action.payload.value
-      });
+      return { ...state,
+        [action.payload.key]: action.payload.value,
+      };
     case resetFormValue.toString():
-      return assign({}, state, {
-        [action.payload.key]: initialState.form[action.payload.key]
-      });
+      return { ...state,
+        [action.payload.key]: initialState.form[action.payload.key],
+      };
     default:
       return state;
   }

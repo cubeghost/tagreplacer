@@ -6,7 +6,7 @@ import socketMiddleware from './socket';
 
 const store = configureStore({
   reducer: reducers,
-  middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), socketMiddleware],
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware),
   preloadedState: initialState,
 })
 

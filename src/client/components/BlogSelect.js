@@ -19,8 +19,8 @@ const BlogSelect = ({ disabled }) => {
       id="blog"
       value={{ value: value, label: value }}
       options={blogs.map(blog => ({
-        label: blog.name,
-        value: blog.name,
+        label: blog,
+        value: blog,
       }))}
       onChange={onChange}
       isDisabled={disabled}

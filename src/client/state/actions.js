@@ -140,10 +140,10 @@ export const reset = () => dispatch => {
   ]);
 };
 
-export const queueFoundPosts = createAction('queue/find/POSTS');
+export const findQueueMessage = createAction('queue/FIND');
 
 import queues from '../../queues';
 
 export const queueActionMap = {
-  [queues.FIND_QUEUE]: queueFoundPosts,
+  [queues.FIND_QUEUE]: findQueueMessage,
 };

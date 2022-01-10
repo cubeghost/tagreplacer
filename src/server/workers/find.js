@@ -1,11 +1,14 @@
+require('dotenv').config();
+
 const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
 const { FIND_QUEUE, MESSAGE_QUEUE } = require('../../queues');
 const { getSession } = require('../session');
+const { connection } = require('../redis');
 const TumblrClient = require('../tumblr');
 
-const queue = new Queue(FIND_QUEUE);
+const queue = new Queue(FIND_QUEUE, { connection });
 
 /**
  * @typedef FindJobData

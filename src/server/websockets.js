@@ -1,6 +1,7 @@
 const { Worker } = require('bullmq');
 
 const { MESSAGE_QUEUE } = require('../queues');
+const { connection } = require('./redis');
 
 module.exports = (ws, req) => {
   const sessionId = req.session.id;
@@ -13,7 +14,7 @@ module.exports = (ws, req) => {
 
   const worker = new Worker(MESSAGE_QUEUE(sessionId), async (job) => {
     ws.send(JSON.stringify(job.data));
-  });
+  }, { connection });
 
   ws.on('close', async () => {
     await worker.close();
