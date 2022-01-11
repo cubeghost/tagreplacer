@@ -49,13 +49,23 @@ apiRouter.use(function(req, res, next) {
 });
 
 apiRouter.get('/user', function(req, res, next) {
-  const token = req.session.grant.response.access_token;
-  const secret = req.session.grant.response.access_secret;
+  if (req.session.tumblr?.name && req.session.tumblr?.blogs) {
+    res.json(req.session.tumblr);
+    return;
+  }
 
-  const client = new TumblrClient({ token, secret });
+  const token = req.session.grant.response.access_token;
+
+  const client = new TumblrClient({ token });
 
   client.getUserInfo()
-    .then(result => res.json(result.user))
+    .then(result => {
+      req.session.tumblr = {
+        name: result.user.name,
+        blogs: result.user.blogs.map(blog => blog.name),
+      };
+      res.json(req.session.tumblr);
+    })
     .catch(error => next(error));
 });
 

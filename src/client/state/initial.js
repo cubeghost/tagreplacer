@@ -6,6 +6,7 @@ const initialState = {
     posts: undefined,
     queued: undefined,
     drafts: undefined,
+    replaced: undefined,
   },
   form: {
     blog: undefined,

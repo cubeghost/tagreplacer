@@ -1,6 +1,5 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
-import get from 'lodash/get';
 import pick from 'lodash/pick';
 
 import initialState from './initial';
@@ -26,6 +25,7 @@ tumblr: {
   posts: undefined,
   queued: undefined,
   drafts: undefined,
+  replaced: undefined,
 },
 form: {
   blog: undefined,
@@ -40,13 +40,12 @@ options: {
 errors: [],
  */
 
-/** TODO we need to persist/cache the blogs list */
-const tumblrReducer = (state = initialState.tumblr, action) => {
+ const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
     case getUser.fulfilled.toString():
       return { ...state,
         username: action.payload.name,
-        blogs: action.payload.blogs.map(blog => blog.name),
+        blogs: action.payload.blogs,
       };
     case find.fulfilled.toString():
       return { ...state, find: action.meta.body.find };
@@ -68,7 +67,7 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 const formReducer = (state = initialState.form, action) => {
   switch (action.type) {
     case getUser.fulfilled.toString(): {
-      const defaultBlog = DEFAULT_BLOG || get(action.payload.blogs, '[0].name');
+      const defaultBlog = DEFAULT_BLOG || action.payload.blogs[0];
       return { ...state, blog: defaultBlog };
     }
     case setFormValue.toString():

@@ -120,6 +120,7 @@ class TumblrClient {
    * @return {Promise<object>} API response
    */
   getUserInfo() {
+    this.log('getUserInfo');
     return this.client.userInfo();
   }
 
@@ -202,6 +203,11 @@ class TumblrClient {
     } else {
       returnValue.complete = true;
     }
+
+    this.log('findPostsWithTags', {
+      methodName,
+      tags,
+    });
 
     return returnValue;
   }
