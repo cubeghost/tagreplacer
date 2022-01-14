@@ -17,7 +17,9 @@ export const actionTypes = {
 };
 
 export const websocketConnect = createAction('websocket/CONNECT');
+export const websocketConnected = createAction('websocket/CONNECTED');
 export const websocketDisconnect = createAction('websocket/DISCONNECT');
+export const websocketDisconnected = createAction('websocket/DISCONNECTED');
 export const websocketSend = createAction('websocket/SEND');
 export const websocketReceive = createAction('websocket/RECEIVE');
 

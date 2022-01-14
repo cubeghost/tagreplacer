@@ -133,6 +133,12 @@ class TumblrClient {
    * @property tags
    * @property timestamp
    */
+  /**
+   * @typedef TinyPost
+   * @property id
+   * @property id_string
+   * @property tags
+   */
 
   /**
    * @typedef FindResponse
@@ -213,45 +219,40 @@ class TumblrClient {
   }
 
   /**
-   * [findAndReplaceTags description]
-   * @param  {MethodName}  methodName
-   * @param  {String[]}    find    
-   * @param  {String[]}    replace
-   * @return {EventEmitter}
+   * replace tags on a post
+   * @param {String}   postId
+   * @param {String[]} find
+   * @param {String[]} replace
+   * @return {Promise<TinyPost>}
    */
-  findAndReplaceTags(methodName, find, replace) {
+  // TODO is there a way we can do this without 2 api calls?
+  async replacePostTags(postId, find, replace) {
     if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
     if (!_.isArray(replace)) throw new Error(`expected 'replace' to be an Array, but it was ${typeof find}`);
 
-    const emitter = new EventEmitter();
+    const post = await this.client.blogPosts(this.blog, postId);
+    const replacedTags = this.tags.replace({
+      tags: post.tags,
+      find,
+      replace,
+    });
+    const tags = replacedTags.join(',');
 
-    this.findPostsWithTags(methodName, find)
-      .on('end', (posts) => {
-        const promises = posts
-          .slice(0, REPLACE_SOFT_LIMIT)
-          .map(post => {
-            const replacedTags = this.tags.replace({
-              tags: post.tags,
-              find,
-              replace,
-            });
+    const response = await this.client.editPost(this.blog, {
+      id: postId,
+      tags,
+    });
 
-            return this.client.editPost(this.blog, {
-              id: post.id,
-              tags: replacedTags.join(','),
-            }).then((response) => {
-              emitter.emit('data', response);
-              return response;
-            });
-          });
+    this.log('replacePostTags', {
+      postId,
+      find,
+      replace,
+    });
 
-        Promise.all(promises)
-          .then(replaced => (
-            emitter.emit('end', replaced)
-          ));
-      });
-
-    return emitter;
+    return {
+      ...response,
+      tags,
+    };
   }
 }
 

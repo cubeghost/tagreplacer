@@ -30,7 +30,7 @@ module.exports = async (job) => {
   } = job.data;
 
   const session = await getSession(sessionId);
-  const messageQueue = new Queue(MESSAGE_QUEUE(sessionId));
+  const messageQueue = new Queue(MESSAGE_QUEUE(sessionId), { connection });
   const token = get(session, 'grant.response.access_token'); 
   const client = new TumblrClient({
     token,

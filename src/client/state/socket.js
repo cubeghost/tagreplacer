@@ -1,7 +1,9 @@
 import createDebug from 'debug';
 import {
   websocketConnect,
+  websocketConnected,
   websocketDisconnect,
+  websocketDisconnected,
   websocketReceive,
   websocketSend,
   queueActionMap,
@@ -16,15 +18,16 @@ const socketMiddleware = () => {
 
   const onOpen = store => (event) => {
     debug('open', event.target.url);
-    // store.dispatch(actions.wsConnected(event.target.url));
+    store.dispatch(websocketConnected());
   };
 
-  const onError = store => (event) => {
+  const onError = () => (event) => {
     debug('error', event);
   };
   
   const onClose = store => (event) => {
     debug('closed', event);
+    store.dispatch(websocketDisconnected());
     if (expectedCloseCodes.includes(event.code)) return;
     store.dispatch(websocketConnect()); // TODO there should be a retry limit
   };

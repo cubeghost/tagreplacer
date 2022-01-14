@@ -39,6 +39,7 @@ apiRouter.use(bodyParser.json());
 
 apiRouter.use(function(req, res, next) {
   if (req.session && req.session.grant && req.session.grant.response && !req.session.grant.response.error) {
+    console.log(req.session.id, req.session.grant.response)
     next();
   } else {
     res.statusMessage = 'No user session';
@@ -103,6 +104,10 @@ apiRouter.post('/replace', function(req, res, next) {
   } else {
     res.status(400).send('POST body must include "blog", "find", and "replace"');
   }
+});
+
+apiRouter.post('/cancel', () => {
+  // https://github.com/taskforcesh/bullmq/issues/862
 });
 
 // error handling
