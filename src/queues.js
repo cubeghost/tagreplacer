@@ -1,10 +1,8 @@
-const FIND_QUEUE = 'tumblr:find';
-const REPLACE_QUEUE = 'tumblr:replace';
+const TUMBLR_QUEUE = 'tumblr';
 
 const MESSAGE_QUEUE = sessionId => `messages:${sessionId}`;
 
 module.exports = {
-  FIND_QUEUE,
-  REPLACE_QUEUE,
+  TUMBLR_QUEUE,
   MESSAGE_QUEUE,
 };

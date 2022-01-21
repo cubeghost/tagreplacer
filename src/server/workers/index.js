@@ -1,26 +1,40 @@
 require('dotenv').config();
 
-const path = require('path');
 const { Worker } = require('bullmq');
 
-const { FIND_QUEUE, REPLACE_QUEUE } = require('../../queues');
+const { TUMBLR_QUEUE } = require('../../queues');
 const { connection } = require('../redis');
 
-const findProcessor = path.join(__dirname, 'find.js');
-const findWorker = new Worker(FIND_QUEUE, findProcessor, { connection });
+const processFind = require('./find');
+const processReplace = require('./replace');
 
-const replaceProcessor = path.join(__dirname, 'replace.js');
-const replaceWorker = new Worker(REPLACE_QUEUE, replaceProcessor, { connection });
+const processor = async (job) => {
+  switch (job.name) {
+    case 'find':
+      return await processFind(job);
+    case 'replace':
+      return await processReplace(job);
+    default:
+      // eslint-disable-next-line no-console
+      console.warn(`Unhandled ${TUMBLR_QUEUE} job`, job);
+      return;
+  }
+}
 
-findWorker.on('error', err => {
-  console.error(err);
+const tumblrWorker = new Worker(TUMBLR_QUEUE, processor, {
+  connection,
+  // https://www.tumblr.com/docs/en/api/v2#rate-limits
+  limiter: {
+    max: 300,
+    duration: 1000 * 60 // minute
+  }
 });
 
-replaceWorker.on('error', err => {
+tumblrWorker.on('error', err => {
+  // eslint-disable-next-line no-console
   console.error(err);
 });
 
 module.exports = {
-  findWorker,
-  replaceWorker,
+  tumblrWorker,
 };

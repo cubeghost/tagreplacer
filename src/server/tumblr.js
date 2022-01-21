@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-const EventEmitter = require('events');
 const _ = require('lodash');
 const tumblr = require('tumblr.js');
 const Sentry = require('@sentry/node');
@@ -60,6 +59,38 @@ const METHODS_CONFIG = {
   }
 };
 
+/**
+ * @typedef Post
+ * @property id
+ * @property id_string
+ * @property post_url
+ * @property state
+ * @property slug
+ * @property tags
+ * @property timestamp
+ */
+const POST_PROPERTIES = ['id', 'id_string', 'post_url', 'state', 'slug', 'tags', 'timestamp'];
+/**
+ * Trim properties from Tumblr API post object to match our slimmer Post
+ * @param {Object} post Tumblr API response post
+ * @returns {Post}
+ */
+const trimPost = post => _.pick(post, POST_PROPERTIES);
+
+/**
+ * @typedef TinyPost
+ * @property id
+ * @property id_string
+ * @property tags
+ */
+const TINY_POST_PROPERTIES = ['id', 'id_string', 'tags'];
+/**
+ * Trim properties from Tumblr API Post object to match our itty bitty TinyPost
+ * @param {Object|Post} post Tumblr API response post or Post
+ * @returns {TinyPost}
+ */
+const tinyTrimPost = post => _.pick(post, TINY_POST_PROPERTIES);
+
 class TumblrClient {
   /**
    * @param {string} token     oAuth access token
@@ -83,7 +114,7 @@ class TumblrClient {
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
   }
 
-  static methods = METHODS_CONFIG;
+  static methods = METHODS;
 
   /**
    * wrap default logger with blog and options context
@@ -125,22 +156,6 @@ class TumblrClient {
   }
 
   /**
-   * @typedef Post
-   * @property id
-   * @property id_string
-   * @property post_url
-   * @property slug
-   * @property tags
-   * @property timestamp
-   */
-  /**
-   * @typedef TinyPost
-   * @property id
-   * @property id_string
-   * @property tags
-   */
-
-  /**
    * @typedef FindResponse
    * @property {Post[]}   posts
    * @property {Object}   params next page params
@@ -179,8 +194,9 @@ class TumblrClient {
       posts = response.posts;
     }
 
+    let filteredPosts = posts;
     if (this.options.caseSensitive) {
-      posts = _.filter(posts, post => {
+      filteredPosts = _.filter(posts, post => {
         const sortedPostTags = _.sortBy(post.tags);
         return _.isEqual(
           _.intersection(sortedPostTags, tags),
@@ -189,7 +205,7 @@ class TumblrClient {
       });
     } else if (tags.length > 1) {
       const lowerCaseTags = _.map(tags, t => t.toLowerCase());
-      posts = _.filter(posts, post => {
+      filteredPosts = _.filter(posts, post => {
         const sortedLowerCasePostTags = _.chain(post.tags).map(t => t.toLowerCase()).sortBy().value();
         return _.isEqual(
           _.intersection(sortedLowerCasePostTags, lowerCaseTags),
@@ -199,7 +215,7 @@ class TumblrClient {
     }
 
     let returnValue = {
-      posts,
+      posts: filteredPosts.map(trimPost),
       params: {},
       complete: false,
     };
@@ -236,11 +252,10 @@ class TumblrClient {
       find,
       replace,
     });
-    const tags = replacedTags.join(',');
 
     const response = await this.client.editPost(this.blog, {
       id: postId,
-      tags,
+      tags: replacedTags.join(','),
     });
 
     this.log('replacePostTags', {
@@ -251,7 +266,7 @@ class TumblrClient {
 
     return {
       ...response,
-      tags,
+      tags: replacedTags,
     };
   }
 }

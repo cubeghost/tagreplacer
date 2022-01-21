@@ -11,7 +11,8 @@ import {
   resetFormValue,
   setOption,
   resetOptions,
-  findQueueMessage,
+  tumblrFindMessage,
+  tumblrReplaceMessage,
 } from './actions';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -23,8 +24,6 @@ tumblr: {
   blogs: [],
   find: [],
   posts: undefined,
-  queued: undefined,
-  drafts: undefined,
   replaced: undefined,
 },
 form: {
@@ -49,15 +48,20 @@ errors: [],
       };
     case find.fulfilled.toString():
       return { ...state, find: action.meta.body.find };
-    case findQueueMessage.toString():
+    case tumblrFindMessage.toString():
       return {
         ...state,
         posts: (state.posts || []).concat(action.payload.posts),
       };
+    case tumblrReplaceMessage.toString():
+      return {
+        ...state,
+        replaced: (state.replaced || []).concat(action.payload),
+      };
     case actionTypes.TUMBLR_CLEAR_POSTS:
       return {
         ...state,
-        ...pick(initialState.tumblr, ['find', 'posts', 'queued', 'drafts']),
+        ...pick(initialState.tumblr, ['find', 'posts', 'replaced']),
       };
     default:
       return state;
@@ -116,7 +120,7 @@ const loadingReducer = (state = initialState.loading, action) => {
       default:
         return state;
     }
-  } else if (action.type.startsWith('queue')) {
+  } else if (action.type === tumblrFindMessage.toString()) {
     return !action.payload.complete;
   } else {
     return state;

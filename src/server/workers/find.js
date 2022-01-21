@@ -3,12 +3,12 @@ require('dotenv').config();
 const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
-const { FIND_QUEUE, MESSAGE_QUEUE } = require('../../queues');
+const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('../../queues');
 const { getSession } = require('../session');
 const { connection } = require('../redis');
 const TumblrClient = require('../tumblr');
 
-const queue = new Queue(FIND_QUEUE, { connection });
+const queue = new Queue(TUMBLR_QUEUE, { connection });
 
 /**
  * @typedef FindJobData
@@ -41,7 +41,7 @@ module.exports = async (job) => {
   const response = await client.findPostsWithTags(methodName, find, params);
 
   await messageQueue.add('message', {
-    queueName: FIND_QUEUE,
+    jobType: `${TUMBLR_QUEUE}:find`,
     methodName,
     blog,
     find,

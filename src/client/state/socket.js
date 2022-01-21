@@ -6,7 +6,7 @@ import {
   websocketDisconnected,
   websocketReceive,
   websocketSend,
-  queueActionMap,
+  jobTypeActionMap,
 } from './actions';
 
 const debug = createDebug('tagreplacer:ws');
@@ -35,8 +35,8 @@ const socketMiddleware = () => {
   const onMessage = store => (event) => {
     const payload = JSON.parse(event.data);
     debug('message', payload);
-    if (payload.queueName && queueActionMap.hasOwnProperty(payload.queueName)) {
-      const action = queueActionMap[payload.queueName];
+    if (payload.jobType && jobTypeActionMap.hasOwnProperty(payload.jobType)) {
+      const action = jobTypeActionMap[payload.jobType];
       store.dispatch(action(payload));
     } else {
       store.dispatch(websocketReceive(payload));

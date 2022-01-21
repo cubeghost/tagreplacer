@@ -3,13 +3,13 @@ require('dotenv').config();
 const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
-const { REPLACE_QUEUE, MESSAGE_QUEUE } = require('../../queues');
+const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('../../queues');
 const { getSession } = require('../session');
 const { connection } = require('../redis');
 const TumblrClient = require('../tumblr');
 
 /**
- * @typedef FindJobData
+ * @typedef ReplaceJobData
  * @property {String}      sessionId
  * @property {String}      blog
  * @property {String}      postId
@@ -39,7 +39,7 @@ module.exports = async (job) => {
   const response = await client.replacePostTags(postId, find, replace);
 
   await messageQueue.add('message', {
-    queueName: REPLACE_QUEUE,
+    jobType: `${TUMBLR_QUEUE}:replace`,
     blog,
     postId,
     find,

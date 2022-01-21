@@ -9,12 +9,11 @@ const bodyParser = require('body-parser');
 const { Queue } = require('bullmq');
 
 const TumblrClient = require('./tumblr');
-const { FIND_QUEUE, REPLACE_QUEUE } = require('../queues');
+const { TUMBLR_QUEUE } = require('../queues');
 const { connection } = require('./redis');
 const logger = require('./logger');
 
-const findQueue = new Queue(FIND_QUEUE, { connection });
-const replaceQueue = new Queue(REPLACE_QUEUE, { connection });
+const tumblrQueue = new Queue(TUMBLR_QUEUE, { connection });
 
 // web router
 const webRouter = express.Router();
@@ -71,22 +70,30 @@ apiRouter.get('/user', function(req, res, next) {
 });
 
 apiRouter.post('/find', asyncHandler(async (req, res) => {
-  if (req.body.blog && req.body.find) {
-    const sessionId = req.session.id;
-    const blog = req.body.blog;
-    const find = req.body.find;
-    const options = req.body.options;
-
-    const params = { sessionId, blog, find, options };
-
-    // TODO do we want to create jobs for `drafts` and `queued` here, or should
-    // the front end decide that and send multiple post requests?
-    const job = await findQueue.add('find', { ...params, methodName: 'posts' });
-
-    res.json({ jobId: job.id });
-  } else {
+  if (!(req.body.blog && req.body.find)) {
     res.status(400).send('POST body must include "blog" and "find"');
+    return;
   }
+
+  const sessionId = req.session.id;
+  const blog = req.body.blog;
+  const find = req.body.find;
+  const options = req.body.options;
+
+  const params = { sessionId, blog, find, options };
+
+  await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.POSTS });
+  // includeQueue and includeDrafts feels out of date, maybe the front end can send 'methods'?
+  if (options.includeQueue) {
+    await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.QUEUED });
+  }
+  if (options.includeDrafts) {
+    await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.DRAFTS });
+  }
+
+  res.json({
+    success: true,
+  });
 }));
 
 apiRouter.post('/replace', function(req, res, next) {

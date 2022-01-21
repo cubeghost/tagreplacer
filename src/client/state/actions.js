@@ -37,60 +37,6 @@ export const resetFormValue = createAction('form/RESET_VALUE', key => ({
   payload: { key },
 }));
 
-const startLoading = () => ({
-  type: actionTypes.SET_LOADING,
-  loading: true,
-});
-const stopLoading = () => ({
-  type: actionTypes.SET_LOADING,
-  loading: false,
-});
-const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
-  const config = {
-    method: method,
-    credentials: 'include',
-  };
-  if (body) {
-    config.headers = { 'Content-Type': 'application/json' };
-    config.body = JSON.stringify(body);
-  }
-
-  dispatch(startLoading());
-
-  return fetch(path, config)
-    .then(response => {
-      if (!response.ok) {
-        response.json().then(json => {
-          dispatch({
-            type: actionTypes.ADD_ERROR,
-            response: {
-              status: response.status,
-              statusText: response.statusText,
-              body: json
-            },
-          });
-          dispatch(stopLoading());
-        });
-        throw Error(response.statusText);
-      }
-
-      return response.json();
-    })
-    .then(response => (
-      dispatch({
-        type: actionType,
-        response,
-        meta: {
-          body,
-        },
-      })
-    ))
-    .then(response => {
-      dispatch(stopLoading());
-      return response;
-    });
-};
-
 export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) => {
   try {
     return await apiFetch('GET', '/user')
@@ -115,21 +61,17 @@ export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => 
   }
 });
 
+export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAPI) => {
+  const { form: { blog, find, replace }, tumblr: { posts }, options } = thunkAPI.getState();
+  const body = { blog, find, replace, options, posts: posts.map(p => p.id) };
 
-export const replace = () => (dispatch, getState) => {
-  const { form: { blog, find, replace }, options } = getState();
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_REPLACE_TAGS,
-    method: 'POST',
-    path: '/api/replace',
-    body: {
-      blog,
-      find,
-      replace,
-      options,
-    }
-  }));
-};
+  try {
+    const response = await apiFetch('POST', '/replace', body);
+    return thunkAPI.fulfillWithValue(response, { body });
+  } catch (error) {
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
+  }
+});
 
 
 export const reset = () => dispatch => {
@@ -142,10 +84,12 @@ export const reset = () => dispatch => {
   ]);
 };
 
-export const findQueueMessage = createAction('queue/FIND');
+export const tumblrFindMessage = createAction('queue/tumblr/FIND');
+export const tumblrReplaceMessage = createAction('queue/tumblr/REPLACE');
 
 import queues from '../../queues';
 
-export const queueActionMap = {
-  [queues.FIND_QUEUE]: findQueueMessage,
+export const jobTypeActionMap = {
+  [`${queues.TUMBLR_QUEUE}:find`]: tumblrFindMessage,
+  [`${queues.TUMBLR_QUEUE}:replace`]: tumblrReplaceMessage,
 };

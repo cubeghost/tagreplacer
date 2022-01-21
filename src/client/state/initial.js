@@ -4,8 +4,6 @@ const initialState = {
     blogs: [],
     find: [],
     posts: undefined,
-    queued: undefined,
-    drafts: undefined,
     replaced: undefined,
   },
   form: {
