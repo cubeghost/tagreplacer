@@ -70,15 +70,13 @@ apiRouter.get('/user', function(req, res, next) {
 });
 
 apiRouter.post('/find', asyncHandler(async (req, res) => {
-  if (!(req.body.blog && req.body.find)) {
+  const sessionId = req.session.id;
+  const { blog, find, options } = req.body;
+
+  if (!(blog && find)) {
     res.status(400).send('POST body must include "blog" and "find"');
     return;
   }
-
-  const sessionId = req.session.id;
-  const blog = req.body.blog;
-  const find = req.body.find;
-  const options = req.body.options;
 
   const params = { sessionId, blog, find, options };
 
@@ -96,22 +94,25 @@ apiRouter.post('/find', asyncHandler(async (req, res) => {
   });
 }));
 
-apiRouter.post('/replace', function(req, res, next) {
-  if (req.body.blog && req.body.find && req.body.replace) {
-    const token = req.session.grant.response.access_token;
-    const secret = req.session.grant.response.access_secret;
-    const blog = req.body.blog;
-    const options = req.body.options;
+apiRouter.post('/replace', asyncHandler(async (req, res) => {
+  const sessionId = req.session.id;
+  const { blog, find, replace, options, posts } = req.body;
 
-    const client = new TumblrClient({ token, secret, blog, options });
-
-    client.findAndReplaceTags(req.body.find, req.body.replace)
-      .then(result => res.json(result))
-      .catch(error => next(error));
-  } else {
-    res.status(400).send('POST body must include "blog", "find", and "replace"');
+  if (!(blog && find && replace && posts?.length)) {
+    res.status(400).send('POST body must include "blog", "find", "replace", and "posts"');
+    return;
   }
-});
+
+  const params = { sessionId, blog, find, replace, options };
+
+  for await (let postId of posts) {
+    await tumblrQueue.add('replace', { ...params, postId });
+  }
+
+  res.json({
+    success: true,
+  });
+}));
 
 apiRouter.post('/cancel', () => {
   // https://github.com/taskforcesh/bullmq/issues/862
