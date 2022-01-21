@@ -1,7 +1,6 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useCallback, useRef } from 'react';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import clsx from 'clsx';
-import { flow, values, map, sum } from 'lodash/fp';
 
 import Options from './Options';
 import Results from './components/Results';
@@ -14,16 +13,14 @@ import * as actions from './state/actions';
 const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
 
 /* eslint-disable react/no-multi-comp */
-const Replaced = ({ replaced }) => {
-  const options = useSelector(state => state.options);
+const Replaced = () => {
+  const options = useSelector(state => state.options, shallowEqual);
   const find = useSelector(state => state.form.find);
   const replace = useSelector(state => state.form.replace);
 
-  const totalReplaced = flow([
-    values,
-    map('length'),
-    sum,
-  ])(replaced);
+  const replaced = useSelector(state => state.tumblr.replaced, shallowEqual);
+
+  const totalReplaced = replaced?.length;
 
   if (totalReplaced === 0) return null;
 
@@ -48,19 +45,15 @@ const Replaced = ({ replaced }) => {
 const Replacer = () => {
   const dispatch = useDispatch();
 
-  const options = useSelector(state => state.options);
+  const options = useSelector(state => state.options, shallowEqual);
 
   const blog = useSelector(state => state.form.blog);
   const find = useSelector(state => state.form.find);
   const replace = useSelector(state => state.form.replace);
 
-  const foundPosts = useSelector(state => (
-    state.tumblr.posts?.length > 0 ||
-    state.tumblr.queued?.length > 0 ||
-    state.tumblr.drafts?.length > 0
-  ));
+  const foundPosts = useSelector(state => state.tumblr.posts?.length > 0);
   const isLoading = useSelector(state => state.loading);
-  const [replaced, setReplaced] = useState([]); // TODO why isnt this in redux
+  // const [replaced, setReplaced] = useState([]); // TODO why isnt this in redux
 
   const replaceInputRef = useRef();
 
@@ -85,14 +78,14 @@ const Replacer = () => {
     if (event) event.preventDefault();
 
     dispatch(actions.replace())
-      .then(action => setReplaced(action.response));
+      // .then(action => setReplaced(action.response));
   }, [dispatch]);
 
   const handleReset = useCallback((event) => {
     if (event) event.preventDefault();
 
     dispatch(actions.reset());
-    setReplaced([]);
+    // setReplaced([]);
   }, [dispatch]);
 
   return (
@@ -155,15 +148,13 @@ const Replacer = () => {
       <div className="window result">
         {foundPosts && (
           <div>
-            <Replaced replaced={replaced} />
+            <Replaced />
             <button className="reset" onClick={handleReset}>
               reset
               </button>
           </div>
         )}
-        <Results name="posts" />
-        {options.includeQueue && <Results name="queued" />}
-        {options.includeDrafts && <Results name="drafts" />}
+        <Results />
       </div>
     </div>
   );

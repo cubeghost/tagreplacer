@@ -207,6 +207,7 @@ input[type=checkbox] {
 
     &__single-value {
       overflow: visible;
+      white-space: pre-wrap;
     }
 
     &__multi-value {
@@ -219,6 +220,7 @@ input[type=checkbox] {
         color: $text;
         font-size: 1em;
         padding: 3px 4px 3px 5px;
+        white-space: pre-wrap;
       }
       &__remove {
         padding: 2px 2px 1px;
