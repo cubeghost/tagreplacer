@@ -8,6 +8,6 @@ const store = configureStore({
   reducer: reducers,
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware),
   preloadedState: initialState,
-})
+});
 
 export default store;

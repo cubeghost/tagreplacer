@@ -3,9 +3,9 @@ require('dotenv').config();
 const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
-const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('../../queues');
-const { getSession } = require('../session');
-const { connection } = require('../redis');
+const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('../queues');
+const { getSession } = require('../server/session');
+const connection = require('../redis');
 const TumblrClient = require('../tumblr');
 
 const queue = new Queue(TUMBLR_QUEUE, { connection });

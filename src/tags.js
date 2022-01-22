@@ -47,6 +47,11 @@ class Tags {
     return result;
   }
 
+  /**
+   * Tags.filterPost
+   * @param {String[]} find   tags to find
+   * @param {Object[]} posts  tumblr posts
+   */
   filterPosts({ find, posts }) {
     const tags = _.sortBy(find);
 

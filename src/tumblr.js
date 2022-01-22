@@ -116,6 +116,8 @@ class TumblrClient {
 
   static methods = METHODS;
 
+  static REPLACE_SOFT_LIMIT = REPLACE_SOFT_LIMIT;
+
   /**
    * wrap default logger with blog and options context
    */

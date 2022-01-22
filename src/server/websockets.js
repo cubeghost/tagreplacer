@@ -1,7 +1,7 @@
 const { Worker } = require('bullmq');
 
 const { MESSAGE_QUEUE } = require('../queues');
-const { connection } = require('./redis');
+const connection = require('../redis');
 
 module.exports = (ws, req) => {
   const sessionId = req.session.id;

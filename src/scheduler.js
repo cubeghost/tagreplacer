@@ -3,7 +3,7 @@ require('dotenv').config();
 const { QueueScheduler } = require('bullmq');
 
 const { TUMBLR_QUEUE } = require('./queues');
-const { connection } = require('./server/redis');
+const connection = require('./redis');
 
 const tumblrScheduler = new QueueScheduler(TUMBLR_QUEUE, { connection });
 

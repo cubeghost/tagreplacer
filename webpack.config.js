@@ -33,7 +33,7 @@ const config = {
     poll: 500
   },
   entry: {
-    client: path.join(paths.appSrc, 'client.js')
+    client: path.join(paths.appSrc, 'client/index.js')
   },
   output: {
     path: paths.appBuild,

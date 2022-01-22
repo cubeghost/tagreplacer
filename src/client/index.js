@@ -3,11 +3,11 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
-import store from './client/state/store';
+import store from './state/store';
 
-import App from './client/App';
+import App from './App';
 
-import './scss/style.scss';
+import '../scss/style.scss';
 
 const Client = () => (
   <Provider store={store}>

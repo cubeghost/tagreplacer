@@ -1,17 +1,13 @@
-/* eslint-disable new-cap */
-
-require('dotenv').config();
-
 const path = require('path');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
 const bodyParser = require('body-parser');
 const { Queue } = require('bullmq');
 
-const TumblrClient = require('./tumblr');
+const TumblrClient = require('../tumblr');
 const { TUMBLR_QUEUE } = require('../queues');
-const { connection } = require('./redis');
-const logger = require('./logger');
+const connection = require('../redis');
+const logger = require('../logger');
 
 const tumblrQueue = new Queue(TUMBLR_QUEUE, { connection });
 
@@ -21,7 +17,7 @@ const buildDir = path.resolve('build');
 
 webRouter.use(express.static(buildDir));
 
-const render = (req, res) => {
+const render = (_req, res) => {
   res.sendFile(path.join(buildDir, '/index.html'));
 };
 
@@ -113,10 +109,6 @@ apiRouter.post('/replace', asyncHandler(async (req, res) => {
     success: true,
   });
 }));
-
-apiRouter.post('/cancel', () => {
-  // https://github.com/taskforcesh/bullmq/issues/862
-});
 
 // error handling
 apiRouter.use(function(error, req, res) {

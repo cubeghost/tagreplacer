@@ -2,8 +2,8 @@ require('dotenv').config();
 
 const { Worker } = require('bullmq');
 
-const { TUMBLR_QUEUE } = require('../../queues');
-const { connection } = require('../redis');
+const { TUMBLR_QUEUE } = require('../queues');
+const connection = require('../redis');
 
 const processFind = require('./find');
 const processReplace = require('./replace');
