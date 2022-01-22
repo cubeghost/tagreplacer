@@ -11,8 +11,10 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "watch": "npm-run-all --parallel watch:*",
-    "watch:server": "nodemon --watch src ./src/index.js",
     "watch:client": "webpack --watch",
+    "watch:server": "nodemon --watch src ./src/index.js",
+    "watch:worker": "nodemon --watch src ./src/workers/index.js",
+    "watch:scheduler": "nodemon --watch src ./src/scheduler.js",
     "build": "webpack",
     "start": "node src/index.js",
     "start:worker": "node src/workers/index.js",
