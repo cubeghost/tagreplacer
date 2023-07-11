@@ -63,7 +63,13 @@ export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => 
 
 export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAPI) => {
   const { form: { blog, find, replace }, tumblr: { posts }, options } = thunkAPI.getState();
-  const body = { blog, find, replace, options, posts: posts.map(p => p.id) };
+  const body = {
+    blog,
+    find,
+    replace,
+    options,
+    posts: posts.map(post => ({ id: post.id, tags: post.tags })),
+  };
 
   try {
     const response = await apiFetch('POST', '/replace', body);

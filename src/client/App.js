@@ -54,10 +54,6 @@ const App = () => {
         </nav>
       </header>
 
-      <div className="window markdown">
-        <ReactMarkdown source={noticeMarkdown} escapeHtml={true} />
-      </div>
-
       <div className="content">
         <Errors />
 

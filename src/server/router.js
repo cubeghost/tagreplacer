@@ -34,7 +34,7 @@ apiRouter.use(bodyParser.json());
 
 apiRouter.use(function(req, res, next) {
   if (req.session && req.session.grant && req.session.grant.response && !req.session.grant.response.error) {
-    console.log(req.session.id, req.session.grant.response)
+    // console.log(req.session.id, req.session.grant.response)
     next();
   } else {
     res.statusMessage = 'No user session';
@@ -101,9 +101,11 @@ apiRouter.post('/replace', asyncHandler(async (req, res) => {
 
   const params = { sessionId, blog, find, replace, options };
 
-  for await (let postId of posts) {
-    await tumblrQueue.add('replace', { ...params, postId });
+  for await (let post of posts) {
+    await tumblrQueue.add('replace', { ...params, postId: post.id, tags: post.tags });
   }
+
+  // TODO queue something to check for done and notify
 
   res.json({
     success: true,

@@ -13,6 +13,7 @@ const TumblrClient = require('../tumblr');
  * @property {String}      sessionId
  * @property {String}      blog
  * @property {String}      postId
+ * @property {String[]}    tags
  * @property {String[]}    find
  * @property {String[]}    replace
  * @property {Options}     options
@@ -22,6 +23,7 @@ module.exports = async (job) => {
     sessionId,
     blog,
     postId,
+    tags,
     find,
     replace,
     options,
@@ -36,7 +38,7 @@ module.exports = async (job) => {
     options,
   });
 
-  const response = await client.replacePostTags(postId, find, replace);
+  const response = await client.replacePostTags(postId, tags, find, replace);
 
   await messageQueue.add('message', {
     jobType: `${TUMBLR_QUEUE}:replace`,

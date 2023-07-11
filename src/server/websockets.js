@@ -12,6 +12,7 @@ module.exports = (ws, req) => {
     return;
   }
 
+  // TODO should we use req.session.tumblr.name for the message queue instead?
   const worker = new Worker(MESSAGE_QUEUE(sessionId), async (job) => {
     ws.send(JSON.stringify(job.data));
   }, { connection });

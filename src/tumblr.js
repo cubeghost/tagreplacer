@@ -130,7 +130,7 @@ class TumblrClient {
 
   wrapClient(client) {
     const proxyHandler = {
-      get: function (target, prop, receiver) {
+      get: function () {
         const promise = Reflect.get(...arguments);
         return function() {
           return promise(...arguments).catch((error) => {
@@ -239,18 +239,17 @@ class TumblrClient {
   /**
    * replace tags on a post
    * @param {String}   postId
+   * @param {String[]} tags
    * @param {String[]} find
    * @param {String[]} replace
    * @return {Promise<TinyPost>}
    */
-  // TODO is there a way we can do this without 2 api calls?
-  async replacePostTags(postId, find, replace) {
+  async replacePostTags(postId, tags, find, replace) {
     if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
     if (!_.isArray(replace)) throw new Error(`expected 'replace' to be an Array, but it was ${typeof find}`);
 
-    const post = await this.client.blogPosts(this.blog, postId);
     const replacedTags = this.tags.replace({
-      tags: post.tags,
+      tags,
       find,
       replace,
     });
