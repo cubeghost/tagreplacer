@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Route, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import ReactMarkdown from 'react-markdown';
 
 import { getUser, websocketConnect } from './state/actions';
 
@@ -9,8 +8,6 @@ import Home from './Home';
 import Replacer from './Replacer';
 import Help from './Help';
 import Privacy from './Privacy';
-
-import noticeMarkdown from './2021-12-26-notice.md';
 
 const replaceHash = () => {
   const location = window.location;
