@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -17,4 +17,6 @@ const Client = () => (
   </Provider>
 );
 
-ReactDOM.render(<Client />, document.querySelector('#react-root'));
+const root = createRoot(document.querySelector('#react-root'))
+
+root.render(<Client />);

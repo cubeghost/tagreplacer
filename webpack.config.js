@@ -8,6 +8,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const isDocker = require('is-docker');
@@ -50,7 +51,8 @@ const config = {
     rules: [
       {
         test: /\.jsx?$/,
-        include: [paths.appSrc],
+        include: [paths.appSrc, /node_modules\/@react-spring/],
+        exclude: /node_modules/,
         use: [{
           loader: 'babel-loader',
           // query: {
@@ -205,22 +207,11 @@ if (PROD) {
 
 } else {
 
-  config.module.rules.unshift({
-    test: /\.js$/,
-    enforce: 'pre',
-    exclude: [/node_modules/],
-    include: [paths.appSrc],
-    use: [{
-      loader: 'eslint-loader',
-      options: {
-        configFile: path.join(__dirname, 'eslint.js'),
-        useEslintrc: false,
-        cache: false,
-        emitWarning: true,
-        formatter: require('eslint-formatter-pretty'),
-      },
-    }],
-  });
+  config.plugins.push(
+    new ESLintPlugin({
+      formatter: require('eslint-formatter-pretty'),
+    })
+  );
 
 }
 

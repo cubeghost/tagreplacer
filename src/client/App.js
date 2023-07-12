@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUser, websocketConnect } from './state/actions';
 
 import Home from './Home';
-import Replacer from './Replacer';
+import Replacer from './components/Replacer';
 import Help from './Help';
 import Privacy from './Privacy';
+import DarkModeToggle from './components/DarkModeToggle';
 
 const replaceHash = () => {
   const location = window.location;
@@ -29,7 +30,6 @@ const App = () => {
   const dispatch = useDispatch();
   
   const isAuthed = useSelector(state => Boolean(state.tumblr.username));
-  const isLoading = useSelector(state => state.loading);
 
   useEffect(() => {
     replaceHash();
@@ -38,37 +38,36 @@ const App = () => {
   }, [dispatch]);
 
   return (
-    <div className="app">
+    <div className="root">
       <header>
         <h1>
           <Link to="/">tag replacer</Link>
         </h1>
         <nav>
           <Link to="/help">help</Link>
-          {(isAuthed && !isLoading) && (
+          {isAuthed && (
             <a href="/disconnect">disconnect</a>
           )}
+          <DarkModeToggle />
         </nav>
       </header>
 
-      <div className="content">
-        <Errors />
+      <Errors />
 
-        <Route path="/help" component={Help} />
-        <Route path="/privacy" component={Privacy} />
+      <Route path="/help" component={Help} />
+      <Route path="/privacy" component={Privacy} />
 
-        <Route
-          exact
-          path="/"
-          render={(routeProps) => {
-            if (isAuthed) {
-              return <Replacer {...routeProps} />;
-            } else {
-              return <Home {...routeProps} />;
-            }
-          }}
-        />
-      </div>
+      <Route
+        exact
+        path="/"
+        render={(routeProps) => {
+          if (isAuthed) {
+            return <Replacer {...routeProps} />;
+          } else {
+            return <Home {...routeProps} />;
+          }
+        }}
+      />
 
       <footer>
         <p>
