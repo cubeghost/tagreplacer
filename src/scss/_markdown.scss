@@ -1,0 +1,59 @@
+.markdown {
+  font-family: $font-sans-serif;
+  font-size: 18px;
+  line-height: 1.25;
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 1em;
+    font-family: $font-monospace;
+    font-weight: bold;
+  }
+
+  .back {
+    font-size: 16px;
+    margin-bottom: 1em;
+    color: inherit;
+    display: inline-block;
+    opacity: 0.75;
+    text-decoration: none;
+    &:hover,
+    &:focus,
+    &:active {
+      // color: $highlight;
+    }
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 1em;
+  }
+
+  p,
+  pre {
+    margin: 1em 0;
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 14px;
+  }
+
+  code {
+    font-size: 14px;
+    font-family: $font-monospace;
+  }
+
+  p > code {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  em {
+    font-style: italic;
+  }
+}

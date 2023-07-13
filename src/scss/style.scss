@@ -1,7 +1,8 @@
-$connector_animation_duration: 2200ms;
+$font-sans-serif: system-ui, sans-serif;
+$font-monospace: Roboto Mono, monospace;
 
 // @import 'reset';
-// @import 'input';
+@import 'markdown';
 
 :root {
   --background-color: #fff;
@@ -26,7 +27,7 @@ body,
 }
 
 body {
-  font-family: Roboto Mono, monospace;
+  font-family: $font-monospace;
   margin: 0;
   background-color: var(--background-color);
   color: var(--foreground-color);

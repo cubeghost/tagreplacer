@@ -3,19 +3,6 @@ import pick from 'lodash/pick';
 
 import { apiFetch } from '../api';
 
-export const actionTypes = {
-  TUMBLR_GET_USER: 'tumblr/GET_USER',
-  TUMBLR_FIND_TAGS: 'tumblr/FIND_TAGS',
-  TUMBLR_REPLACE_TAGS: 'tumblr/REPLACE_TAGS',
-  TUMBLR_CLEAR_POSTS: 'tumblr/CLEAR_POSTS',
-  SET_OPTION: 'options/SET',
-  RESET_OPTIONS: 'options/RESET',
-  SET_FORM_VALUE: 'form/SET_VALUE',
-  RESET_FORM_VALUE: 'form/RESET_VALUE',
-  ADD_ERROR: 'errors/ADD',
-  SET_LOADING: 'loading/SET',
-};
-
 export const websocketConnect = createAction('websocket/CONNECT');
 export const websocketConnected = createAction('websocket/CONNECTED');
 export const websocketDisconnect = createAction('websocket/DISCONNECT');
