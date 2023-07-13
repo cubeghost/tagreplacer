@@ -70,9 +70,9 @@ const App = () => {
       />
 
       <footer>
-        <p>
+        {/* <p>
           by <a href="https://cubegho.st/">alex</a>
-        </p>
+        </p> */}
         <nav>
           <Link to="/privacy">privacy</Link>
           <a href="https://github.com/cubeghost/tagreplacer">github</a>

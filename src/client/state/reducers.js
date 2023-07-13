@@ -1,16 +1,18 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
-import pick from 'lodash/pick';
+import keyBy from 'lodash/keyBy';
+import every from 'lodash/every';
 
 import initialState from './initial';
 import {
-  actionTypes,
   getUser,
   find,
+  replace,
   setFormValue,
   resetFormValue,
   setOption,
   resetOptions,
+  clearPosts,
   tumblrFindMessage,
   tumblrReplaceMessage,
 } from './actions';
@@ -18,51 +20,70 @@ import {
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const DEFAULT_BLOG = IS_PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
-/**
-tumblr: {
-  username: undefined,
-  blogs: [],
-  find: [],
-  posts: undefined,
-  replaced: undefined,
-},
-form: {
-  blog: undefined,
-  find: [],
-  replace: [],
-},
-options: {
-  includeQueue: false,
-  includeDrafts: false,
-  caseSensitive: false,
-},
-errors: [],
- */
-
- const tumblrReducer = (state = initialState.tumblr, action) => {
+const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
     case getUser.fulfilled.toString():
       return { ...state,
+        loading: false,
         username: action.payload.name,
         blogs: action.payload.blogs,
       };
-    case find.fulfilled.toString():
-      return { ...state, find: action.meta.body.find };
+    case getUser.pending.toString():
+      return {
+        ...state,
+        loading: true,
+      };
+    case getUser.rejected.toString():
+      return {
+        ...state,
+        loading: false,
+      };
+    default:
+      return state;
+  }
+};
+
+const postsReducer = (state = initialState.posts, action) => {
+  switch (action.type) {
+    case find.pending.toString():
+    case replace.pending.toString():
+      return {
+        ...state,
+        loading: true,
+      };
+    case find.rejected.toString():
+    case replace.rejected.toString():
+      return {
+        ...state,
+        loading: false,
+      };
     case tumblrFindMessage.toString():
       return {
         ...state,
-        posts: (state.posts || []).concat(action.payload.posts),
+        entities: {
+          ...state.entities,
+          ...keyBy(action.payload.posts, 'id'),
+        },
+        loading: !action.payload.complete,
       };
     case tumblrReplaceMessage.toString():
+      const post = {
+        ...state.entities[action.payload.postId],
+        tags: action.payload.tags,
+        replaced: true,
+      };
+      const entities = {
+        ...state.entities,
+        [action.payload.postId]: post,
+      };
+      const complete = every(Object.values(entities), ['replaced', true]);
       return {
         ...state,
-        replaced: (state.replaced || []).concat(action.payload),
+        entities: entities,
+        loading: !complete,
       };
-    case actionTypes.TUMBLR_CLEAR_POSTS:
-      return {
-        ...state,
-        ...pick(initialState.tumblr, ['find', 'posts', 'replaced']),
-      };
+    case clearPosts.toString():
+      return initialState.posts;
     default:
       return state;
   }
@@ -108,29 +129,29 @@ const errorsReducer = (state = initialState.errors, action) => {
   }
 };
 
-const loadingReducer = (state = initialState.loading, action) => {
-  const postfix = action.type.match(/\/(pending|fulfilled|rejected)$/)?.[1];
-  if (postfix && !action.meta?.waitingForQueue) {
-    switch (postfix) {
-      case 'pending':
-        return true;
-      case 'fulfilled':
-      case 'rejected':
-        return false;
-      default:
-        return state;
-    }
-  } else if (action.type === tumblrFindMessage.toString()) {
-    return !action.payload.complete;
-  } else {
-    return state;
-  }
-};
+// const loadingReducer = (state = initialState.loading, action) => {
+//   const postfix = action.type.match(/\/(pending|fulfilled|rejected)$/)?.[1];
+//   if (postfix && !action.meta?.waitingForQueue) {
+//     switch (postfix) {
+//       case 'pending':
+//         return true;
+//       case 'fulfilled':
+//       case 'rejected':
+//         return false;
+//       default:
+//         return state;
+//     }
+//   } else if (action.type === tumblrFindMessage.toString()) {
+//     return !action.payload.complete;
+//   } else {
+//     return state;
+//   }
+// };
 
 export default combineReducers({
   tumblr: tumblrReducer,
+  posts: postsReducer,
   form: formReducer,
   options: optionsReducer,
   errors: errorsReducer,
-  loading: loadingReducer,
 });

@@ -68,8 +68,9 @@ const METHODS_CONFIG = {
  * @property slug
  * @property tags
  * @property timestamp
+ * @property type
  */
-const POST_PROPERTIES = ['id', 'id_string', 'post_url', 'state', 'slug', 'tags', 'timestamp'];
+const POST_PROPERTIES = ['id', 'id_string', 'post_url', 'state', 'slug', 'tags', 'timestamp', 'type'];
 /**
  * Trim properties from Tumblr API post object to match our slimmer Post
  * @param {Object} post Tumblr API response post
@@ -182,7 +183,6 @@ class TumblrClient {
     const response = await this.client[method.clientMethod](this.blog, {
       tag: firstTag,
       limit: POST_LIMIT,
-      filter: 'text',
       ...params,
     });
 

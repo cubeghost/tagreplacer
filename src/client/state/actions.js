@@ -55,20 +55,20 @@ export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => 
 
   try {
     const response = await apiFetch('POST', '/find', body);
-    return thunkAPI.fulfillWithValue(response, { body, waitingForQueue: true });
+    return thunkAPI.fulfillWithValue(response, { body });
   } catch (error) {
     return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
   }
 });
 
 export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAPI) => {
-  const { form: { blog, find, replace }, tumblr: { posts }, options } = thunkAPI.getState();
+  const { form: { blog, find, replace }, posts: { entities }, options } = thunkAPI.getState();
   const body = {
     blog,
     find,
     replace,
     options,
-    posts: posts.map(post => ({ id: post.id, tags: post.tags })),
+    posts: Object.values(entities).map(post => ({ id: post.id, tags: post.tags })),
   };
 
   try {
@@ -79,12 +79,11 @@ export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAP
   }
 });
 
+export const clearPosts = createAction('posts/CLEAR');
 
 export const reset = () => dispatch => {
   return Promise.all([
-    dispatch({
-      type: actionTypes.TUMBLR_CLEAR_POSTS,
-    }),
+    dispatch(clearPosts()),
     dispatch(resetFormValue('find')),
     dispatch(resetFormValue('replace')),
   ]);

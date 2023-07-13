@@ -7,3 +7,12 @@ export const formatTags = (tags) => {
     return '#' + tags.join(', #');
   }
 };
+
+export const joinReactNodes = (nodes, separator) =>
+  nodes
+    .reduce((previousValue, currentValue) => {
+      return [...previousValue, currentValue, separator];
+    }, [])
+    .slice(0, -1);
+
+export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

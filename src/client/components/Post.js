@@ -1,24 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { formatTags } from '../util';
-
-const Post = ({ id, slug, post_url, tags }) => (
+const Post = ({ id, tags, permalink, replaced }) => (
   <div className="post">
-    <a href={post_url} target="_blank" rel="noopener noreferrer">
-      {id}/{slug}
+    {replaced && "✅"}
+    <a className="post-permalink" href={permalink} target="_blank" rel="noopener noreferrer">
+      {id}
     </a>
-    <span className="tags">
-      {tags.length > 0 && formatTags(tags)}
-    </span>
+    <div className="post-tags">{tags}</div>
   </div>
 );
 
 Post.propTypes = {
   id: PropTypes.string.isRequired,
-  slug: PropTypes.string,
+  // slug: PropTypes.string,
   post_url: PropTypes.string,
-  tags: PropTypes.arrayOf(PropTypes.string),
+  tags: PropTypes.node,
+  replaced: PropTypes.bool,
 };
 
 export default React.memo(Post);
