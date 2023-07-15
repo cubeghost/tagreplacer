@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import postTypeSprites from '../../assets/postTypes.svg';
 
 const Post = ({ id, legacy_type, post_url, replaced, slug, summary, tags, thumbnail }) => {
-  // TODO trunace summary much earlier
-
   return (
     <div className="post">
       <a className="post-permalink" href={post_url} target="_blank" rel="noopener noreferrer">
@@ -17,8 +15,11 @@ const Post = ({ id, legacy_type, post_url, replaced, slug, summary, tags, thumbn
         <span>{summary || (thumbnail ? '' : slug || id)}</span>
       </a>
       <div className="post-tags">{tags}</div>
-      {true && <div className="post-checkmark">✅</div>}
-
+      {replaced && (
+        <div className="post-checkmark">
+          <span role="img" aria-label="Checkmark">✅</span>
+        </div>
+      )}
     </div>
   );
 };

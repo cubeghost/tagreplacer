@@ -10,7 +10,7 @@ $font-monospace: Roboto Mono, monospace;
   --foreground-color: #000;
   --background-color-rgb: 255, 255, 255;
   --foreground-color-rgb: 0, 0, 0;
-  --post-background-color: rgba(255, 255, 255, 0.5);
+  --post-background-color: transparent;
 }
 
 :root.dark-mode {
@@ -171,8 +171,10 @@ nav {
   padding: 0.5rem 1rem;
   margin: 0.5rem 0;
   background-color: var(--post-background-color);
+  border: 1px dotted rgba(var(--foreground-color-rgb), 0.25);
   font-size: 0.8rem;
 
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -203,6 +205,13 @@ nav {
     display: block;
     height: 1.5rem;
     width: 1.5rem;
+  }
+
+  &-checkmark {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
   }
 }
 
