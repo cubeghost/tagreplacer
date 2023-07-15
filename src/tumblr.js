@@ -60,17 +60,76 @@ const METHODS_CONFIG = {
 };
 
 /**
+ * Determine a post's legacy type
+ * @param {object} post - Destructured into content and layout
+ * @param {Array} [post.trail] - Full post trail
+ * @param {Array} [post.content] - Post content array
+ * @param {Array} [post.layout] - Post layout array
+ * @returns {string} The determined legacy type of the post
+ * @see https://github.com/tumblr/docs/blob/master/npf-spec.md#mapping-npf-post-content-to-legacy-post-types
+ * @author April Sylph
+ * @see https://github.com/AprilSylph/XKit-Rewritten/blob/670310797365d76edfa09a28d1eff82f9f900079/src/util/interface.js#L56-L77
+ */
+const getLegacyPostType = ({ trail = [], content = [], layout = [] }) => {
+  content = trail[0]?.content || content;
+  layout = trail[0]?.layout || layout;
+
+  if (layout.some(({ type }) => type === 'ask')) return 'ask';
+  else if (content.some(({ type }) => type === 'video')) return 'video';
+  else if (content.some(({ type }) => type === 'image')) return 'photo';
+  else if (content.some(({ type }) => type === 'audio')) return 'audio';
+  else if (content.some(({ type, subtype }) => type === 'text' && subtype === 'quote')) return 'quote';
+  else if (content.some(({ type, subtype }) => type === 'text' && subtype === 'chat')) return 'chat';
+  else if (content.some(({ type }) => type === 'link')) return 'link';
+  else return 'text';
+};
+
+const getPostThumbnail = ({ trail = [], content = [], legacy_type }) => {
+  content = trail[0]?.content || content;
+
+  switch (legacy_type) {
+    case 'ask':
+    case 'audio':
+    case 'link':
+    case 'quote':
+    case 'chat':
+    case 'text':
+      return 'icon';
+    case 'photo': {
+      const images = _.filter(content, ['type', 'image']);
+      const sortedMedia = _.orderBy(images[0].media, ['width'], ['desc']);
+      const media = _.find(sortedMedia, ['cropped', true]) || sortedMedia[0];
+      return media?.url;
+    }
+    case 'video': {
+      const videos = _.filter(content, ['type', 'video']);
+      return videos[0].poster?.[0]?.url;
+    }
+    default:
+      return;
+  }
+};
+
+const addPostMetadata = (post) => {
+  post.legacy_type = getLegacyPostType(post);
+  post.thumbnail = getPostThumbnail(post);
+  return post;
+};
+
+/**
  * @typedef Post
  * @property id
  * @property id_string
+ * @property legacy_type
  * @property post_url
  * @property state
  * @property slug
+ * @property summary
  * @property tags
  * @property timestamp
- * @property type
+ * @property thumbnail
  */
-const POST_PROPERTIES = ['id', 'id_string', 'post_url', 'state', 'slug', 'tags', 'timestamp', 'type'];
+const POST_PROPERTIES = ['id', 'id_string', 'legacy_type', 'post_url', 'state', 'slug', 'summary', 'tags', 'timestamp', 'thumbnail'];
 /**
  * Trim properties from Tumblr API post object to match our slimmer Post
  * @param {Object} post Tumblr API response post
@@ -175,14 +234,13 @@ class TumblrClient {
   async findPostsWithTags(methodName, tags, params = {}) {
     const method = METHODS_CONFIG[methodName];
 
-    const sortedTags = _.chain(tags)
-      .sortBy()
-      .value();
+    const sortedTags = _.sortBy(tags);
     const firstTag = sortedTags[0];
 
     const response = await this.client[method.clientMethod](this.blog, {
       tag: firstTag,
       limit: POST_LIMIT,
+      npf: true,
       ...params,
     });
 
@@ -217,7 +275,7 @@ class TumblrClient {
     }
 
     let returnValue = {
-      posts: filteredPosts.map(trimPost),
+      posts: filteredPosts.map(addPostMetadata).map(trimPost),
       params: {},
       complete: false,
     };

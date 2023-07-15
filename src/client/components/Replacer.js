@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { useSelector, useDispatch, useStore } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import clsx from 'clsx';
 
 import OptionsIcon from './OptionsIcon';
@@ -9,8 +9,8 @@ import Posts from './Posts';
 import Options from './Options';
 import BlogSelect from './BlogSelect';
 import TagInput from './TagInput';
+import ResultsHeader from './ResultsHeader';
 import { find as findPosts, replace as replacePosts, reset } from '../state/actions';
-import { formatTags } from '../util';
 
 const Replacer = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const Replacer = () => {
   const findContainerRef = useRef();
   const replaceContainerRef = useRef();
 
-  const { blog, find, replace } = useSelector(state => state.form);
+  // const { blog, find, replace } = useSelector(state => state.form);
 
   const isLoading = useSelector(state => state.posts.loading);
   const [showOptions, setShowOptions] = useState(false);
@@ -155,44 +155,10 @@ const Replacer = () => {
         </div>
 
         <div className="column">
-          <div className="section sticky" style={{ top: "1rem" }}>
-            {showResults && (
-              <div>
-                found x{/** TODO */} results for{" "}
-                <a
-                  href={`https://${blog}.tumblr.com/tagged/${find}`}
-                  className="external-link"
-                >
-                  {formatTags(find)}
-                </a>
-              </div>
-            )}
-            {previewReplace && (
-              <div>
-                <br />
-                replacing with{" "}
-                <a
-                  href={`https://${blog}.tumblr.com/tagged/${replace}`}
-                  className="external-link"
-                >
-                  {formatTags(replace)}
-                </a>{" "}
-                (preview)
-              </div>
-            )}
-            {isReplaced && (
-              <div>
-                <br />
-                replaced with{" "}
-                <a
-                  href={`https://${blog}.tumblr.com/tagged/${replace}`}
-                  className="external-link"
-                >
-                  {formatTags(replace)}
-                </a>{" "}
-              </div>
-            )}
-          </div>
+          <ResultsHeader
+            isPreview={previewReplace}
+            isReplaced={isReplaced}
+          />
           {isLoading && <Loading />}
           <div>
             {showResults && (

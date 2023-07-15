@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import Select from 'react-select';
 
+import { selectStyles, selectTheme } from './Select';
 import { setFormValue } from '../state/actions';
 
 const BlogSelect = ({ disabled }) => {
@@ -28,6 +29,8 @@ const BlogSelect = ({ disabled }) => {
       className="react-select _specific"
       classNamePrefix="react-select"
       blurInputOnSelect
+      theme={selectTheme}
+      styles={selectStyles}
     />
   );
 };

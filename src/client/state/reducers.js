@@ -66,7 +66,7 @@ const postsReducer = (state = initialState.posts, action) => {
         },
         loading: !action.payload.complete,
       };
-    case tumblrReplaceMessage.toString():
+    case tumblrReplaceMessage.toString(): {
       const post = {
         ...state.entities[action.payload.postId],
         tags: action.payload.tags,
@@ -82,6 +82,7 @@ const postsReducer = (state = initialState.posts, action) => {
         entities: entities,
         loading: !complete,
       };
+    }
     case clearPosts.toString():
       return initialState.posts;
     default:

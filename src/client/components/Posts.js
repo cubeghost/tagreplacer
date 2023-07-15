@@ -4,6 +4,11 @@ import { useSelector } from 'react-redux';
 import Post from './Post';
 import {joinReactNodes} from '../util'
 
+/** TODO use actual Tags module for preview
+ * const Tags = require('./tags');
+ * tags = new Tags(options)
+ */
+
 const Posts = ({ isPreview }) => {
   const { find, replace } = useSelector(state => state.form);
   const posts = useSelector((state) => state.posts.entities);
@@ -27,11 +32,15 @@ const Posts = ({ isPreview }) => {
 
     return (
       <Post
-        id={post.id}
-        key={post.id}
-        permalink={post.post_url}
-        tags={joinReactNodes(tags, ', ')}
+        id={post.id_string}
+        key={post.id_string}
+        legacy_type={post.legacy_type}
+        post_url={post.post_url}
         replaced={post.replaced}
+        slug={post.slug}
+        summary={post.summary}
+        tags={joinReactNodes(tags, ', ')}
+        thumbnail={post.thumbnail}
       />
     );
   });

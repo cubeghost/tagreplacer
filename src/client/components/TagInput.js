@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import Creatable from 'react-select/creatable';
 
+import { selectStyles, selectTheme } from './Select';
 import { setFormValue } from '../state/actions';
 import { mapForSelect } from '../util';
 
@@ -36,8 +37,8 @@ const TagInput = ({ name, disabled, setRef }) => {
       formatCreateLabel={formatCreateLabel}
       arrowRenderer={arrowRenderer}
       isClearable={false}
-      className="react-select _specific"
-      classNamePrefix="react-select"
+      theme={selectTheme}
+      styles={selectStyles}
     />
   );
 }

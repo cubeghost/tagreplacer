@@ -1,18 +1,23 @@
 $font-sans-serif: system-ui, sans-serif;
 $font-monospace: Roboto Mono, monospace;
 
-// @import 'reset';
+// @import 'input';
 @import 'markdown';
 
 :root {
+  --container-width: 60rem;
   --background-color: #fff;
   --foreground-color: #000;
+  --background-color-rgb: 255, 255, 255;
+  --foreground-color-rgb: 0, 0, 0;
   --post-background-color: rgba(255, 255, 255, 0.5);
 }
 
 :root.dark-mode {
   --background-color: #000;
   --foreground-color: #fff;
+  --background-color-rgb: 0, 0, 0;
+  --foreground-color-rgb: 255, 255, 255;
   --post-background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -54,6 +59,11 @@ header {
   }
 }
 
+footer {
+  margin-top: auto;
+  padding: 1rem;
+}
+
 a {
   color: inherit;
 }
@@ -68,7 +78,7 @@ nav {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  max-width: 60rem;
+  max-width: var(--container-width);
   padding: 0 2rem;
   margin-left: auto;
   margin-right: auto;
@@ -135,7 +145,7 @@ nav {
   fill: var(--foreground-color);
 }
 
-@keyframes fillStroke {
+@keyframes connectStroke {
   to {
     stroke-dashoffset: 0;
   }
@@ -145,7 +155,7 @@ nav {
   stroke-dashoffset: 1000;
 }
 .svg-connector-enabled .mask-path {
-  animation: fillStroke 2200ms linear forwards;
+  animation: connectStroke 2200ms linear forwards;
 }
 .svg-connector .svg-connector-path {
   stroke: var(--foreground-color);
@@ -165,9 +175,85 @@ nav {
 
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+
+  &-permalink {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    span {
+      max-width: min(20vw, calc(var(--container-width) / 5));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &:empty {
+        display: none;
+      }
+    }
+  }
 
   &-tags {
-    margin-left: 0.5rem;
     opacity: 0.5;
+  }
+
+  &-thumbnail {
+    display: block;
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+}
+
+@keyframes rectDash {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.connect {
+  display: block;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  width: 80%;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-size: 4vw;
+  font-size: clamp(1rem, 4vw, 2.5rem);
+
+  svg {
+    --rect-length: 255.3469;
+
+    position: absolute;
+    height: 100%;
+    max-width: 90vw;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    rect.dashed {
+      stroke: rgba(var(--foreground-color-rgb), 0.25);
+      stroke-dasharray: 1;
+    }
+    rect.stroke {
+      stroke-width: 2px;
+      stroke: rgba(var(--background-color-rgb), 0.75);
+      stroke-dasharray: var(--rect-length);
+      stroke-dashoffset: var(--rect-length);
+    }
+  }
+
+  &:hover svg,
+  &:active svg {
+    rect.dashed {
+      stroke: rgba(var(--foreground-color-rgb), 1);
+    }
+    rect.stroke {
+      stroke-dasharray: calc(var(--rect-length) - 40) 40;
+      animation: rectDash 6s linear infinite;
+    }
   }
 }
