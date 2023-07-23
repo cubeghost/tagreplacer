@@ -1,7 +1,6 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
 import keyBy from 'lodash/keyBy';
-import every from 'lodash/every';
 
 import initialState from './initial';
 import {
@@ -10,6 +9,9 @@ import {
   replace,
   setFormValue,
   resetFormValue,
+  nextStep,
+  previousStep,
+  resetStep,
   setOption,
   resetOptions,
   clearPosts,
@@ -76,11 +78,10 @@ const postsReducer = (state = initialState.posts, action) => {
         ...state.entities,
         [action.payload.postId]: post,
       };
-      const complete = every(Object.values(entities), ['replaced', true]);
       return {
         ...state,
         entities: entities,
-        loading: !complete,
+        loading: !action.payload.complete,
       };
     }
     case clearPosts.toString():
@@ -103,6 +104,30 @@ const formReducer = (state = initialState.form, action) => {
     case resetFormValue.toString():
       return { ...state,
         [action.payload.key]: initialState.form[action.payload.key],
+      };
+    case tumblrFindMessage.toString():
+      return {
+        ...state,
+        step: (action.payload.posts.length > 0 && action.payload.complete) ? state.step + 1 : state.step,
+      };
+    case tumblrReplaceMessage.toString():
+      return {...state,
+        step: action.payload.complete ? state.step + 1 : state.step,
+      };
+    case nextStep.toString():
+      return {
+        ...state,
+        step: state.step + 1,
+      };
+    case previousStep.toString():
+      return {
+        ...state,
+        step: state.step - 1,
+      };
+    case resetStep.toString():
+      return {
+        ...state,
+        step: 0,
       };
     default:
       return state;

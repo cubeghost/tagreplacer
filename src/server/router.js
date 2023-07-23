@@ -102,7 +102,7 @@ apiRouter.post('/replace', asyncHandler(async (req, res) => {
   const params = { sessionId, blog, find, replace, options };
 
   for await (let post of posts) {
-    await tumblrQueue.add('replace', { ...params, postId: post.id_string, tags: post.tags });
+    await tumblrQueue.add('replace', { ...params, postId: post.id, tags: post.tags });
   }
 
   // TODO queue something to check for done and notify

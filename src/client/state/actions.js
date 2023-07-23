@@ -1,5 +1,6 @@
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 import pick from 'lodash/pick';
+import every from 'lodash/every';
 
 import { apiFetch } from '../api';
 
@@ -23,6 +24,10 @@ export const setFormValue = createAction('form/SET_VALUE', (key, value) => ({
 export const resetFormValue = createAction('form/RESET_VALUE', key => ({
   payload: { key },
 }));
+
+export const nextStep = createAction('form/step/NEXT');
+export const previousStep = createAction('form/step/PREVIOUS');
+export const resetStep = createAction('form/step/RESET');
 
 export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) => {
   try {
@@ -71,13 +76,32 @@ export const clearPosts = createAction('posts/CLEAR');
 export const reset = () => dispatch => {
   return Promise.all([
     dispatch(clearPosts()),
+    dispatch(resetStep()),
     dispatch(resetFormValue('find')),
     dispatch(resetFormValue('replace')),
   ]);
 };
 
+const isReplaceComplete = (payload, state) => {
+  const posts = {
+    ...state.posts.entities,
+    [payload.postId]: {
+      replaced: true,
+    },
+  };
+  return every(Object.values(posts), ['replaced', true]);
+}
+
 export const tumblrFindMessage = createAction('queue/tumblr/FIND');
-export const tumblrReplaceMessage = createAction('queue/tumblr/REPLACE');
+export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatch({
+  type: 'queue/tumblr/REPLACE',
+  payload: {
+    ...payload,
+    complete: isReplaceComplete(payload, getState()),
+  }
+});
+tumblrReplaceMessage.toString = () => 'queue/tumblr/REPLACE';
+
 
 import queues from '../../queues';
 
