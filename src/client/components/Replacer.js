@@ -10,7 +10,7 @@ import Options from './Options';
 import BlogSelect from './BlogSelect';
 import TagInput from './TagInput';
 import ResultsHeader from './ResultsHeader';
-import { find as findPosts, nextStep, replace as replacePosts, reset } from '../state/actions';
+import { find as findPosts, replace as replacePosts, nextStep, previousStep, reset } from '../state/actions';
 import { useStep, useCan } from '../steps';
 
 const Replacer = () => {
@@ -21,24 +21,16 @@ const Replacer = () => {
   const replaceContainerRef = useRef();
 
   const step = useStep();
+  console.log(step)
 
   const canFind = useCan('find');
   const canReplace = useCan('replace');
   const canOptions = useCan('options');
   const canNext = useCan('next');
-  console.log('step', step)
-  const isPreviewing = step.key === 'replace';
-  const isReplaced = step.key === 'replaced';
-
-  // const { blog, find, replace } = useSelector(state => state.form);
+  const isPreviewReplace = step.key === 'replace';
 
   const isLoading = useSelector(state => state.posts.loading);
   const [showOptions, setShowOptions] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  // const [canFind, setCanFind] = useState(true);
-  // const [canReplace, setCanReplace] = useState(false);
-  // const [previewReplace, setPreviewReplace] = useState(false);
-  // const [isReplaced, setIsReplaced] = useState(false);
 
   const preventFormSubmit = (event) => event.preventDefault();
 
@@ -59,10 +51,6 @@ const Replacer = () => {
 
   const doFind = useCallback(async () => {
     await dispatch(findPosts());
-
-    // setCanFind(false);
-    // setCanReplace(true);
-    setShowResults(true);
   }, []);
 
   const doPreview = useCallback(async () => {
@@ -70,19 +58,15 @@ const Replacer = () => {
   }, []);
 
   const doReplace = useCallback(async () => {
-    // setPreviewReplace(false);
-    // setCanReplace(false);
-    
     await dispatch(replacePosts());
-
-    // setIsReplaced(true);
   }, []);
 
   const doReset = useCallback(() => {
     dispatch(reset());
-    // setPreviewReplace(false);
-    // setCanFind(true);
-    // setCanReplace(false);
+  }, []);
+
+  const stepBack = useCallback(() => {
+    dispatch(previousStep());
   }, []);
 
   return (
@@ -159,27 +143,23 @@ const Replacer = () => {
             >
               <legend><label htmlFor="replace">replace</label></legend>
               <TagInput name="replace" disabled={!canReplace} />
-              <button onClick={doPreview} disabled={canReplace && !canNext}>
-                {isPreviewing ? "cancel" : "preview"}
+              <button onClick={isPreviewReplace ? stepBack : doPreview} disabled={canReplace && !canNext}>
+                {isPreviewReplace ? "cancel" : "preview"}
               </button>
-              {isPreviewing && (
+              {isPreviewReplace && (
                 <button onClick={doReplace} disabled={canReplace && !canNext}>replace</button>
               )}
             </fieldset>
           </form>
-          {step.index > 0 && <button onClick={doReset}>start over</button>}
+          {step.index > 0 && <button onClick={stepBack}>&larr;</button>}
+          {step.index > 0 && <button onClick={doReset}>reset</button>}
         </div>
 
         <div className="column">
-          <ResultsHeader
-            isPreview={isPreviewing}
-            isReplaced={isReplaced}
-          />
+          <ResultsHeader />
           {isLoading && <Loading />}
           <div>
-            {showResults && (
-              <Posts isPreview={isPreviewing} />
-            )}
+            {step.index > 0 && <Posts />}
           </div>
         </div>
       </div>

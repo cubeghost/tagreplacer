@@ -106,6 +106,8 @@ const formReducer = (state = initialState.form, action) => {
         [action.payload.key]: initialState.form[action.payload.key],
       };
     case tumblrFindMessage.toString():
+      // TODO when finding drafts/queue, we get multiple "complete" messages
+      // should we go back to using listeners for the queue complete -> next step stuff? hmm
       return {
         ...state,
         step: (action.payload.posts.length > 0 && action.payload.complete) ? state.step + 1 : state.step,

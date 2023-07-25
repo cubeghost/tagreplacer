@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
 import { useSelector, shallowEqual } from 'react-redux';
 
 import Post from './Post';

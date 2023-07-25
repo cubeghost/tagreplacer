@@ -34,6 +34,24 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.tracingHandler());
 }
 
+if (process.env.NODE_ENV === 'development') {
+  const { createBullBoard } = require('@bull-board/api');
+  const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
+  const { ExpressAdapter } = require('@bull-board/express');
+
+  const { tumblrQueue } = require('../queues');
+
+  const serverAdapter = new ExpressAdapter();
+
+  const board = createBullBoard({
+    queues: [new BullMQAdapter(tumblrQueue)],
+    serverAdapter: serverAdapter,
+  });
+
+  serverAdapter.setBasePath('/admin/queues');
+  app.use('/admin/queues', serverAdapter.getRouter());
+}
+
 const grant = new Grant({
   defaults: {
     protocol: process.env.PROTOCOL,

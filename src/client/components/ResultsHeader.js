@@ -1,26 +1,58 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
 
 import { formatTags } from '../util';
+import { useStep } from '../steps';
+import countBy from 'lodash/countBy';
 
-const ResultsHeader = ({ isPreview, isReplaced }) => {
+const listFormatter = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
+
+const ResultsHeader = () => {
+  const step = useStep();
   const { includeQueue, includeDrafts } = useSelector(state => state.options);
   const { blog, find, replace } = useSelector(state => state.form);
-  const postsCount = useSelector(state => Object.keys(state.posts.entities).length);
+
+  const separatePostCounts = includeQueue || includeDrafts;
+  const postCounts = useSelector((state) => {
+    const posts = Object.values(state.posts.entities);
+    const counts = countBy(posts, (post) => {
+      if (post.state === 'published' || post.state === 'private') {
+        return 'published';
+      } else {
+        return post.state;
+      }
+    });
+
+    return {
+      total: posts.length,
+      published: counts.published || 0,
+      queued: counts.queued || 0,
+      draft: counts.draft || 0,
+    };
+  });
+  const hasFound = step.index > 0;
+  const isPreviewReplace = step.key === 'replace';
+  const isReplaced = step.key === 'replaced';
 
   return (
     <div className="section sticky" style={{ top: "1rem" }}>
-      <div>
-        found {postsCount} results for{" "}
-        <a
-          href={`https://${blog}.tumblr.com/tagged/${find}`}
-          className="external-link"
-        >
-          {formatTags(find)}
-        </a>
-      </div>
-      {isPreview && (
+      {hasFound && (
+        <div>
+          found{" "}
+          {separatePostCounts ? listFormatter.format([
+            `${postCounts.published} published`,
+            includeQueue && `${postCounts.queued} queued`,
+            includeDrafts && `${postCounts.draft} drafted`
+          ].filter(Boolean)) : postCounts.total} posts for{" "}
+          <a
+            href={`https://${blog}.tumblr.com/tagged/${find}`}
+            className="external-link"
+          >
+            {formatTags(find)}
+          </a>
+        </div>
+      )}
+      {isPreviewReplace && (
         <div>
           <br />
           replacing with{" "}
@@ -47,11 +79,6 @@ const ResultsHeader = ({ isPreview, isReplaced }) => {
       )}
     </div>
   );
-};
-
-ResultsHeader.propTypes = {
-  isPreview: PropTypes.bool,
-  isReplaced: PropTypes.bool,
 };
 
 export default React.memo(ResultsHeader);

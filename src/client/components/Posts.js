@@ -1,21 +1,26 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import orderBy from 'lodash/orderBy';
 
 import Post from './Post';
 import {joinReactNodes} from '../util'
+import { useStep } from '../steps';
 
 /** TODO use actual Tags module for preview
  * const Tags = require('./tags');
  * tags = new Tags(options)
  */
 
-const Posts = ({ isPreview }) => {
+const Posts = () => {
+  const step = useStep();
+  const isPreviewReplace = step.key === 'replace';
+
   const { find, replace } = useSelector(state => state.form);
   const posts = useSelector((state) => state.posts.entities);
 
-  return Object.values(posts).map((post) => {
+  return orderBy(Object.values(posts), ['timestamp']).map((post) => {
     const tags = post.tags.map((tag) => {
-      if (isPreview && find.includes(tag)) {
+      if (isPreviewReplace && find.includes(tag)) {
         return <strong key={tag}>#{replace}</strong>;
       }
       if (post.replaced && replace.includes(tag)) {

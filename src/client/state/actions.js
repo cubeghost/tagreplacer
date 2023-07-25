@@ -103,9 +103,9 @@ export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatc
 tumblrReplaceMessage.toString = () => 'queue/tumblr/REPLACE';
 
 
-import queues from '../../queues';
+import { TUMBLR_QUEUE } from '../../consts';
 
 export const jobTypeActionMap = {
-  [`${queues.TUMBLR_QUEUE}:find`]: tumblrFindMessage,
-  [`${queues.TUMBLR_QUEUE}:replace`]: tumblrReplaceMessage,
+  [`${TUMBLR_QUEUE}:find`]: tumblrFindMessage,
+  [`${TUMBLR_QUEUE}:replace`]: tumblrReplaceMessage,
 };

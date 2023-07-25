@@ -1,8 +1,15 @@
-const TUMBLR_QUEUE = 'tumblr';
+const { Queue } = require('bullmq');
 
-const MESSAGE_QUEUE = sessionId => `messages:${sessionId}`;
+const connection = require('./redis');
+const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('./consts');
+
+const tumblrQueue = new Queue(TUMBLR_QUEUE, { connection });
+
+const getMessageQueueName = sessionId => `${MESSAGE_QUEUE}:${sessionId}`;
+const getMessageQueue = sessionId => new Queue(getMessageQueueName(sessionId), { connection });
 
 module.exports = {
-  TUMBLR_QUEUE,
-  MESSAGE_QUEUE,
+  tumblrQueue,
+  getMessageQueue,
+  getMessageQueueName,
 };

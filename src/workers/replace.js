@@ -1,11 +1,9 @@
 require('dotenv').config();
 
-const { Queue } = require('bullmq');
 const get = require('lodash/get');
 
-const { TUMBLR_QUEUE, MESSAGE_QUEUE } = require('../queues');
+const { tumblrQueue, getMessageQueue } = require('../queues');
 const { getSession } = require('../server/session');
-const connection = require('../redis');
 const TumblrClient = require('../tumblr');
 
 /**
@@ -30,7 +28,7 @@ module.exports = async (job) => {
   } = job.data;
 
   const session = await getSession(sessionId);
-  const messageQueue = new Queue(MESSAGE_QUEUE(sessionId), { connection });
+  const messageQueue = getMessageQueue(sessionId);
   const token = get(session, 'grant.response.access_token');
   const client = new TumblrClient({
     token,
@@ -41,7 +39,7 @@ module.exports = async (job) => {
   const response = await client.replacePostTags(postId, tags, find, replace);
 
   await messageQueue.add('message', {
-    jobType: `${TUMBLR_QUEUE}:replace`,
+    jobType: `${tumblrQueue.name}:replace`,
     blog,
     postId,
     find,

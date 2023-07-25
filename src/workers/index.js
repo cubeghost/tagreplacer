@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { Worker } = require('bullmq');
 
-const { TUMBLR_QUEUE } = require('../queues');
+const { tumblrQueue } = require('../queues');
 const connection = require('../redis');
 
 const processFind = require('./find');
@@ -16,12 +16,12 @@ const processor = async (job) => {
       return await processReplace(job);
     default:
       // eslint-disable-next-line no-console
-      console.warn(`Unhandled ${TUMBLR_QUEUE} job`, job);
+      console.warn(`Unhandled ${tumblrQueue.name} job`, job);
       return;
   }
 }
 
-const tumblrWorker = new Worker(TUMBLR_QUEUE, processor, {
+const tumblrWorker = new Worker(tumblrQueue.name, processor, {
   connection,
   // https://www.tumblr.com/docs/en/api/v2#rate-limits
   limiter: {

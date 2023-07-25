@@ -2,14 +2,10 @@ const path = require('path');
 const express = require('express');
 const asyncHandler = require('express-async-handler');
 const bodyParser = require('body-parser');
-const { Queue } = require('bullmq');
 
 const TumblrClient = require('../tumblr');
-const { TUMBLR_QUEUE } = require('../queues');
-const connection = require('../redis');
+const { tumblrQueue } = require('../queues');
 const logger = require('../logger');
-
-const tumblrQueue = new Queue(TUMBLR_QUEUE, { connection });
 
 // web router
 const webRouter = express.Router();
@@ -78,6 +74,7 @@ apiRouter.post('/find', asyncHandler(async (req, res) => {
 
   await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.POSTS });
   // includeQueue and includeDrafts feels out of date, maybe the front end can send 'methods'?
+  // yeah this will make the completeness issue easier to fix too
   if (options.includeQueue) {
     await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.QUEUED });
   }
