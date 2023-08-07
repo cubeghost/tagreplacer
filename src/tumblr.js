@@ -4,6 +4,7 @@ const _ = require('lodash');
 const tumblr = require('tumblr.js');
 const Sentry = require('@sentry/node');
 
+const { METHODS } = require('./consts');
 const Tags = require('./tags');
 const logger = require('./logger');
 
@@ -18,18 +19,6 @@ const REPLACE_SOFT_LIMIT = 500 - POST_LIMIT;
 const DEFAULT_OPTIONS = {
   caseSensitive: false,
   allowDelete: false,
-};
-
-/**
- * @typedef MethodName
- * @property {string} POSTS posts
- * @property {string} QUEUED queued
- * @property {string} DRAFTS drafts
- */
-const METHODS = {
-  POSTS: 'posts',
-  QUEUED: 'queued',
-  DRAFTS: 'drafts',
 };
 
 /**

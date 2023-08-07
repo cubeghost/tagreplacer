@@ -3,6 +3,7 @@ import pick from 'lodash/pick';
 import every from 'lodash/every';
 
 import { apiFetch } from '../api';
+import { METHODS, TUMBLR_QUEUE } from '../../consts';
 
 export const websocketConnect = createAction('websocket/CONNECT');
 export const websocketConnected = createAction('websocket/CONNECTED');
@@ -43,7 +44,8 @@ export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) =
 
 export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => {
   const { form: { blog, find }, options } = thunkAPI.getState();
-  const body = { blog, find, options };
+  const methods = [METHODS.POSTS, options.includeQueue && METHODS.QUEUED, options.includeDrafts && METHODS.DRAFTS].filter(Boolean);
+  const body = { blog, find, options, methods };
 
   try {
     const response = await apiFetch('POST', '/find', body);
@@ -82,6 +84,14 @@ export const reset = () => dispatch => {
   ]);
 };
 
+const isFindComplete = (payload, state) => {
+  const methodsFound = {
+    ...state.posts.methodsFound,
+    [payload.methodName]: payload.complete,
+  };
+  return Object.values(methodsFound).every(Boolean);
+};
+
 const isReplaceComplete = (payload, state) => {
   const posts = {
     ...state.posts.entities,
@@ -92,7 +102,15 @@ const isReplaceComplete = (payload, state) => {
   return every(Object.values(posts), ['replaced', true]);
 }
 
-export const tumblrFindMessage = createAction('queue/tumblr/FIND');
+export const tumblrFindMessage = payload => (dispatch, getState) => dispatch({
+  type: 'queue/tumblr/FIND',
+  payload: {
+    ...payload,
+    allComplete: isFindComplete(payload, getState())
+  }
+});
+tumblrFindMessage.toString = () => 'queue/tumblr/FIND';
+
 export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatch({
   type: 'queue/tumblr/REPLACE',
   payload: {
@@ -101,9 +119,6 @@ export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatc
   }
 });
 tumblrReplaceMessage.toString = () => 'queue/tumblr/REPLACE';
-
-
-import { TUMBLR_QUEUE } from '../../consts';
 
 export const jobTypeActionMap = {
   [`${TUMBLR_QUEUE}:find`]: tumblrFindMessage,

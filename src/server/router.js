@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const TumblrClient = require('../tumblr');
 const { tumblrQueue } = require('../queues');
 const logger = require('../logger');
+const { METHODS } = require('../consts');
 
 // web router
 const webRouter = express.Router();
@@ -63,7 +64,7 @@ apiRouter.get('/user', function(req, res, next) {
 
 apiRouter.post('/find', asyncHandler(async (req, res) => {
   const sessionId = req.session.id;
-  const { blog, find, options } = req.body;
+  const { blog, find, options, methods } = req.body;
 
   if (!(blog && find)) {
     res.status(400).send('POST body must include "blog" and "find"');
@@ -71,16 +72,14 @@ apiRouter.post('/find', asyncHandler(async (req, res) => {
   }
 
   const params = { sessionId, blog, find, options };
+  for (const method of methods) {
+    if (!Object.values(METHODS).includes(method)) {
+      logger.warn(`Unsupported find method ${method}`);
+      return;
+    }
 
-  await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.POSTS });
-  // includeQueue and includeDrafts feels out of date, maybe the front end can send 'methods'?
-  // yeah this will make the completeness issue easier to fix too
-  if (options.includeQueue) {
-    await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.QUEUED });
-  }
-  if (options.includeDrafts) {
-    await tumblrQueue.add('find', { ...params, methodName: TumblrClient.methods.DRAFTS });
-  }
+    await tumblrQueue.add('find', { ...params, methodName: method });
+  } 
 
   res.json({
     success: true,

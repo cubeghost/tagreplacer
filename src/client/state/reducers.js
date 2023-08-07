@@ -59,6 +59,11 @@ const postsReducer = (state = initialState.posts, action) => {
         ...state,
         loading: false,
       };
+    case find.fulfilled.toString():
+      return {
+        ...state,
+        methodsFound: Object.fromEntries(action.meta.body.methods.map(method => ([method, false]))),
+      };
     case tumblrFindMessage.toString():
       return {
         ...state,
@@ -66,7 +71,11 @@ const postsReducer = (state = initialState.posts, action) => {
           ...state.entities,
           ...keyBy(action.payload.posts, 'id'),
         },
-        loading: !action.payload.complete,
+        loading: !action.payload.allComplete,
+        methodsFound: {
+          ...state.methodsFound,
+          [action.payload.methodName]: action.payload.complete,
+        },
       };
     case tumblrReplaceMessage.toString(): {
       const post = {
@@ -106,11 +115,9 @@ const formReducer = (state = initialState.form, action) => {
         [action.payload.key]: initialState.form[action.payload.key],
       };
     case tumblrFindMessage.toString():
-      // TODO when finding drafts/queue, we get multiple "complete" messages
-      // should we go back to using listeners for the queue complete -> next step stuff? hmm
       return {
         ...state,
-        step: (action.payload.posts.length > 0 && action.payload.complete) ? state.step + 1 : state.step,
+        step: (action.payload.posts.length > 0 && action.payload.allComplete) ? state.step + 1 : state.step,
       };
     case tumblrReplaceMessage.toString():
       return {...state,
@@ -156,25 +163,6 @@ const errorsReducer = (state = initialState.errors, action) => {
     return state;
   }
 };
-
-// const loadingReducer = (state = initialState.loading, action) => {
-//   const postfix = action.type.match(/\/(pending|fulfilled|rejected)$/)?.[1];
-//   if (postfix && !action.meta?.waitingForQueue) {
-//     switch (postfix) {
-//       case 'pending':
-//         return true;
-//       case 'fulfilled':
-//       case 'rejected':
-//         return false;
-//       default:
-//         return state;
-//     }
-//   } else if (action.type === tumblrFindMessage.toString()) {
-//     return !action.payload.complete;
-//   } else {
-//     return state;
-//   }
-// };
 
 export default combineReducers({
   tumblr: tumblrReducer,
