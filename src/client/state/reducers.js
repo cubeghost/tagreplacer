@@ -48,6 +48,10 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 const postsReducer = (state = initialState.posts, action) => {
   switch (action.type) {
     case find.pending.toString():
+      return {
+        entities: initialState.posts.entities,
+        loading: true,
+      };
     case replace.pending.toString():
       return {
         ...state,

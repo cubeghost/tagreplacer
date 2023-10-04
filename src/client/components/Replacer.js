@@ -107,19 +107,20 @@ const Replacer = () => {
           >
             <fieldset className={clsx(
               "section",
-              canFind ? "section-enabled" : "section-disabled"
+              canFind ? "section--enabled" : "section--disabled"
             )}>
               <legend><label htmlFor="find">find</label></legend>
               <TagInput name="find" disabled={!canFind} />
-              <button onClick={doFind} disabled={canFind && !canNext}>
-                go
-                <img
-                  src="https://unpkg.com/pixelarticons@latest/svg/search.svg"
-                  height="12"
-                  alt="find"
-                />
-              </button>
-
+              <div className="actions">
+                <button onClick={doFind} disabled={canFind && !canNext} className="button">
+                  go&nbsp;
+                  <img
+                    src="https://unpkg.com/pixelarticons@latest/svg/search.svg"
+                    height="12"
+                    alt="find"
+                  />
+                </button>
+              </div>
             </fieldset>
           </form>
           <Connector
@@ -137,22 +138,36 @@ const Replacer = () => {
             <fieldset 
               className={clsx(
                 "section",
-                canReplace ? "section-enabled" : "section-disabled"
+                canReplace ? "section--enabled" : "section--disabled"
               )} 
               style={{ opacity: canReplace ? 1 : 0.25 }}
             >
               <legend><label htmlFor="replace">replace</label></legend>
               <TagInput name="replace" disabled={!canReplace} />
-              <button onClick={isPreviewReplace ? stepBack : doPreview} disabled={canReplace && !canNext}>
-                {isPreviewReplace ? "cancel" : "preview"}
-              </button>
-              {isPreviewReplace && (
-                <button onClick={doReplace} disabled={canReplace && !canNext}>replace</button>
-              )}
+              <div className="actions">
+                <button
+                  onClick={isPreviewReplace ? stepBack : doPreview}
+                  disabled={canReplace && !canNext}
+                  className="button"
+                >
+                  {isPreviewReplace ? "cancel" : "preview"}
+                </button>
+                {isPreviewReplace && (
+                  <button
+                    onClick={doReplace}
+                    disabled={canReplace && !canNext}
+                    className="button"
+                  >
+                    replace
+                  </button>
+                )}
+              </div>
             </fieldset>
           </form>
-          {step.index > 0 && <button onClick={stepBack}>&larr;</button>}
-          {step.index > 0 && <button onClick={doReset}>reset</button>}
+          <div className="actions">
+            {step.index > 0 && <button onClick={stepBack} className="button">&larr;</button>}
+            {step.index > 0 && <button onClick={doReset} className="button">reset</button>}
+          </div>
         </div>
 
         <div className="column">

@@ -90,22 +90,55 @@ nav {
 }
 
 .section {
+  position: relative;
   padding: 1rem;
+  padding-bottom: 1.5rem;
   margin: 1rem 0;
   border: 1px solid var(--foreground-color);
   background-color: var(--background-color);
 
-  &-disabled {
+  &--disabled {
     opacity: 0.25;
   }
 
-  &-enabled {
+  &--enabled {
     opacity: 1;
     transition: 200ms ease opacity;
   }
 
   &:empty {
     display: none;
+  }
+}
+
+.section .actions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-right: 1rem;
+  padding-inline-start: 2px;
+  padding-inline-end: 2px;
+  transform: translateY(50%);
+  background-color: var(--background-color);
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+}
+
+button.button {
+  background-color: var(--background-color);
+  border: 1px solid var(--foreground-color);
+  border-radius: 4px;
+  padding: 3px 8px;
+
+  &:disabled {
+    border-color: rgba(var(--foreground-color-rgb), 0.25);
+  }
+
+  &:not(:disabled):active {
+    background-color: rgba(var(--foreground-color-rgb), 0.25);
   }
 }
 
