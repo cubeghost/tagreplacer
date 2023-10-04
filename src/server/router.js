@@ -1,14 +1,12 @@
-/* eslint-disable new-cap */
-
-require('dotenv').config();
-
-const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
+const express = require('express');
+const asyncHandler = require('express-async-handler');
+const bodyParser = require('body-parser');
 
-const TumblrClient = require('./tumblr');
-const logger = require('./logger');
-
+const TumblrClient = require('../tumblr');
+const { tumblrQueue } = require('../queues');
+const logger = require('../logger');
+const { METHODS } = require('../consts');
 
 // web router
 const webRouter = express.Router();
@@ -16,7 +14,7 @@ const buildDir = path.resolve('build');
 
 webRouter.use(express.static(buildDir));
 
-const render = (req, res) => {
+const render = (_req, res) => {
   res.sendFile(path.join(buildDir, '/index.html'));
 };
 
@@ -33,6 +31,7 @@ apiRouter.use(bodyParser.json());
 
 apiRouter.use(function(req, res, next) {
   if (req.session && req.session.grant && req.session.grant.response && !req.session.grant.response.error) {
+    // console.log(req.session.id, req.session.grant.response)
     next();
   } else {
     res.statusMessage = 'No user session';
@@ -43,52 +42,75 @@ apiRouter.use(function(req, res, next) {
 });
 
 apiRouter.get('/user', function(req, res, next) {
+  if (req.session.tumblr?.name && req.session.tumblr?.blogs) {
+    res.json(req.session.tumblr);
+    return;
+  }
+
   const token = req.session.grant.response.access_token;
   const secret = req.session.grant.response.access_secret;
 
   const client = new TumblrClient({ token, secret });
 
   client.getUserInfo()
-    .then(result => res.json(result.user))
+    .then(result => {
+      req.session.tumblr = {
+        name: result.user.name,
+        blogs: result.user.blogs.map(blog => blog.name),
+      };
+      res.json(req.session.tumblr);
+    })
     .catch(error => next(error));
 });
 
-apiRouter.post('/find', function(req, res, next) {
-  if (req.body.blog && req.body.find) {
-    const token = req.session.grant.response.access_token;
-    const secret = req.session.grant.response.access_secret;
-    const blog = req.body.blog;
-    const options = req.body.options;
+apiRouter.post('/find', asyncHandler(async (req, res) => {
+  const sessionId = req.session.id;
+  const { blog, find, options, methods } = req.body;
 
-    const client = new TumblrClient({ token, secret, blog, options });
-
-    client.findPostsWithTags(req.body.find)
-      .then(result => res.json(result))
-      .catch(error => next(error));
-  } else {
+  if (!(blog && find)) {
     res.status(400).send('POST body must include "blog" and "find"');
+    return;
   }
-});
 
-apiRouter.post('/replace', function(req, res, next) {
-  if (req.body.blog && req.body.find && req.body.replace) {
-    const token = req.session.grant.response.access_token;
-    const secret = req.session.grant.response.access_secret;
-    const blog = req.body.blog;
-    const options = req.body.options;
+  const params = { sessionId, blog, find, options };
+  for (const method of methods) {
+    if (!Object.values(METHODS).includes(method)) {
+      logger.warn(`Unsupported find method ${method}`);
+      return;
+    }
 
-    const client = new TumblrClient({ token, secret, blog, options });
+    await tumblrQueue.add('find', { ...params, methodName: method });
+  } 
 
-    client.findAndReplaceTags(req.body.find, req.body.replace)
-      .then(result => res.json(result))
-      .catch(error => next(error));
-  } else {
-    res.status(400).send('POST body must include "blog", "find", and "replace"');
+  res.json({
+    success: true,
+  });
+}));
+
+apiRouter.post('/replace', asyncHandler(async (req, res) => {
+  const sessionId = req.session.id;
+  const { blog, find, replace, options, posts } = req.body;
+
+  if (!(blog && find && replace && posts?.length)) {
+    res.status(400).send('POST body must include "blog", "find", "replace", and "posts"');
+    return;
   }
-});
+
+  const params = { sessionId, blog, find, replace, options };
+
+  for await (let post of posts) {
+    await tumblrQueue.add('replace', { ...params, postId: post.id, tags: post.tags });
+  }
+
+  // TODO queue something to check for done and notify
+
+  res.json({
+    success: true,
+  });
+}));
 
 // error handling
-apiRouter.use(function(error, req, res, next) {
+apiRouter.use(function(error, req, res) {
   logger.error(error.message, {
     error: {
       stack: error.stack,

@@ -1,154 +1,126 @@
-import { get } from 'lodash';
+import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
+import pick from 'lodash/pick';
+import every from 'lodash/every';
 
-const PRODUCTION = process.env.NODE_ENV === 'production';
-const DEFAULT_BLOG = PRODUCTION ? undefined : process.env.TESTING_BLOG;
+import { apiFetch } from '../api';
+import { METHODS, TUMBLR_QUEUE } from '../../consts';
 
-export const actionTypes = {
-  TUMBLR_GET_USER: 'tumblr/GET_USER',
-  TUMBLR_FIND_TAGS: 'tumblr/FIND_TAGS',
-  TUMBLR_REPLACE_TAGS: 'tumblr/REPLACE_TAGS',
-  TUMBLR_CLEAR_POSTS: 'tumblr/CLEAR_POSTS',
-  SET_OPTION: 'options/SET',
-  RESET_OPTIONS: 'options/RESET',
-  SET_FORM_VALUE: 'form/SET_VALUE',
-  RESET_FORM_VALUE: 'form/RESET_VALUE',
-  ADD_ERROR: 'errors/ADD',
-  SET_LOADING: 'loading/SET',
-};
+export const websocketConnect = createAction('websocket/CONNECT');
+export const websocketConnected = createAction('websocket/CONNECTED');
+export const websocketDisconnect = createAction('websocket/DISCONNECT');
+export const websocketDisconnected = createAction('websocket/DISCONNECTED');
+export const websocketSend = createAction('websocket/SEND');
+export const websocketReceive = createAction('websocket/RECEIVE');
 
-const GET = 'GET';
-const POST = 'POST';
+export const setOption = createAction('options/SET', (key, value) => ({
+  payload: { key, value },
+}));
 
-const startLoading = () => ({
-  type: actionTypes.SET_LOADING,
-  loading: true,
-});
+export const resetOptions = createAction('options/RESET');
 
-const stopLoading = () => ({
-  type: actionTypes.SET_LOADING,
-  loading: false,
-});
+export const setFormValue = createAction('form/SET_VALUE', (key, value) => ({
+  payload: { key, value },
+}));
 
-export const setOption = (key, value) => ({
-  type: actionTypes.SET_OPTION,
-  key,
-  value,
-});
+export const resetFormValue = createAction('form/RESET_VALUE', key => ({
+  payload: { key },
+}));
 
-export const resetOptions = () => ({
-  type: actionTypes.RESET_OPTIONS,
-});
+export const nextStep = createAction('form/step/NEXT');
+export const previousStep = createAction('form/step/PREVIOUS');
+export const resetStep = createAction('form/step/RESET');
 
+export const getUser = createAsyncThunk('tumblr/GET_USER', async (_, thunkAPI) => {
+  try {
+    return await apiFetch('GET', '/user')
+  } catch (error) {
+    if (error.statusText === 'No user session') {
+      throw new Error('');
+    }
 
-
-export const setFormValue = (key, value) => ({
-  type: actionTypes.SET_FORM_VALUE,
-  key,
-  value,
-});
-
-export const resetFormValue = (key) => ({
-  type: actionTypes.RESET_FORM_VALUE,
-  key,
-});
-
-
-const thunkFetch = ({ actionType, method, path, body }) => dispatch => {
-  const config = {
-    method: method,
-    credentials: 'include',
-  };
-  if (body) {
-    config.headers = { 'Content-Type': 'application/json' };
-    config.body = JSON.stringify(body);
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']));
   }
+});
 
-  dispatch(startLoading());
+export const find = createAsyncThunk('tumblr/FIND_TAGS', async (_, thunkAPI) => {
+  const { form: { blog, find }, options } = thunkAPI.getState();
+  const methods = [METHODS.POSTS, options.includeQueue && METHODS.QUEUED, options.includeDrafts && METHODS.DRAFTS].filter(Boolean);
+  const body = { blog, find, options, methods };
 
-  return fetch(path, config)
-    .then(response => {
-      if (!response.ok) {
-        response.json().then(json => {
-          dispatch({
-            type: actionTypes.ADD_ERROR,
-            response: {
-              status: response.status,
-              statusText: response.statusText,
-              body: json
-            },
-          });
-          dispatch(stopLoading());
-        });
-        throw Error(response.statusText);
-      }
+  try {
+    const response = await apiFetch('POST', '/find', body);
+    return thunkAPI.fulfillWithValue(response, { body });
+  } catch (error) {
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
+  }
+});
 
-      return response.json();
-    })
-    .then(response => (
-      dispatch({
-        type: actionType,
-        response,
-        meta: {
-          body,
-        },
-      })
-    ))
-    .then(response => {
-      dispatch(stopLoading());
-      return response;
-    });
-};
+export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAPI) => {
+  const { form: { blog, find, replace }, posts: { entities }, options } = thunkAPI.getState();
+  const body = {
+    blog,
+    find,
+    replace,
+    options,
+    posts: Object.values(entities).map(post => ({ id: post.id, tags: post.tags })),
+  };
 
-export const getUser = () => (dispatch, getState) => {
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_GET_USER,
-    method: GET,
-    path: '/api/user',
-  })).then(() => {
-    const { tumblr: { blogs } } = getState();
-    const defaultBlog = DEFAULT_BLOG || get(blogs, '[0].name');
-    if (defaultBlog) {
-      return dispatch(setFormValue('blog', defaultBlog));
-    }
-  });
-};
+  try {
+    const response = await apiFetch('POST', '/replace', body);
+    return thunkAPI.fulfillWithValue(response, { body });
+  } catch (error) {
+    return thunkAPI.rejectWithValue(pick(error, ['status', 'statusText', 'body']), { body });
+  }
+});
 
-export const find = () => (dispatch, getState) => {
-  const { form: { blog, find }, options } = getState();
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_FIND_TAGS,
-    method: POST,
-    path: '/api/find',
-    body: {
-      blog,
-      find,
-      options,
-    }
-  }));
-};
-
-export const replace = () => (dispatch, getState) => {
-  const { form: { blog, find, replace }, options } = getState();
-  return dispatch(thunkFetch({
-    actionType: actionTypes.TUMBLR_REPLACE_TAGS,
-    method: POST,
-    path: '/api/replace',
-    body: {
-      blog,
-      find,
-      replace,
-      options,
-    }
-  }));
-};
-
+export const clearPosts = createAction('posts/CLEAR');
 
 export const reset = () => dispatch => {
   return Promise.all([
-    dispatch({
-      type: actionTypes.TUMBLR_CLEAR_POSTS,
-    }),
+    dispatch(clearPosts()),
+    dispatch(resetStep()),
     dispatch(resetFormValue('find')),
     dispatch(resetFormValue('replace')),
   ]);
+};
+
+const isFindComplete = (payload, state) => {
+  const methodsFound = {
+    ...state.posts.methodsFound,
+    [payload.methodName]: payload.complete,
+  };
+  return Object.values(methodsFound).every(Boolean);
+};
+
+const isReplaceComplete = (payload, state) => {
+  const posts = {
+    ...state.posts.entities,
+    [payload.postId]: {
+      replaced: true,
+    },
+  };
+  return every(Object.values(posts), ['replaced', true]);
+}
+
+export const tumblrFindMessage = payload => (dispatch, getState) => dispatch({
+  type: 'queue/tumblr/FIND',
+  payload: {
+    ...payload,
+    allComplete: isFindComplete(payload, getState())
+  }
+});
+tumblrFindMessage.toString = () => 'queue/tumblr/FIND';
+
+export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatch({
+  type: 'queue/tumblr/REPLACE',
+  payload: {
+    ...payload,
+    complete: isReplaceComplete(payload, getState()),
+  }
+});
+tumblrReplaceMessage.toString = () => 'queue/tumblr/REPLACE';
+
+export const jobTypeActionMap = {
+  [`${TUMBLR_QUEUE}:find`]: tumblrFindMessage,
+  [`${TUMBLR_QUEUE}:replace`]: tumblrReplaceMessage,
 };

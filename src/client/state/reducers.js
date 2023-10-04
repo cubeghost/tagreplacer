@@ -1,50 +1,104 @@
 import { assign } from 'lodash';
 import { combineReducers } from 'redux';
+import keyBy from 'lodash/keyBy';
 
 import initialState from './initial';
-import { actionTypes } from './actions';
+import {
+  getUser,
+  find,
+  replace,
+  setFormValue,
+  resetFormValue,
+  nextStep,
+  previousStep,
+  resetStep,
+  setOption,
+  resetOptions,
+  clearPosts,
+  tumblrFindMessage,
+  tumblrReplaceMessage,
+} from './actions';
 
-/**
-tumblr: {
-  username: undefined,
-  blogs: [],
-  find: [],
-  posts: undefined,
-  queued: undefined,
-  drafts: undefined,
-},
-form: {
-  blog: undefined,
-  find: [],
-  replace: [],
-},
-options: {
-  includeQueue: false,
-  includeDrafts: false,
-  caseSensitive: false,
-},
-errors: [],
- */
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const DEFAULT_BLOG = IS_PRODUCTION ? undefined : process.env.TESTING_BLOG;
 
 const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
-    case actionTypes.TUMBLR_GET_USER:
-      return assign({}, state, {
-        username: action.response.name,
-        blogs: action.response.blogs,
-      });
-    case actionTypes.TUMBLR_FIND_TAGS:
-      return assign({}, state, {
-        ...action.response,
-        find: action.meta.body.find,
-      });
-    case actionTypes.TUMBLR_CLEAR_POSTS:
-      return assign({}, state, {
-        find: initialState.tumblr.find,
-        posts: initialState.tumblr.posts,
-        queued: initialState.tumblr.queued,
-        drafts: initialState.tumblr.drafts
-      });
+    case getUser.fulfilled.toString():
+      return { ...state,
+        loading: false,
+        username: action.payload.name,
+        blogs: action.payload.blogs,
+      };
+    case getUser.pending.toString():
+      return {
+        ...state,
+        loading: true,
+      };
+    case getUser.rejected.toString():
+      return {
+        ...state,
+        loading: false,
+      };
+    default:
+      return state;
+  }
+};
+
+const postsReducer = (state = initialState.posts, action) => {
+  switch (action.type) {
+    case find.pending.toString():
+      return {
+        entities: initialState.posts.entities,
+        loading: true,
+      };
+    case replace.pending.toString():
+      return {
+        ...state,
+        loading: true,
+      };
+    case find.rejected.toString():
+    case replace.rejected.toString():
+      return {
+        ...state,
+        loading: false,
+      };
+    case find.fulfilled.toString():
+      return {
+        ...state,
+        methodsFound: Object.fromEntries(action.meta.body.methods.map(method => ([method, false]))),
+      };
+    case tumblrFindMessage.toString():
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          ...keyBy(action.payload.posts, 'id'),
+        },
+        loading: !action.payload.allComplete,
+        methodsFound: {
+          ...state.methodsFound,
+          [action.payload.methodName]: action.payload.complete,
+        },
+      };
+    case tumblrReplaceMessage.toString(): {
+      const post = {
+        ...state.entities[action.payload.postId],
+        tags: action.payload.tags,
+        replaced: true,
+      };
+      const entities = {
+        ...state.entities,
+        [action.payload.postId]: post,
+      };
+      return {
+        ...state,
+        entities: entities,
+        loading: !action.payload.complete,
+      };
+    }
+    case clearPosts.toString():
+      return initialState.posts;
     default:
       return state;
   }
@@ -52,14 +106,42 @@ const tumblrReducer = (state = initialState.tumblr, action) => {
 
 const formReducer = (state = initialState.form, action) => {
   switch (action.type) {
-    case actionTypes.SET_FORM_VALUE:
-      return assign({}, state, {
-        [action.key]: action.value
-      });
-    case actionTypes.RESET_FORM_VALUE:
-      return assign({}, state, {
-        [action.key]: initialState.form[action.key]
-      });
+    case getUser.fulfilled.toString(): {
+      const defaultBlog = DEFAULT_BLOG || action.payload.blogs[0];
+      return { ...state, blog: defaultBlog };
+    }
+    case setFormValue.toString():
+      return { ...state,
+        [action.payload.key]: action.payload.value,
+      };
+    case resetFormValue.toString():
+      return { ...state,
+        [action.payload.key]: initialState.form[action.payload.key],
+      };
+    case tumblrFindMessage.toString():
+      return {
+        ...state,
+        step: (action.payload.posts.length > 0 && action.payload.allComplete) ? state.step + 1 : state.step,
+      };
+    case tumblrReplaceMessage.toString():
+      return {...state,
+        step: action.payload.complete ? state.step + 1 : state.step,
+      };
+    case nextStep.toString():
+      return {
+        ...state,
+        step: state.step + 1,
+      };
+    case previousStep.toString():
+      return {
+        ...state,
+        step: state.step - 1,
+      };
+    case resetStep.toString():
+      return {
+        ...state,
+        step: 0,
+      };
     default:
       return state;
   }
@@ -67,11 +149,11 @@ const formReducer = (state = initialState.form, action) => {
 
 const optionsReducer = (state = initialState.options, action) => {
   switch (action.type) {
-    case actionTypes.SET_OPTION:
+    case setOption.toString():
       return assign({}, state, {
-        [action.key]: action.value
+        [action.payload.key]: action.payload.value
       });
-    case actionTypes.RESET_OPTIONS:
+    case resetOptions.toString():
       return assign({}, initialState.options);
     default:
       return state;
@@ -79,29 +161,17 @@ const optionsReducer = (state = initialState.options, action) => {
 };
 
 const errorsReducer = (state = initialState.errors, action) => {
-  switch (action.type) {
-    case actionTypes.ADD_ERROR:
-      return [...state, { ...action.response }];
-    default:
-      return state;
+  if (/\/rejected$/.test(action.type) && action.payload) {
+    return [...state, { ...action.payload }];
+  } else {
+    return state;
   }
 };
 
-const loadingReducer = (state = initialState.loading, action) => {
-  switch (action.type) {
-    case actionTypes.SET_LOADING:
-      return action.loading;
-    default:
-      return state;
-  }
-};
-
-const reducers = combineReducers({
+export default combineReducers({
   tumblr: tumblrReducer,
+  posts: postsReducer,
   form: formReducer,
   options: optionsReducer,
   errors: errorsReducer,
-  loading: loadingReducer,
 });
-
-export default reducers;

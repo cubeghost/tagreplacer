@@ -2,15 +2,11 @@
 
 const { expect } = require('chai');
 
-const TumblrClient = require('../tumblr');
+const Tags = require('../tags');
 
-const token = 'fake';
-const secret = 'also-fake';
-
-describe('TumblrClient.replaceTags', function() {
+describe('Tags.replace', function() {
   it('can replace 1 tag with 1 tag', function() {
-    const client = new TumblrClient({ token, secret });
-    const result = client.replaceTags({
+    const result = new Tags().replace({
       tags: ['cat', 'dog'],
       find: ['cat'],
       replace: ['mouse']
@@ -20,8 +16,7 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can replace 1 tag with 2 tags, preserving original order', function() {
-    const client = new TumblrClient({ token, secret });
-    const result = client.replaceTags({
+    const result = new Tags().replace({
       tags: ['cat', 'dog'],
       find: ['cat'],
       replace: ['mouse', 'hamster']
@@ -31,8 +26,7 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can append tags (replace 1 tag with itself and another tag)', function() {
-    const client = new TumblrClient({ token, secret });
-    const result = client.replaceTags({
+    const result = new Tags().replace({
       tags: ['cat', 'dog', 'bird'],
       find: ['dog'],
       replace: ['dog', 'hamster']
@@ -42,10 +36,9 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can remove a tag (replace 1 tag with 0 tags)', function() {
-    const client = new TumblrClient({ token, secret, options: {
+    const result = new Tags({
       allowDelete: true,
-    }});
-    const result = client.replaceTags({
+    }).replace({
       tags: ['cat', 'dog', 'bird'],
       find: ['dog'],
       replace: [],
@@ -55,10 +48,9 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can remove multiple tags (replace 2+ tags with 0 tags)', function() {
-    const client = new TumblrClient({ token, secret, options: {
+    const result = new Tags({
       allowDelete: true,
-    }});
-    const result = client.replaceTags({
+    }).replace({
       tags: ['cat', 'dog', 'bird'],
       find: ['cat', 'dog'],
       replace: [],
@@ -68,10 +60,9 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can find tags case-insensitively', function() {
-    const client = new TumblrClient({ token, secret, options: {
+    const result = new Tags({
       caseSensitive: false,
-    }});
-    const result = client.replaceTags({
+    }).replace({
       tags: ['cat', 'Dog'],
       find: ['Cat'],
       replace: ['Mouse'],
@@ -81,10 +72,9 @@ describe('TumblrClient.replaceTags', function() {
   });
 
   it('can find tags case-sensitively', function() {
-    const client = new TumblrClient({ token, secret, options: {
+    const result = new Tags({
       caseSensitive: true,
-    }});
-    const result = client.replaceTags({
+    }).replace({
       tags: ['cat', 'Cat', 'Dog'],
       find: ['Cat'],
       replace: ['Mouse'],

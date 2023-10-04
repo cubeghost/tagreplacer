@@ -1,13 +1,15 @@
 const initialState = {
   tumblr: {
+    loading: false,
     username: undefined,
     blogs: [],
-    find: [],
-    posts: undefined,
-    queued: undefined,
-    drafts: undefined,
+  },
+  posts: {
+    loading: false,
+    entities: {},
   },
   form: {
+    step: 0,
     blog: undefined,
     find: [],
     replace: [],
@@ -19,7 +21,6 @@ const initialState = {
     allowDelete: false,
   },
   errors: [],
-  loading: false,
 };
 
 export default initialState;
