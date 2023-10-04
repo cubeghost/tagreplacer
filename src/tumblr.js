@@ -146,16 +146,13 @@ class TumblrClient {
    * @param {string} blog      blog identifier
    * @param {Options} options  api options
    */
-  constructor({ token, blog, options = {} }) {
-    this.client = this.wrapClient(new tumblr.Client({
-      credentials: {
-        consumer_key: process.env.TUMBLR_API_KEY,
-        consumer_secret: process.env.TUMBLR_API_SECRET,
-        // this is not officially supported
-        bearer: token,
-      },
-      returnPromises: true
-    }));
+  constructor({ token, secret, blog, options = {} }) {
+    this.client = new tumblr.Client({
+      consumer_key: process.env.TUMBLR_API_KEY,
+      consumer_secret: process.env.TUMBLR_API_SECRET,
+      token: token,
+      token_secret: secret,
+    });
     
     this.tags = new Tags(options);
 
@@ -179,18 +176,21 @@ class TumblrClient {
 
   wrapClient(client) {
     const proxyHandler = {
-      get: function () {
-        const promise = Reflect.get(...arguments);
-        return function() {
-          return promise(...arguments).catch((error) => {
-            Sentry.captureException(error, {
-              contexts: {
-                tumblr: { response: JSON.stringify(error.body, null, 2) },
-              },
+      get: function (target, prop, receiver) {
+        const value = target[prop];
+        if (value instanceof Function) {
+          return function(...args) {
+            return value.apply(this === receiver ? target : this, args).catch((error) => {
+              Sentry.captureException(error, {
+                contexts: {
+                  tumblr: { response: JSON.stringify(error.body, null, 2) },
+                },
+              });
+              throw error;
             });
-            throw error;
-          });
-        };
+          };
+        }
+        return value;
       },
     };
     return new Proxy(client, proxyHandler);
@@ -300,8 +300,8 @@ class TumblrClient {
       find,
       replace,
     });
-
-    const response = await this.client.editPost(this.blog, {
+  
+    const response = await this.client.editLegacyPost(this.blog, {
       id: postId,
       tags: replacedTags.join(','),
     });

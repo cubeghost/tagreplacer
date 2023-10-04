@@ -48,8 +48,9 @@ apiRouter.get('/user', function(req, res, next) {
   }
 
   const token = req.session.grant.response.access_token;
+  const secret = req.session.grant.response.access_secret;
 
-  const client = new TumblrClient({ token });
+  const client = new TumblrClient({ token, secret });
 
   client.getUserInfo()
     .then(result => {

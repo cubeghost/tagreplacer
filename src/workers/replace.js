@@ -30,8 +30,10 @@ module.exports = async (job) => {
   const session = await getSession(sessionId);
   const messageQueue = getMessageQueue(sessionId);
   const token = get(session, 'grant.response.access_token');
+  const secret = get(session, 'grant.response.access_secret');
   const client = new TumblrClient({
     token,
+    secret,
     blog,
     options,
   });
