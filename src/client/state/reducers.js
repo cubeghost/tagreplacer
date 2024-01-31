@@ -25,7 +25,8 @@ const DEFAULT_BLOG = IS_PRODUCTION ? undefined : process.env.TESTING_BLOG;
 const tumblrReducer = (state = initialState.tumblr, action) => {
   switch (action.type) {
     case getUser.fulfilled.toString():
-      return { ...state,
+      return {
+        ...state,
         loading: false,
         username: action.payload.name,
         blogs: action.payload.blogs,
@@ -111,20 +112,23 @@ const formReducer = (state = initialState.form, action) => {
       return { ...state, blog: defaultBlog };
     }
     case setFormValue.toString():
-      return { ...state,
+      return {
+        ...state,
         [action.payload.key]: action.payload.value,
       };
     case resetFormValue.toString():
-      return { ...state,
+      return {
+        ...state,
         [action.payload.key]: initialState.form[action.payload.key],
       };
     case tumblrFindMessage.toString():
       return {
         ...state,
-        step: (action.payload.posts.length > 0 && action.payload.allComplete) ? state.step + 1 : state.step,
+        step: (action.payload.foundPostsCount > 0 && action.payload.allComplete) ? state.step + 1 : state.step,
       };
     case tumblrReplaceMessage.toString():
-      return {...state,
+      return {
+        ...state,
         step: action.payload.complete ? state.step + 1 : state.step,
       };
     case nextStep.toString():

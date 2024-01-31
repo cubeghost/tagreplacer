@@ -1,85 +1,106 @@
-$border: $lightgray 2px solid;
+$offwhite: #F4F4F2;
+$lightgray: #D6D8D4;
+$darkgray: #2C363F;
+// $brightpink: #E75A7C;
 
-input, button {
-  font-family:$monospace;
-  font-weight:300;
-  font-size:1em;
-  background-color:transparent;
-  border-radius:$border-radius;
-  border:$border;
+$color-lightGray: #EFEFEF;
+$color-darkBlueGray: #2C363F;
 
-  &:focus, &:active {
-    outline:none;
-    border-color:$highlight;
+$text: $darkgray;
+$background: $offwhite;
+$highlight: saturate(#4BA4BE, 10);
+
+$monospace: 'Roboto Mono', monospace;
+$font-monospace: 'Roboto Mono', monospace;
+$font-sansSerif: 'Assistant', Helvetica, Arial, sans-serif;
+$border-radius: 0.25em;
+
+$border: var(--foreground-color) 1px solid;
+
+input,
+button {
+  font-family: $monospace;
+  font-weight: 300;
+  font-size: 1em;
+  background-color: transparent;
+  border-radius: $border-radius;
+  border: $border;
+
+  &:focus,
+  &:active {
+    outline: none;
+    border-color: $highlight;
   }
 
 }
 
 input[type=text] {
-  padding:5px 6px;
-  color:$text;
+  padding: 5px 6px;
+  color: $text;
 }
 
 button {
-  padding:6px 12px 5px;
-  color:$text;
-  cursor:pointer;
+  padding: 6px 12px 5px;
+  color: $text;
+  cursor: pointer;
 
-  &:focus, &:active, &:hover {
-    color:$background;
-    border-color:$highlight;
-    background-color:$highlight;
+  &:focus,
+  &:active,
+  &:hover {
+    color: $background;
+    border-color: $highlight;
+    background-color: $highlight;
   }
 }
 
 form {
-  display:flex;
-  align-items:center;
-  margin-bottom:3em;
+  display: flex;
+  align-items: center;
+  margin-bottom: 3em;
   &:last-of-type {
-    margin-bottom:0;
+    margin-bottom: 0;
   }
 
   label {
-    text-align:right;
-    flex:0 0 30%;
+    text-align: right;
+    flex: 0 0 30%;
   }
 
   & > input {
-    width:100%;
-    flex:1 0 40%;
-    margin:0 1em;
+    width: 100%;
+    flex: 1 0 40%;
+    margin: 0 1em;
   }
 
   .react-selectize.root-node {
-    min-width:40%;
-    margin:0 1em;
+    min-width: 40%;
+    margin: 0 1em;
   }
 
   .react-selectize.multi-select {
-    flex:1 0 40%;
+    flex: 1 0 40%;
   }
 
   button {
-    text-align:center;
-    flex:1 0 8%;
+    text-align: center;
+    flex: 1 0 8%;
   }
 
 }
 
 form.disabled label {
   opacity: 0.6;
-  pointer-events:none;
+  pointer-events: none;
 }
 input:disabled,
 button:disabled {
   background-color: $lightgray;
-  pointer-events:none;
+  pointer-events: none;
   opacity: 0.6;
 }
 
 @function encodecolor($string) {
-  @if type-of($string) == 'color' and str-index(#{$string}, '#') == 1 {
+  @if type-of($string)=='color' and str-index(#{$string}, '#')==1 {
     $hex: str-slice(ie-hex-str($string), 4);
     $string: unquote('#{$hex}');
 
@@ -94,40 +115,40 @@ button:disabled {
 }
 
 input[type=checkbox] {
-  opacity:0;
-  width:0;
-  margin:0;
+  opacity: 0;
+  width: 0;
+  margin: 0;
 
-  &+label {
-    font-size:16px;
-    margin-left:-2px;
-    margin-right:8px;
-    display:inline-block;
-    padding-top:6px;
-    -webkit-user-select:none;
-    -moz-user-select:none;
+  & + label {
+    font-size: 16px;
+    margin-left: -2px;
+    margin-right: 8px;
+    display: inline-block;
+    padding-top: 6px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 
     &:before {
-      content:'';
-      display:inline-block;
-      width:18px;
-      height:18px;
-      background-size:10px 10px;
-      border:$border;
-      background-repeat:no-repeat;
-      background-position:center center;
-      vertical-align:-3px;
-      margin-right:6px;
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-size: 10px 10px;
+      border: $border;
+      background-repeat: no-repeat;
+      background-position: center center;
+      vertical-align: -3px;
+      margin-right: 6px;
     }
   }
   &:active + label:before,
   &:focus + label:before {
-    background-color:rgba(0,0,0,0.05);
+    background-color: rgba(0, 0, 0, 0.05);
   }
 
   &:checked + label {
     &:before {
-      border-color:$highlight;
+      border-color: $highlight;
       @include checkmark($highlight);
     }
   }
@@ -229,7 +250,8 @@ input[type=checkbox] {
         color: rgba($text, 0.5);
         border-radius: 0;
 
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           background-color: rgba($text, 0.1);
           color: rgba($text, 0.75);
         }

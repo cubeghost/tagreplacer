@@ -9,6 +9,7 @@ export const STEPS = mapValues({
     key: 'find',
     can: {
       next: (state) => state.form.find?.length > 0,
+      previous: false,
       options: true,
       find: true,
       replace: false,
@@ -18,6 +19,7 @@ export const STEPS = mapValues({
     key: 'previewReplace',
     can: {
       next: (state) => state.form.replace?.length > 0,
+      previous: true,
       options: false,
       find: false,
       replace: true,
@@ -27,6 +29,7 @@ export const STEPS = mapValues({
     key: 'replace',
     can: {
       next: true,
+      previous: true,
       options: false,
       find: false,
       replace: true,
@@ -36,6 +39,8 @@ export const STEPS = mapValues({
     key: 'replaced',
     can: {
       next: false,
+      previous: false,
+      undo: true,
       options: false,
       find: false,
       replace: false,

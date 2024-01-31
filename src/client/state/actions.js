@@ -102,13 +102,17 @@ const isReplaceComplete = (payload, state) => {
   return every(Object.values(posts), ['replaced', true]);
 }
 
-export const tumblrFindMessage = payload => (dispatch, getState) => dispatch({
-  type: 'queue/tumblr/FIND',
-  payload: {
-    ...payload,
-    allComplete: isFindComplete(payload, getState())
-  }
-});
+export const tumblrFindMessage = payload => (dispatch, getState) => {
+  const state = getState();
+  return dispatch({
+    type: 'queue/tumblr/FIND',
+    payload: {
+      ...payload,
+      foundPostsCount: Object.keys(state.posts.entities).length,
+      allComplete: isFindComplete(payload, state)
+    }
+  });
+};
 tumblrFindMessage.toString = () => 'queue/tumblr/FIND';
 
 export const tumblrReplaceMessage = (payload) => (dispatch, getState) => dispatch({

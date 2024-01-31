@@ -3,16 +3,29 @@ import PropTypes from 'prop-types';
 
 import postTypeSprites from '../../assets/postTypes.svg';
 
-const Post = ({ id, legacy_type, post_url, replaced, slug, summary, tags, thumbnail }) => {
+const STATE_EMOJI = {
+  queued: '🕓',
+  draft: '📝',
+  private: '🔒',
+};
+
+const Post = ({ id, legacy_type, post_url, state, replaced, slug, summary, tags, thumbnail }) => {
   return (
     <div className="post">
       <a className="post-permalink" href={post_url} target="_blank" rel="noopener noreferrer">
-        {thumbnail && (thumbnail === 'icon' ? (
-          <svg className="post-thumbnail" alt={`${legacy_type} icon`}><use href={`${postTypeSprites}#${legacy_type}`} /></svg>
-        ) : (
-          <img src={thumbnail} className="post-thumbnail" alt="TODO media thumbnail" />
-        ))}
-        <span>{summary || (thumbnail ? '' : slug || id)}</span>
+        {thumbnail && (
+          <div className="post-thumbnail">
+            {thumbnail === 'icon' ? (
+              <svg alt={`${legacy_type} icon`}><use href={`${postTypeSprites}#${legacy_type}`} /></svg>
+            ) : (
+              <img src={thumbnail} alt="TODO media thumbnail" />
+            )}
+            {state && state !== 'published' && STATE_EMOJI[state] && (
+              <span role="img" aria-label={state} title={state} className="post-thumbnail-state">{STATE_EMOJI[state]}</span>
+            )}
+          </div>
+        )}
+        <span className="post-permalink-label">{summary || (thumbnail ? '' : slug || id)}</span>
       </a>
       <div className="post-tags">{tags}</div>
       {replaced && (
@@ -28,6 +41,7 @@ Post.propTypes = {
   id: PropTypes.string.isRequired,
   legacy_type: PropTypes.string.isRequired,
   post_url: PropTypes.string.isRequired,
+  state: PropTypes.oneOf(['published', 'queued', 'draft', 'private']),
   replaced: PropTypes.bool,
   slug: PropTypes.string,
   summary: PropTypes.string,

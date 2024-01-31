@@ -41,6 +41,7 @@
     "history": "^4.10.1",
     "is-docker": "^2.0.0",
     "lodash": "^4.17.15",
+    "pixelarticons": "^1.7.0",
     "raven-js": "3.26.3",
     "react-markdown": "^2.5.0",
     "redis": "^2.8.0",

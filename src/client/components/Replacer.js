@@ -27,6 +27,7 @@ const Replacer = () => {
   const canReplace = useCan('replace');
   const canOptions = useCan('options');
   const canNext = useCan('next');
+  const canPrevious = useCan('previous');
   const isPreviewReplace = step.key === 'replace';
 
   const isLoading = useSelector(state => state.posts.loading);
@@ -71,7 +72,7 @@ const Replacer = () => {
 
   return (
     <main>
-      <div style={{ display: "flex", alignItems: "flex-start" }}>
+      <div className="replacer">
         <div className="column sticky" style={{ paddingRight: "1.5rem" }}>
           <form
             className="section"
@@ -135,15 +136,15 @@ const Replacer = () => {
             ref={replaceContainerRef}
             onSubmit={preventFormSubmit}
           >
-            <fieldset 
+            <fieldset
               className={clsx(
                 "section",
                 canReplace ? "section--enabled" : "section--disabled"
-              )} 
+              )}
               style={{ opacity: canReplace ? 1 : 0.25 }}
             >
               <legend><label htmlFor="replace">replace</label></legend>
-              <TagInput name="replace" disabled={!canReplace} />
+              <TagInput name="replace" disabled={!canReplace || isPreviewReplace} />
               <div className="actions">
                 <button
                   onClick={isPreviewReplace ? stepBack : doPreview}
@@ -165,7 +166,7 @@ const Replacer = () => {
             </fieldset>
           </form>
           <div className="actions">
-            {step.index > 0 && <button onClick={stepBack} className="button">&larr;</button>}
+            {canPrevious && <button onClick={stepBack} className="button">&larr;</button>}
             {step.index > 0 && <button onClick={doReset} className="button">reset</button>}
           </div>
         </div>

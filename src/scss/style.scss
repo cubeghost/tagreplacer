@@ -129,16 +129,24 @@ nav {
 
 button.button {
   background-color: var(--background-color);
+  color: var(--foreground-color);
   border: 1px solid var(--foreground-color);
   border-radius: 4px;
   padding: 3px 8px;
+
+  svg {
+    stroke: currentColor;
+  }
 
   &:disabled {
     border-color: rgba(var(--foreground-color-rgb), 0.25);
   }
 
+  &:not(:disabled):hover {
+    background-color: rgba(var(--foreground-color-rgb), 0.05);
+  }
   &:not(:disabled):active {
-    background-color: rgba(var(--foreground-color-rgb), 0.25);
+    background-color: rgba(var(--foreground-color-rgb), 0.15);
   }
 }
 
@@ -153,6 +161,21 @@ button.button {
 
 .column {
   flex-basis: 50%;
+}
+
+.replacer {
+  display: flex;
+  align-items: flex-start;
+
+  .column {}
+
+  @media screen and (max-width: 600px) {
+    flex-wrap: wrap;
+
+    .column {
+      flex-basis: 100%;
+    }
+  }
 }
 
 .field {
@@ -217,12 +240,14 @@ button.button {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    text-decoration: none;
 
-    span {
+    &-label {
       max-width: min(20vw, calc(var(--container-width) / 5));
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-decoration: underline;
 
       &:empty {
         display: none;
@@ -235,9 +260,21 @@ button.button {
   }
 
   &-thumbnail {
-    display: block;
-    height: 1.5rem;
-    width: 1.5rem;
+    position: relative;
+
+    svg,
+    img {
+      display: block;
+      height: 1.5rem;
+      width: 1.5rem;
+    }
+
+    &-state {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      transform: translateX(2px) translateY(25%);
+    }
   }
 
   &-checkmark {

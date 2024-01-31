@@ -18,7 +18,7 @@ const Posts = () => {
   const { find, replace } = useSelector(state => state.form);
   const posts = useSelector((state) => state.posts.entities);
 
-  return orderBy(Object.values(posts), ['timestamp']).map((post) => {
+  return orderBy(Object.values(posts), ['timestamp'], ['desc']).map((post) => {
     const tags = post.tags.map((tag) => {
       if (isPreviewReplace && find.includes(tag)) {
         return <strong key={tag}>#{replace}</strong>;
@@ -41,6 +41,7 @@ const Posts = () => {
         key={post.id_string}
         legacy_type={post.legacy_type}
         post_url={post.post_url}
+        state={post.state}
         replaced={post.replaced}
         slug={post.slug}
         summary={post.summary}
