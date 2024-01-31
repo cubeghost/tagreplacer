@@ -19,7 +19,7 @@
     "watch:test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "engines": {
-    "node": "14.x"
+    "node": "16.x"
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
@@ -42,7 +42,7 @@
     "redis": "^2.8.0",
     "sass": "^1.38.0",
     "stringify": "^5.1.0",
-    "tumblr.js": "https://github.com/cubeghost/tumblr.js",
+    "tumblr.js": "4.0.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {

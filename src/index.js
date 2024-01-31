@@ -40,9 +40,10 @@ const grant = new Grant({
     state: true,
   },
   tumblr: {
-    authorize_url: 'https://www.tumblr.com/oauth2/authorize',
-    access_url: 'https://api.tumblr.com/v2/oauth2/token',
-    oauth: 2,
+    request_url: 'https://www.tumblr.com/oauth/request_token',
+    authorize_url: 'https://www.tumblr.com/oauth/authorize',
+    access_url: 'https://www.tumblr.com/oauth/access_token',
+    oauth: 1,
     scope: ['write'],
     key: process.env.TUMBLR_API_KEY,
     secret: process.env.TUMBLR_API_SECRET,

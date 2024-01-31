@@ -43,15 +43,12 @@ class TumblrClient {
    * @param {Options} [options={}]  api options
    */
   constructor({ token, secret, blog, options = {} }) {
-    this.client = this.wrapClient(new tumblr.Client({
-      credentials: {
-        consumer_key: process.env.TUMBLR_API_KEY,
-        consumer_secret: process.env.TUMBLR_API_SECRET,
-        // this is not officially supported
-        bearer: token,
-      },
-      returnPromises: true
-    }));
+    this.client = new tumblr.Client({
+      consumer_key: process.env.TUMBLR_API_KEY,
+      consumer_secret: process.env.TUMBLR_API_SECRET,
+      token: token,
+      token_secret: secret,
+    });
 
     this.blog = blog;
     this.options = _.assign({}, DEFAULT_OPTIONS, options);
@@ -310,7 +307,7 @@ class TumblrClient {
               replace,
             });
 
-            return this.client.editPost(this.blog, {
+            return this.client.editLegacyPost(this.blog, {
               id: post.id,
               tags: replacedTags.join(',')
             });
