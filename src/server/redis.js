@@ -1,10 +1,7 @@
 require('dotenv').config();
 
-const IORedis = require('ioredis');
+var redis = require('redis');
 
-const connection = new IORedis(process.env.REDIS_URL, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
+var client = redis.createClient(process.env.REDIS_URL);
 
-module.exports = connection;
+module.exports = client;
