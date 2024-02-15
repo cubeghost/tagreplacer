@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import { Route, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import ReactMarkdown from 'react-markdown';
 
 import { getUser } from './state/actions';
 
@@ -10,8 +9,6 @@ import Home from './home';
 import Replacer from './replacer';
 import Help from './help';
 import Privacy from './privacy';
-
-import noticeMarkdown from './2021-12-26-notice.md';
 
 const mapStateToProps = state => ({
   authed: !!state.tumblr.username,
