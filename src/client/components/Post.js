@@ -27,7 +27,7 @@ const Post = ({ id, legacy_type, post_url, state, replaced, slug, summary, tags,
         )}
         <span className="post-permalink-label">{summary || (thumbnail ? '' : slug || id)}</span>
       </a>
-      <div className="post-tags">{tags}</div>
+      <div className="post-tags display-tag">{tags}</div>
       {replaced && (
         <div className="post-checkmark">
           <span role="img" aria-label="Checkmark">✅</span>

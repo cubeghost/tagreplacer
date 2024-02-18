@@ -1,6 +1,6 @@
 export const selectTheme = (theme) => ({
   ...theme,
-  colors: { 
+  colors: {
     ...theme.colors,
     primary: 'var(--foreground-color)',
   },
@@ -16,5 +16,8 @@ export const selectStyles = {
     ...baseStyles,
     backgroundColor: 'var(--background-color)',
   }),
-  
+  multiValueLabel: (baseStyles, state) => ({
+    ...baseStyles,
+    whiteSpace: 'pre-wrap',
+  })
 };

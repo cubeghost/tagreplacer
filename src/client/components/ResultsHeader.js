@@ -46,7 +46,7 @@ const ResultsHeader = () => {
           ].filter(Boolean)) : postCounts.total} posts for{" "}
           <a
             href={`https://${blog}.tumblr.com/tagged/${find}`}
-            className="external-link"
+            className="external-link display-tag"
           >
             {formatTags(find)}
           </a>
@@ -58,7 +58,7 @@ const ResultsHeader = () => {
           replacing with{" "}
           <a
             href={`https://${blog}.tumblr.com/tagged/${replace}`}
-            className="external-link"
+            className="external-link display-tag"
           >
             {formatTags(replace)}
           </a>{" "}

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import orderBy from 'lodash/orderBy';
 
 import Post from './Post';
-import {joinReactNodes} from '../util'
+import { joinReactNodes } from '../util'
 import { useStep } from '../steps';
 
 /** TODO use actual Tags module for preview
@@ -21,7 +21,7 @@ const Posts = () => {
   return orderBy(Object.values(posts), ['timestamp'], ['desc']).map((post) => {
     const tags = post.tags.map((tag) => {
       if (isPreviewReplace && find.includes(tag)) {
-        return <strong key={tag}>#{replace}</strong>;
+        return replace.map((replaceTag) => (<strong key={replaceTag}>#{replaceTag}</strong>));
       }
       if (post.replaced && replace.includes(tag)) {
         return <strong key={tag}>#{tag}</strong>;
