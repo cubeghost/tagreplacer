@@ -62,7 +62,7 @@ export const replace = createAsyncThunk('tumblr/REPLACE_TAGS', async (_, thunkAP
     find,
     replace,
     options,
-    posts: Object.values(entities).map(post => ({ id: post.id, tags: post.tags })),
+    posts: Object.values(entities).map(post => ({ id: post.id_string, tags: post.tags })),
   };
 
   try {
