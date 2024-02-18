@@ -308,7 +308,7 @@ class TumblrClient {
             });
 
             return this.client.editLegacyPost(this.blog, {
-              id: post.id,
+              id: post.id_string,
               tags: replacedTags.join(',')
             });
           })
