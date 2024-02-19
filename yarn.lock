@@ -7561,10 +7561,9 @@ tty-browserify@0.0.0:
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
   integrity sha1-oVe6QC2iTpv5V/mqadUk7tQpAaY=
 
-tumblr.js@4.0.1:
+"tumblr.js@https://codeload.github.com/cubeghost/tumblr.js/legacy.tar.gz/refs/heads/main":
   version "4.0.1"
-  resolved "https://registry.yarnpkg.com/tumblr.js/-/tumblr.js-4.0.1.tgz#ea4cfc5aa8fe9558862ee89cbd6b2520aaa8b60a"
-  integrity sha512-DwVJxSw9nj8NAPh0Sqp0PeT/sFXB728iIxJHMKWAoxNZnuzp3Kcyq3EM6F+R3F8ZPO8dUBq2JXIpNWC53O9hcQ==
+  resolved "https://codeload.github.com/cubeghost/tumblr.js/legacy.tar.gz/refs/heads/main#1f76ba24e2881885fa6ee0bd7875e1caecaa9faf"
   dependencies:
     "@types/node" ">=16"
     "@types/oauth" "^0.9.1"

@@ -12,14 +12,14 @@
   "scripts": {
     "watch": "npm-run-all --parallel watch:*",
     "watch:server": "nodemon --watch src ./src/index.js",
-    "watch:client": "webpack --watch",
-    "build": "webpack",
+    "watch:client": "NODE_OPTIONS=--openssl-legacy-provider webpack --watch",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack",
     "start": "node src/index.js",
     "test": "mocha \"./src/**/tests/*.js\"",
     "watch:test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
@@ -43,7 +43,7 @@
     "redis": "^2.8.0",
     "sass": "^1.38.0",
     "stringify": "^5.1.0",
-    "tumblr.js": "4.0.1",
+    "tumblr.js": "https://codeload.github.com/cubeghost/tumblr.js/legacy.tar.gz/refs/heads/main",
     "winston": "^3.2.1"
   },
   "devDependencies": {
