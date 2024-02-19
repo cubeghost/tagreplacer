@@ -156,6 +156,7 @@ class TumblrClient {
       tag: tag,
       limit: POST_LIMIT,
       filter: 'text',
+      npf: true,
     }, params)).then(response => {
 
       let posts;
@@ -307,17 +308,30 @@ class TumblrClient {
               replace,
             });
 
-            return Sentry.startSpan({
-              name: 'editLegacyPost',
-              attributes: {
-                blog: this.blog,
+            return new Promise((resolve, reject) => {
+              return Sentry.startSpan({
+                name: 'editLegacyPost',
+                op: 'http',
+                attributes: {
+                  blog: this.blog,
+                  id: post.id_string,
+                  tags: replacedTags.join(',')
+                }
+              }, (span) => this.client.editLegacyPost(this.blog, {
                 id: post.id_string,
                 tags: replacedTags.join(',')
-              }
-            }, async () => await this.client.editLegacyPost(this.blog, {
-              id: post.id_string,
-              tags: replacedTags.join(',')
-            }));
+              }, (err, resp, response) => {
+                if (err) {
+                  console.log(response);
+                  if (span) {
+                    span.setAttribute('response', response);
+                  }
+                  reject(err);
+                } else {
+                  resolve(resp);
+                }
+              }));
+            });
           })
           .value();
 
