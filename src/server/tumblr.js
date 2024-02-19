@@ -307,10 +307,17 @@ class TumblrClient {
               replace,
             });
 
-            return this.client.editLegacyPost(this.blog, {
+            return Sentry.startSpan({
+              name: 'editLegacyPost',
+              attributes: {
+                blog: this.blog,
+                id: post.id_string,
+                tags: replacedTags.join(',')
+              }
+            }, async () => await this.client.editLegacyPost(this.blog, {
               id: post.id_string,
               tags: replacedTags.join(',')
-            });
+            }));
           })
           .value();
 
