@@ -309,28 +309,21 @@ class TumblrClient {
             });
 
             return new Promise((resolve, reject) => {
-              return Sentry.startSpan({
-                name: 'editLegacyPost',
-                op: 'http',
-                attributes: {
-                  blog: this.blog,
-                  id: post.id_string,
-                  tags: replacedTags.join(',')
-                }
-              }, (span) => this.client.editLegacyPost(this.blog, {
+              this.client.editLegacyPost(this.blog, {
                 id: post.id_string,
                 tags: replacedTags.join(',')
               }, (err, resp, response) => {
                 if (err) {
-                  console.log(response);
-                  if (span) {
-                    span.setAttribute('response', response);
-                  }
+                  logger.error(err.message, {
+                    blog: this.blog,
+                    post_id: post.id_string,
+                    tags: replacedTags.join(',')
+                  });
                   reject(err);
                 } else {
                   resolve(resp);
                 }
-              }));
+              });
             });
           })
           .value();
