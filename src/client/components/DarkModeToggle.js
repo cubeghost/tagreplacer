@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import sun from 'pixelarticons/svg/sun.svg';
 
 const DarkModeToggle = () => {
   const [darkMode, setDarkMode] = useState(
@@ -20,7 +21,7 @@ const DarkModeToggle = () => {
   return (
     <button onClick={toggleDarkMode}>
       <img
-        src="https://unpkg.com/pixelarticons@latest/svg/sun.svg"
+        src={sun}
         height="12"
         alt=""
       />

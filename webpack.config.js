@@ -2,136 +2,114 @@ require('dotenv').config();
 
 const path = require('path');
 const webpack = require('webpack');
-// const findCacheDir = require('find-cache-dir');
+const { EsbuildPlugin } = require('esbuild-loader')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const isDocker = require('is-docker');
 
 const PROD = process.env.NODE_ENV === 'production';
 const DOCKER = isDocker();
-
-const paths = {
-  appBuild: path.resolve(__dirname, './build'),
-  appHtml: path.resolve(__dirname, './src/html/index.html'),
-  appFavicon: path.resolve(__dirname, './src/assets/favicon.png'),
-  appPackageJson: path.resolve(__dirname, './package.json'),
-  appSrc: path.resolve(__dirname, './src'),
-  appNodeModules: path.resolve(__dirname, './node_modules'),
-};
+const ESBUILD_TARGET = 'es2017';
+const src = path.resolve(__dirname, './src');
+const node_modules = path.resolve(__dirname, './node_modules');
 
 const config = {
   mode: 'development',
-  devtool: 'cheap-module-eval-source-map',
-  watchOptions: {
-    ignored: /node_modules/,
-    aggregateTimeout: 300,
-    poll: 500
-  },
+  devtool: 'eval-cheap-module-source-map',
+  // watchOptions: {
+  //   ignored: /node_modules/,
+  //   aggregateTimeout: 300,
+  //   poll: 500
+  // },
   entry: {
-    client: path.join(paths.appSrc, 'client/index.js')
+    client: './src/client/index.js'
   },
   output: {
-    path: paths.appBuild,
+    path: path.resolve(__dirname, './build'),
     pathinfo: true,
-    filename: '[name].[hash:8].js',
-    sourceMapFilename: '[name].[hash:8].js.map',
+    filename: '[name].[contenthash:8].js',
+    sourceMapFilename: '[name].[contenthash:8].js.map',
     publicPath: '/',
   },
   resolve: {
-    modules: [paths.appNodeModules],
+    modules: ['./node_modules'],
     extensions: ['.js', '.jsx', '.json'],
   },
   module: {
     rules: [
       {
         test: /\.jsx?$/,
-        include: [paths.appSrc, /node_modules\/@react-spring/],
+        include: [src, /node_modules\/@react-spring/],
         exclude: /node_modules/,
-        use: [{
-          loader: 'babel-loader',
-          // query: {
-          //   cacheDirectory: findCacheDir({
-          //     name: 'tagreplacer-babel-cache',
-          //   }),
-          // },
-        }],
+        loader: 'esbuild-loader',
+        options: {
+          loader: 'jsx',
+          target: ESBUILD_TARGET
+        }
       },
       {
         test: /\.scss$/,
         exclude: /node_modules/,
         use: [
-          (() => {
-            if (PROD) {
-              return MiniCssExtractPlugin.loader;
-            } else {
-              return {
-                loader: 'style-loader',
-                options: {
-                  sourceMap: true,
-                  singleton: false,
-                },
-              };
-            }
-          })(),
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
             options: {
               sourceMap: true,
-              minimize: PROD,
-              localIdentName: PROD ? '[hash:5]' : '[path][hash:5]',
+              modules: {
+                localIdentName: PROD ? '[contenthash:5]' : '[path][contenthash:5]',
+              }
             },
           },
           {
             loader: 'postcss-loader',
             options: {
               sourceMap: true,
-              config: {
-                path: path.resolve(__dirname, './postcss.config.js'),
-              },
             },
           },
           {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              includePaths: [
-                paths.appSrc,
-                path.resolve(paths.appSrc, './scss'),
-                path.resolve(paths.appSrc, './assets'),
-                path.resolve(__dirname, './node_modules'),
-              ],
-              outputStyle: PROD ? 'compressed' : 'expanded',
+              sassOptions: {
+                includePaths: [
+                  './src',
+                  './src/scss',
+                  './src/assets',
+                ],
+              },
             },
           },
         ],
       },
       {
         test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
-        include: [paths.appSrc],
-        loader: 'file-loader',
+        include: [src, node_modules],
+        type: 'asset/resource'
       },
       {
         test: /\.md/,
-        include: [paths.appSrc],
-        loader: 'raw-loader',
+        include: [src],
+        type: 'asset/source'
       },
     ],
   },
   optimization: {
-    namedModules: true,
-    concatenateModules: true,
+    moduleIds: 'named',
+    // concatenateModules: true,
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].[contenthash:8].css',
+    }),
     new HtmlWebpackPlugin({
       inject: true,
-      template: paths.appHtml,
-      favicon: paths.appFavicon,
+      template: './src/html/index.html',
+      favicon: './src/assets/favicon.png',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -149,9 +127,14 @@ const config = {
     new webpack.DefinePlugin({
       'process.env.WEBSOCKET_HOST': `'${process.env.PROTOCOL.replace('http', 'ws')}://${process.env.HOST_HOSTNAME}'`,
     }),
+    new EsbuildPlugin({
+      define: {
+        'process.env.WEBSOCKET_HOST': `'${process.env.PROTOCOL.replace('http', 'ws')}://${process.env.HOST_HOSTNAME}'`,
+      },
+    }),
     new CaseSensitivePathsPlugin(),
-    new FriendlyErrorsWebpackPlugin(),
-    new CleanWebpackPlugin([paths.appBuild])
+    // new FriendlyErrorsWebpackPlugin(),
+    // new CleanWebpackPlugin(['./build'])
   ]
 };
 
@@ -182,28 +165,28 @@ if (PROD) {
   config.optimization = {
     minimize: true,
     minimizer: [
-      new TerserPlugin({
-        cache: true,
-        parallel: true,
-        sourceMap: true,
+      new EsbuildPlugin({
+        target: ESBUILD_TARGET,
+        css: true
       })
-    ],
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-      },
-    },
+    ]
+    // minimizer: [
+    //   new TerserPlugin({
+    //     cache: true,
+    //     parallel: true,
+    //     sourceMap: true,
+    //   })
+    // ],
+    // splitChunks: {
+    //   cacheGroups: {
+    //     commons: {
+    //       test: /[\\/]node_modules[\\/]/,
+    //       name: 'vendors',
+    //       chunks: 'all',
+    //     },
+    //   },
+    // },
   };
-
-  config.plugins.push(
-    new MiniCssExtractPlugin({
-      filename: '[name].[hash:8].css',
-    })
-  );
 
 } else {
 

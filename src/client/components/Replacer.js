@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import clsx from 'clsx';
+import search from 'pixelarticons/svg/search.svg';
 
 import OptionsIcon from './OptionsIcon';
 import Connector from './Connector';
@@ -73,7 +74,7 @@ const Replacer = () => {
   return (
     <main>
       <div className="replacer">
-        <div className="column sticky" style={{ paddingRight: "1.5rem" }}>
+        <div className="column sticky replacer-form-column">
           <form
             className="section"
             ref={blogContainerRef}
@@ -116,7 +117,7 @@ const Replacer = () => {
                 <button onClick={doFind} disabled={canFind && !canNext} className="button">
                   go&nbsp;
                   <img
-                    src="https://unpkg.com/pixelarticons@latest/svg/search.svg"
+                    src={search}
                     height="12"
                     alt="find"
                   />

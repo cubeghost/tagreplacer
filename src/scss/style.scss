@@ -167,6 +167,10 @@ button.button {
   display: flex;
   align-items: flex-start;
 
+  &-form-column {
+    padding-right: 1.5rem;
+  }
+
   .column {}
 
   @media screen and (max-width: 600px) {
@@ -174,6 +178,9 @@ button.button {
 
     .column {
       flex-basis: 100%;
+    }
+    &-form-column {
+      padding-right: 0;
     }
   }
 }
@@ -261,6 +268,8 @@ button.button {
 
   &-tags {
     opacity: 0.5;
+
+    & > * {}
   }
 
   &-thumbnail {
