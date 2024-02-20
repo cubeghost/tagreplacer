@@ -31,7 +31,7 @@ const OptionsIcon = ({ active }) => {
       </defs>
       <g className="foreground">
         {positions.map(({ y }, index) => (
-          <g mask={`url(#shadow-${index}`} key={index}>
+          <g mask={`url(#shadow-${index})`} key={index}>
             <rect x={2 + index * 5} y={0} width={1} height={15} />
             <animated.rect x={index * 5} y={y} width={5} height={1} />
           </g>

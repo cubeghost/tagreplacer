@@ -60,9 +60,6 @@ const config = {
             loader: 'css-loader',
             options: {
               sourceMap: true,
-              modules: {
-                localIdentName: PROD ? '[contenthash:5]' : '[path][contenthash:5]',
-              }
             },
           },
           {
