@@ -66,7 +66,7 @@ apiRouter.post('/find', function(req, res, next) {
       .then(result => res.json(result))
       .catch(error => next(error));
   } else {
-    res.status(400).send('POST body must include "blog" and "find"');
+    res.status(400).json({ message: 'POST body must include "blog" and "find"' });
   }
 });
 
@@ -83,7 +83,7 @@ apiRouter.post('/replace', function(req, res, next) {
       .then(result => res.json(result))
       .catch(error => next(error));
   } else {
-    res.status(400).send('POST body must include "blog", "find", and "replace"');
+    res.status(400).json({ message: 'POST body must include "blog", "find", and "replace"' });
   }
 });
 
@@ -101,7 +101,7 @@ apiRouter.use(function(error, req, res, next) {
       originalUrl: req.originalUrl,
     }
   });
-  res.status(500).send(error);
+  res.status(500).json({ message: error.message });
 });
 
 
