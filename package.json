@@ -11,17 +11,17 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "watch": "npm-run-all --parallel watch:*",
-    "watch:client": "webpack --watch",
+    "watch:client": "NODE_OPTIONS=--openssl-legacy-provider webpack --watch",
     "watch:server": "nodemon --watch src ./src/index.js",
     "watch:worker": "nodemon --watch src ./src/workers/index.js",
-    "build": "webpack",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack",
     "start": "node src/index.js",
     "start:worker": "node src/workers/index.js",
     "test": "mocha \"./src/**/tests/*.js\"",
     "watch:test": "mocha --watch --recursive \"./src/**/tests/*.js\""
   },
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "dependencies": {
     "@babel/runtime": "^7.22.6",
