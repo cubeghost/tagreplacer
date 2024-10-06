@@ -43,7 +43,7 @@
     "redis": "^2.8.0",
     "sass": "^1.38.0",
     "stringify": "^5.1.0",
-    "tumblr.js": "https://codeload.github.com/cubeghost/tumblr.js/legacy.tar.gz/refs/heads/main",
+    "tumblr.js": "https://github.com/cubeghost/tumblr.js",
     "winston": "^3.2.1"
   },
   "devDependencies": {
