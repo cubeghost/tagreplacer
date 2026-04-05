@@ -9,6 +9,7 @@ import Home from './home';
 import Replacer from './replacer';
 import Help from './help';
 import Privacy from './privacy';
+import DonationBanner from './components/donationBanner';
 
 const mapStateToProps = state => ({
   authed: !!state.tumblr.username,
@@ -51,6 +52,8 @@ class App extends Component {
   render() {
     return (
       <div className="app">
+        <DonationBanner />
+
         <header>
           <h1>
             <Link to="/">tag replacer</Link>

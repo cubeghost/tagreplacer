@@ -44,7 +44,7 @@ body {
 .app {
   max-width: 680px;
   margin: 0 auto;
-  padding:4em 0 2em;
+  padding:5em 0 2em;
   min-height:100vh;
   display:flex;
   flex-direction:column;
@@ -310,4 +310,28 @@ header, footer {
   font-family: $monospace;
   border-left: 4px solid $brightpink;
   padding-left: 1em;
+}
+
+
+.donation-banner {
+  background: #000;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.donation-banner li {
+  display: inline-block;
+}
+.donation-banner li span {
+  padding: 0 0.5rem;
+  vertical-align: middle;
+}
+.donation-banner a {
+  color: #fff;
 }
