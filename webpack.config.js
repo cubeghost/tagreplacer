@@ -110,7 +110,7 @@ const config = {
         ],
       },
       {
-        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2)$/,
+        test: /\.(jpg|png|gif|eot|svg|ttf|otf|woff|woff2|webp)$/,
         include: [paths.appSrc],
         loader: 'file-loader',
       },

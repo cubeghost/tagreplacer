@@ -84,7 +84,8 @@ class App extends Component {
 
         <footer>
           <p>
-            by <a href="https://cubegho.st/">alex</a>
+            by <a href="https://cubegho.st/">alex</a>&ensp;&middot;&ensp;
+            loading gif by <a href="https://jjjjjjjjjjohn.tumblr.com/">john karel</a>
           </p>
           <nav>
             <Link to="/privacy">privacy</Link>

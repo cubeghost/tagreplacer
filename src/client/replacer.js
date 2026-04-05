@@ -8,11 +8,10 @@ import Options from './options';
 import Results from './components/results';
 import TagInput from './components/tagInput';
 import BlogSelect from './components/blogSelect';
+import loadingAnimation from '../assets/rotate-clipping-monitor.webp';
 
 import { formatTags } from './util';
 import { find, replace, reset } from './state/actions';
-
-const LOADING = 'https://media.giphy.com/media/l3fQv3YSQZwlTTbC8/200.gif';
 
 const mapStateToProps = state => ({
   blogs: state.tumblr.blogs,
@@ -147,7 +146,7 @@ class Replacer extends Component {
         {loading && (
           <div className="loading">
             <p>loading</p>
-            <img src={LOADING} width="100" />
+            <img src={loadingAnimation} width="100" />
           </div>
         )}
 
