@@ -1,9 +1,9 @@
-const { Worker } = require('bullmq');
+import { Worker } from 'bullmq';
 
-const { getMessageQueueName } = require('../queues');
-const connection = require('../redis');
+import { getMessageQueueName } from '../queues.mjs';
+import connection from '../redis.mjs';
 
-module.exports = (ws, req) => {
+export default (ws, req) => {
   const sessionId = req.session.id;
   const hasTumblrSession = Boolean(req.session.grant && req.session.grant.response && !req.session.grant.response.error);
 

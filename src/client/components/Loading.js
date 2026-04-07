@@ -1,9 +1,11 @@
 import React from 'react';
 
+import fileTransfer from '../../assets/filetransfer.gif';
+
 const Loading = () => (
-  <div style={{ textAlign: "center" }}>
+  <div style={{ textAlign: 'center' }}>
     <img
-      src="https://i.imgur.com/I5D2NXj.gif"
+      src={fileTransfer}
       className="pixel-perfect"
       alt="loading"
       height={48}

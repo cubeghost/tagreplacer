@@ -1,6 +1,6 @@
-import { assign } from 'lodash';
 import { combineReducers } from 'redux';
-import keyBy from 'lodash/keyBy';
+import assign from 'lodash-es/assign';
+import keyBy from 'lodash-es/keyBy';
 
 import initialState from './initial';
 import {

@@ -1,12 +1,17 @@
-require('dotenv').config();
+import tumblr from 'tumblr.js';
+import filter from 'lodash-es/filter.js';
+import orderBy from 'lodash-es/orderBy.js';
+import sortBy from 'lodash-es/sortBy.js';
+import find from 'lodash-es/find.js';
+import get from 'lodash-es/get.js';
+import pick from 'lodash-es/pick.js';
+import isEqual from 'lodash-es/isEqual.js';
+import intersection from 'lodash-es/intersection.js';
+import Sentry from '@sentry/node';
 
-const _ = require('lodash');
-const tumblr = require('tumblr.js');
-const Sentry = require('@sentry/node');
-
-const { METHODS } = require('./consts');
-const Tags = require('./tags');
-const logger = require('./logger');
+import { METHODS } from './consts.mjs';
+import { replaceTags } from './tags.mjs';
+import logger from './logger.mjs';
 
 const POST_LIMIT = 20;
 const REPLACE_SOFT_LIMIT = 500 - POST_LIMIT;
@@ -85,13 +90,13 @@ const getPostThumbnail = ({ trail = [], content = [], legacy_type }) => {
     case 'text':
       return 'icon';
     case 'photo': {
-      const images = _.filter(content, ['type', 'image']);
-      const sortedMedia = _.orderBy(images[0].media, ['width'], ['desc']);
-      const media = _.find(sortedMedia, ['cropped', true]) || sortedMedia[0];
+      const images = filter(content, ['type', 'image']);
+      const sortedMedia = orderBy(images[0].media, ['width'], ['desc']);
+      const media = find(sortedMedia, ['cropped', true]) || sortedMedia[0];
       return media?.url;
     }
     case 'video': {
-      const videos = _.filter(content, ['type', 'video']);
+      const videos = filter(content, ['type', 'video']);
       return videos[0].poster?.[0]?.url;
     }
     default:
@@ -124,7 +129,7 @@ const POST_PROPERTIES = ['id', 'id_string', 'legacy_type', 'post_url', 'state', 
  * @param {Object} post Tumblr API response post
  * @returns {Post}
  */
-const trimPost = post => _.pick(post, POST_PROPERTIES);
+const trimPost = post => pick(post, POST_PROPERTIES);
 
 /**
  * @typedef TinyPost
@@ -138,7 +143,7 @@ const TINY_POST_PROPERTIES = ['id', 'id_string', 'tags'];
  * @param {Object|Post} post Tumblr API response post or Post
  * @returns {TinyPost}
  */
-const tinyTrimPost = post => _.pick(post, TINY_POST_PROPERTIES);
+const tinyTrimPost = post => pick(post, TINY_POST_PROPERTIES);
 
 class TumblrClient {
   /**
@@ -154,10 +159,8 @@ class TumblrClient {
       token_secret: secret,
     });
     
-    this.tags = new Tags(options);
-
     this.blog = blog;
-    this.options = _.assign({}, DEFAULT_OPTIONS, options);
+    this.options = {...DEFAULT_OPTIONS, ...options};
   }
 
   static methods = METHODS;
@@ -223,7 +226,7 @@ class TumblrClient {
   async findPostsWithTags(methodName, tags, params = {}) {
     const method = METHODS_CONFIG[methodName];
 
-    const sortedTags = _.sortBy(tags);
+    const sortedTags = sortBy(tags);
     const firstTag = sortedTags[0];
 
     const response = await this.client[method.clientMethod](this.blog, {
@@ -236,8 +239,8 @@ class TumblrClient {
     let posts;
     if (method.key !== METHODS.posts) {
       // draft and queue methods don't support the tag param 🙄
-      posts = _.filter(response.posts, post => (
-        _.includes(post.tags.map(t => t.toLowerCase()), firstTag.toLowerCase())
+      posts = response.posts.filter(post => (
+        post.tags.map(t => t.toLowerCase()).includes(firstTag.toLowerCase())
       ));
     } else {
       posts = response.posts;
@@ -245,19 +248,19 @@ class TumblrClient {
 
     let filteredPosts = posts;
     if (this.options.caseSensitive) {
-      filteredPosts = _.filter(posts, post => {
-        const sortedPostTags = _.sortBy(post.tags);
-        return _.isEqual(
-          _.intersection(sortedPostTags, tags),
+      filteredPosts = posts.filter(post => {
+        const sortedPostTags = sortBy(post.tags);
+        return isEqual(
+          intersection(sortedPostTags, tags),
           tags
         );
       });
     } else if (tags.length > 1) {
-      const lowerCaseTags = _.map(tags, t => t.toLowerCase());
-      filteredPosts = _.filter(posts, post => {
-        const sortedLowerCasePostTags = _.chain(post.tags).map(t => t.toLowerCase()).sortBy().value();
-        return _.isEqual(
-          _.intersection(sortedLowerCasePostTags, lowerCaseTags),
+      const lowerCaseTags = tags.map(t => t.toLowerCase());
+      filteredPosts = posts.filter(post => {
+        const sortedLowerCasePostTags = sortBy(post.tags.map(t => t.toLowerCase()));
+        return isEqual(
+          intersection(sortedLowerCasePostTags, lowerCaseTags),
           lowerCaseTags,
         );
       });
@@ -269,7 +272,7 @@ class TumblrClient {
       complete: false,
     };
 
-    if (_.get(response, '_links.next')) {
+    if (get(response, '_links.next')) {
       returnValue.params[method.nextParam] = response._links.next.query_params[method.nextParam];
     } else {
       returnValue.complete = true;
@@ -292,14 +295,14 @@ class TumblrClient {
    * @return {Promise<TinyPost>}
    */
   async replacePostTags(postId, tags, find, replace) {
-    if (!_.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
-    if (!_.isArray(replace)) throw new Error(`expected 'replace' to be an Array, but it was ${typeof find}`);
+    if (Array.isArray(find)) throw new Error(`expected 'find' to be an Array, but it was ${typeof find}`);
+    if (Array.isArray(replace)) throw new Error(`expected 'replace' to be an Array, but it was ${typeof find}`);
 
-    const replacedTags = this.tags.replace({
+    const replacedTags = replaceTags({
       tags,
       find,
       replace,
-    });
+    }, this.options);
   
     const response = await this.client.editLegacyPost(this.blog, {
       id: postId,
@@ -319,4 +322,4 @@ class TumblrClient {
   }
 }
 
-module.exports = TumblrClient;
+export default TumblrClient;

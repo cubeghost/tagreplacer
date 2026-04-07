@@ -1,10 +1,10 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-const get = require('lodash/get');
+import get from 'lodash-es/get.js';
 
-const { tumblrQueue, getMessageQueue } = require('../queues');
-const { getSession } = require('../server/session');
-const TumblrClient = require('../tumblr');
+import { tumblrQueue, getMessageQueue } from '../queues.mjs';
+import { getSession } from '../server/session.mjs';
+import TumblrClient from '../tumblr.mjs';
 
 /**
  * @typedef ReplaceJobData
@@ -16,7 +16,7 @@ const TumblrClient = require('../tumblr');
  * @property {String[]}    replace
  * @property {Options}     options
  */
-module.exports = async (job) => {
+export default async (job) => {
   const {
     sessionId,
     blog,

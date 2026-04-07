@@ -1,6 +1,6 @@
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
-import pick from 'lodash/pick';
-import every from 'lodash/every';
+import pick from 'lodash-es/pick';
+import every from 'lodash-es/every';
 
 import { apiFetch } from '../api';
 import { METHODS, TUMBLR_QUEUE } from '../../consts';

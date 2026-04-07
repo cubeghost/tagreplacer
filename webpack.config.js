@@ -37,7 +37,7 @@ const config = {
   },
   resolve: {
     modules: ['./node_modules'],
-    extensions: ['.js', '.jsx', '.json'],
+    extensions: ['.js', '.mjs', '.jsx', '.json'],
   },
   module: {
     rules: [

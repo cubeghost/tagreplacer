@@ -1,15 +1,14 @@
-const path = require('path');
-const express = require('express');
-const asyncHandler = require('express-async-handler');
-const bodyParser = require('body-parser');
+import path from 'path';
+import express from 'express';
+import bodyParser from 'body-parser';
 
-const TumblrClient = require('../tumblr');
-const { tumblrQueue } = require('../queues');
-const logger = require('../logger');
-const { METHODS } = require('../consts');
+import TumblrClient from '../tumblr.mjs';
+import { tumblrQueue } from '../queues.mjs';
+import logger from '../logger.mjs';
+import { METHODS } from '../consts.mjs';
 
 // web router
-const webRouter = express.Router();
+export const webRouter = express.Router();
 const buildDir = path.resolve('build');
 
 webRouter.use(express.static(buildDir));
@@ -25,7 +24,7 @@ webRouter.get('/privacy', render);
 
 // api router
 // prefixed with '/api'
-const apiRouter = express.Router();
+export const apiRouter = express.Router();
 
 apiRouter.use(bodyParser.json());
 
@@ -63,7 +62,7 @@ apiRouter.get('/user', function(req, res, next) {
     .catch(error => next(error));
 });
 
-apiRouter.post('/find', asyncHandler(async (req, res) => {
+apiRouter.post('/find', async (req, res) => {
   const sessionId = req.session.id;
   const { blog, find, options, methods } = req.body;
 
@@ -85,9 +84,9 @@ apiRouter.post('/find', asyncHandler(async (req, res) => {
   res.json({
     success: true,
   });
-}));
+});
 
-apiRouter.post('/replace', asyncHandler(async (req, res) => {
+apiRouter.post('/replace', async (req, res) => {
   const sessionId = req.session.id;
   const { blog, find, replace, options, posts } = req.body;
 
@@ -107,7 +106,7 @@ apiRouter.post('/replace', asyncHandler(async (req, res) => {
   res.json({
     success: true,
   });
-}));
+});
 
 // error handling
 apiRouter.use(function(error, req, res) {
@@ -125,9 +124,3 @@ apiRouter.use(function(error, req, res) {
   });
   res.status(500).send(error);
 });
-
-
-module.exports = {
-  webRouter,
-  apiRouter
-};

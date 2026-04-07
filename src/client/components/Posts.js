@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import orderBy from 'lodash/orderBy';
+import orderBy from 'lodash-es/orderBy';
 
 import Post from './Post';
 import { joinReactNodes } from '../util'

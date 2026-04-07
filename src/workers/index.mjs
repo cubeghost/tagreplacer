@@ -1,12 +1,11 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-const { Worker } = require('bullmq');
+import { Worker } from 'bullmq';
 
-const { tumblrQueue } = require('../queues');
-const connection = require('../redis');
-
-const processFind = require('./find');
-const processReplace = require('./replace');
+import { tumblrQueue } from '../queues.mjs';
+import connection from '../redis.mjs';
+import processFind from './find.mjs';
+import processReplace from './replace.mjs';
 
 const processor = async (job) => {
   switch (job.name) {
@@ -21,7 +20,7 @@ const processor = async (job) => {
   }
 }
 
-const tumblrWorker = new Worker(tumblrQueue.name, processor, {
+export const tumblrWorker = new Worker(tumblrQueue.name, processor, {
   connection,
   // https://www.tumblr.com/docs/en/api/v2#rate-limits
   limiter: {
@@ -34,7 +33,3 @@ tumblrWorker.on('error', err => {
   // eslint-disable-next-line no-console
   console.error(err);
 });
-
-module.exports = {
-  tumblrWorker,
-};

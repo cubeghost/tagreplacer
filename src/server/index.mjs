@@ -1,22 +1,20 @@
-require('dotenv').config();
+import http from 'http';
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import Grant from 'grant-express';
+import Sentry from '@sentry/node';
+import Tracing from '@sentry/tracing';
+import helmet from 'helmet';
 
-const http = require('http');
-const express = require('express');
-const Grant = require('grant-express');
-const Sentry = require('@sentry/node');
-const Tracing = require('@sentry/tracing');
-const helmet = require('helmet');
-const WebSocket = require('ws');
-
-const { session } = require('./session');
-const { webRouter, apiRouter } = require('./router');
-const webSocketHandler = require('./websockets');
-const logger = require('../logger');
+import { session } from './session.mjs';
+import { webRouter, apiRouter } from './router.mjs';
+import webSocketHandler from './websockets.mjs';
+import logger from '../logger.mjs';
 
 // setup
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ server });
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -35,11 +33,11 @@ if (process.env.SENTRY_DSN) {
 }
 
 if (process.env.NODE_ENV === 'development') {
-  const { createBullBoard } = require('@bull-board/api');
-  const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
-  const { ExpressAdapter } = require('@bull-board/express');
+  const { createBullBoard } = await import('@bull-board/api');
+  const { BullMQAdapter } = await import('@bull-board/api/bullMQAdapter.js');
+  const { ExpressAdapter } = await import('@bull-board/express');
 
-  const { tumblrQueue } = require('../queues');
+  const { tumblrQueue } = await import('../queues.mjs');
 
   const serverAdapter = new ExpressAdapter();
 
@@ -115,7 +113,7 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
-app.use((error, _req, res) => {
+app.use((error, _req, res, _next) => {
   logger.error(error.message, {
     stack: error.stack,
   });
@@ -125,4 +123,4 @@ app.use((error, _req, res) => {
   });
 });
 
-module.exports = server;
+export default server;

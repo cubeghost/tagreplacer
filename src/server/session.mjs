@@ -1,14 +1,14 @@
-const Session = require('express-session');
-const RedisStore = require('connect-redis')(Session);
+import {RedisStore} from 'connect-redis';
+import initSession from 'express-session';
 
-const connection = require('../redis');
+import connection from '../redis.mjs';
 
-const sessionStore = new RedisStore({
+export const sessionStore = new RedisStore({
   client: connection,
   disableTouch: true,
 });
 
-const session = Session({
+export const session = initSession({
   store: sessionStore,
   name: 'tagreplacer_session',
   resave: false,
@@ -17,7 +17,7 @@ const session = Session({
   secret: process.env.SECRET,
 });
 
-const getSession = sessionId => new Promise((resolve, reject) => (
+export const getSession = sessionId => new Promise((resolve, reject) => (
   sessionStore.get(sessionId, (error, response) => {
     if (error) {
       reject(error);
@@ -26,9 +26,3 @@ const getSession = sessionId => new Promise((resolve, reject) => (
     }
   })
 ));
-
-module.exports = {
-  session,
-  sessionStore,
-  getSession,
-};
