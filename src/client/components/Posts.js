@@ -3,8 +3,9 @@ import { useSelector } from 'react-redux';
 import orderBy from 'lodash-es/orderBy';
 
 import Post from './Post';
-import { joinReactNodes } from '../util'
+import { joinReactNodes } from '../util';
 import { useStep } from '../steps';
+import { replaceTags } from '../../tags.mjs';
 
 /** TODO use actual Tags module for preview
  * const Tags = require('./tags');
@@ -15,14 +16,23 @@ const Posts = () => {
   const step = useStep();
   const isPreviewReplace = step.key === 'replace';
 
-  const { find, replace } = useSelector(state => state.form);
+  const { find, replace } = useSelector((state) => state.form);
+  const { caseSensitive, allowDelete } = useSelector((state) => state.options);
   const posts = useSelector((state) => state.posts.entities);
 
   return orderBy(Object.values(posts), ['timestamp'], ['desc']).map((post) => {
-    const tags = post.tags.map((tag) => {
-      if (isPreviewReplace && find.includes(tag)) {
-        return replace.map((replaceTag) => (<strong key={replaceTag}>#{replaceTag}</strong>));
-      }
+    const tags = isPreviewReplace
+      ? replaceTags(
+          {
+            tags: post.tags,
+            find,
+            replace,
+          },
+          { caseSensitive, allowDelete }
+        )
+      : post.tags;
+
+    const renderedTags = tags.flatMap((tag) => {
       if (post.replaced && replace.includes(tag)) {
         return <strong key={tag}>#{tag}</strong>;
       }
@@ -32,7 +42,7 @@ const Posts = () => {
       if (replace.includes(tag)) {
         return <em key={tag}>#{tag}</em>;
       }
-      return "#" + tag;
+      return '#' + tag;
     });
 
     return (
@@ -45,7 +55,7 @@ const Posts = () => {
         replaced={post.replaced}
         slug={post.slug}
         summary={post.summary}
-        tags={joinReactNodes(tags, ', ')}
+        tags={joinReactNodes(renderedTags, ', ')}
         thumbnail={post.thumbnail}
       />
     );

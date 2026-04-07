@@ -108,7 +108,7 @@ export const tumblrFindMessage = payload => (dispatch, getState) => {
     type: 'queue/tumblr/FIND',
     payload: {
       ...payload,
-      foundPostsCount: Object.keys(state.posts.entities).length,
+      foundPostsCount: Object.keys(state.posts.entities).length + payload.posts.length,
       allComplete: isFindComplete(payload, state)
     }
   });
